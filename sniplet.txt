@@ -1,6 +1,12 @@
 pyenv virtualenv 3.8.5 my_chat_bot
 pyenv local my_chat_bot
 
-#unvicorn
+# unvicorn
 
 uvicorn app.main:app --reload
+
+# docker
+
+docker build . -t kampuan
+
+docker run -i -d -p 5000:5000 kampuan
