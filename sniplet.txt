@@ -1,0 +1,2 @@
+pyenv virtualenv 3.8.5 my_chat_bot
+pyenv local my_chat_bot
