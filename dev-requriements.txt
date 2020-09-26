@@ -6,3 +6,4 @@ pytest
 pytest-cov
 isort
 autoflake
+autopep8
