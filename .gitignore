@@ -287,3 +287,8 @@ dmypy.json
 .history
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,python,jupyternotebooks,microsoftoffice,pycharm
+
+# General
+.DS_Store
+.AppleDouble
+.LSOverride

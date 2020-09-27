@@ -14,6 +14,7 @@ setup(name='kampuan',
       install_requires=[
           "numpy",
           "pandas",
+          "pythainlp"
       ],
       extras_require={
           'dev': [

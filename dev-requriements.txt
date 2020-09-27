@@ -7,3 +7,4 @@ pytest-cov
 isort
 autoflake
 autopep8
+ipykernel
