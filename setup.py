@@ -21,7 +21,8 @@ setup(name='kampuan',
           'dev': [
               'ipykernel',
               'mypy',
-              'autopep8'
+              'autopep8',
+              'rope'
           ],
           'test': [
               'pytest',

@@ -1,8 +1,23 @@
-from .const import df_vowel_form, THAI_TONE
-from typing import List
+# %%
+from kampuan.const import df_vowel_form, THAI_TONE
+from typing import List, NamedTuple
+from collections import namedtuple
+import re
 
+# %%
+# Tones
+
+
+def remove_tone_mark(text, tone_marks=THAI_TONE):
+    for mark in tone_marks:
+        text = text.replace(mark, '')
+    return text
+
+# %%
 
 # Vowel extraction
+
+
 def get_vowel_form(REP: str = '[REP]', is_sort=True) -> List[str]:
     """ Get all of Thai's vowel forms
 
@@ -41,8 +56,35 @@ def get_vowel_pattern(REP='[REP]') -> List[str]:
     return vowel_pattern
 
 
-# tone marks
-def remove_tone_mark(text, tone_marks=THAI_TONE):
-    for mark in tone_marks:
-        text = text.replace(mark, '')
-    return text
+def extract_vowel_form(text:str, vowel_patterns:List[str]=None, vowel_forms:List[str]=None)-> NamedTuple:
+    """Extract vowel of the subword
+
+    Args:
+        text (str):text (only single substring with single vowel)
+        vowel_patterns (List[str], optional): vowel patterns for regex match. Defaults to None.
+        vowel_forms (List[str], optional): vowel forms with matching order to return visually. Defaults to None.
+
+    Returns:
+        NamedTuple: namedtuple(
+        'vowel_extract', ['vowel_form', 'regex', 'matched_pattern'])
+    """
+    vowel_extract = namedtuple(
+        'vowel_extract', ['vowel_form', 'regex', 'matched_pattern'])
+    if not vowel_patterns:
+        vowel_patterns = get_vowel_pattern()
+    if not vowel_forms:
+        vowel_forms = get_vowel_form(REP='-')
+    text = remove_tone_mark(text)
+    for i, pattern in enumerate(vowel_patterns):
+        m = re.match(pattern, text)
+        if m:
+            return vowel_extract(vowel_forms[i], m, pattern)
+
+    return vowel_extract(None, text, text)
+
+
+extract_vowel_form('ไก่').vowel_form
+# %%
+
+
+# %%
