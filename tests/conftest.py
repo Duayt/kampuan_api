@@ -21,7 +21,7 @@ words_list = [
 
 @pytest.fixture(scope='module', params=words_list)
 def test_words(request):
-    yield request.params
+    yield request
 
 
 # @ pytest.mark.parametrize(

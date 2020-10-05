@@ -8,7 +8,8 @@ def test_vowel_form():
     vowel_forms = get_vowel_form()
     assert len(vowel_forms) == 38
 
-
+@pytest.mark.parametrize("test_words",
+                         test_words)
 def test_extract_cases(test_words):
 
     assert extract_vowel_form(test_words.raw).vowel_form == test_words.vowel_form
