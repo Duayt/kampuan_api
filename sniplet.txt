@@ -10,3 +10,7 @@ uvicorn app.main:app --reload
 docker build . -t kampuan 
 
 docker run -i -d -p 5000:5000 kampuan --name kampuan
+
+#compose
+docker-compose build
+docker-compose up -d
