@@ -6,3 +6,6 @@ def test_const():
     assert len(THAI_CONS) == 44
     assert len(THAI_VOW) == 20
     assert len(THAI_TONE) == 4
+
+def test_numbers(numbers):
+    assert numbers <5

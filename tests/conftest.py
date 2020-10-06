@@ -16,17 +16,20 @@ words_list = [
     TestWord('เขียว', 'เ-ีย', None, 'ข', 'ว'),
     TestWord('เกรียน', 'เ-ีย', None, 'กร', 'น'),
     TestWord('ตู่', '-ู', '-่', 'ต', None),
+    TestWord('คั่ว', '-ัว', '-่', None, None),
+    TestWord('ปลอม', '-อ', None, 'ปล', 'ม'),
+    TestWord('กลบ', '-', None, 'กล', 'บ'),
+    
 ]
 
 
 @pytest.fixture(scope='module', params=words_list)
-def test_words(request):
-    yield request
+def words(request):
+    yield request.param
 
 
-# @ pytest.mark.parametrize(
-#     'test_word',
-#     (['เขียว', 'เ-ีย', None, 'ข', 'ว'],
-#      ['เกรียน', 'เ-ีย', None, 'กร', 'น']),
-#     indirect = True
-# )
+
+# Example fixture to test list
+@pytest.fixture(scope='module', params=[1,2,3])
+def numbers(request):
+    yield request.param
