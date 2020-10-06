@@ -1,21 +1,23 @@
 import kampuan as kp
-
+import json
 from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 
 app = FastAPI()
 
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World!!!!!!"}
+    return {"message": "Hello World!!!"}
 
 
 @app.get("/user/greet/{name}")
 def kampuan_test(name: str = "Anonymous"):
-    return {"input": name,
+    return  {"input": name,
             "message": kp.test(name=name)}
 
 
 @app.get("/vowel/{phrase}")
 def extract_vowel(phrase: str = 'สวัสดีครับ'):
-    return kp.extract_vowel(phrase)
+    return  {"input": phrase,
+            "result": kp.extract_vowel(phrase)}

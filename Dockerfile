@@ -8,8 +8,9 @@ WORKDIR /work
 
 COPY . .
 COPY requirements.txt .
+COPY dev-requirements.txt .
 RUN pip3 install -r requirements.txt
-
+RUN pip3 install -r dev-requirements.txt
 
 EXPOSE 5000
 
