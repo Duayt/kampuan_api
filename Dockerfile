@@ -12,6 +12,6 @@ COPY dev-requirements.txt .
 RUN pip3 install -r requirements.txt
 RUN pip3 install -r dev-requirements.txt
 
-EXPOSE 5000
+EXPOSE 8000
 
-# CMD ["uvicorn", "--host", "0.0.0.0", "--port", "5000", "app.main:app", "--reload"]
+CMD ["uvicorn", "--host", "0.0.0.0", "--port", "8000", "app.main:app", "--reload"]
