@@ -13,11 +13,11 @@ async def root():
 
 @app.get("/user/greet/{name}")
 def kampuan_test(name: str = "Anonymous"):
-    return  {"input": name,
+    return {"input": name,
             "message": kp.test(name=name)}
 
 
 @app.get("/vowel/{phrase}")
 def extract_vowel(phrase: str = 'สวัสดีครับ'):
-    return  {"input": phrase,
+    return {"input": phrase,
             "result": kp.extract_vowel(phrase)}
