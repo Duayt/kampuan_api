@@ -15,7 +15,7 @@ setup(name='kampuan',
           "numpy==1.19.2",
           "pandas==1.1.2",
           "pythainlp==2.2.4",
-          "xlrd==1.2.0"
+          "openpyxl"
       ],
       extras_require={
           'dev': [
