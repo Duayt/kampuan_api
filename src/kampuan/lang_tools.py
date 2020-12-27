@@ -1,5 +1,5 @@
 # %%
-from kampuan.const import df_vowel_form, THAI_TONE
+from kampuan.const import VOWEL_FORMS, THAI_TONE
 from typing import List, NamedTuple
 from collections import namedtuple
 import re
@@ -28,8 +28,7 @@ def get_vowel_form(REP: str = '[REP]', is_sort=True) -> List[str]:
     Returns:
         List[str]: List of Thai vowel forms
     """
-    vowel_list = df_vowel_form['รูปสระ'].str.replace(
-        '\xa0', '').str.replace('-', REP).str.strip().tolist()
+    vowel_list = [ch.replace('-', REP).strip() for ch in VOWEL_FORMS]
     vowel_list.append(REP)
     if is_sort:
         vowel_list.sort(key=len, reverse=True)
@@ -56,7 +55,7 @@ def get_vowel_pattern(REP='[REP]') -> List[str]:
     return vowel_pattern
 
 
-def extract_vowel_form(text:str, vowel_patterns:List[str]=None, vowel_forms:List[str]=None)-> NamedTuple:
+def extract_vowel_form(text: str, vowel_patterns: List[str] = None, vowel_forms: List[str] = None) -> NamedTuple:
     """Extract vowel of the subword
 
     Args:
@@ -83,7 +82,7 @@ def extract_vowel_form(text:str, vowel_patterns:List[str]=None, vowel_forms:List
     return vowel_extract(None, text, text)
 
 
-extract_vowel_form('ไก่').vowel_form
+# extract_vowel_form('ไก่').vowel_form
 # %%
 
 
