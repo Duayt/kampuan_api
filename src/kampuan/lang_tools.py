@@ -52,7 +52,7 @@ def get_vowel_pattern(REP='[REP]') -> List[str]:
             vowel_pattern.append(f"{vow.replace(REP,'(.{1,2})')}([ก-ฮ])")
         else:  # general case
             vowel_pattern.append(
-                f"({vow.replace(REP,')(.{1,2})(')})([ก-ฮ]*)".replace('()', ''))
+                f"({vow.replace(REP,')(.{1,3})(')})([ก-ฮ]*)".replace('()', ''))
     return vowel_pattern
 
 

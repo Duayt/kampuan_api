@@ -22,10 +22,13 @@ class ThaiSubWord:
         # Type based
         self._vowel_form: str = self._ex_vw_form
         self._vowel_con_tup = self.vowel_con_tup
+        self._vowel_form_tup = self.vowel_form_tup
+        self._vowel_form_tup.sort()
         self._mute_con_tup = self.mute_con_tup
         self._mute_con = self.mute_con
         self._true_con_tup = self.true_con_tup
         self._con_split = self.consonant_split_index()
+        self.split_con()
         # self._init_con: str = self.init_con
         # self._final_con: str = self._ex_regex.groups()[-1]
 
@@ -71,6 +74,15 @@ class ThaiSubWord:
         return (-1, None)
 
     @property
+    def vowel_form_tup(self):
+        if self.vowel_con_tup[0] == -1:
+            return self.vowels_tup
+        else:
+            vowel_form_tup = self.vowels_tup + [self._vowel_con_tup]
+            vowel_form_tup.sort()
+            return vowel_form_tup
+
+    @property
     def true_con_tup(self):
         true_con_tup = self.consonants_tup.copy()
 
@@ -113,12 +125,13 @@ class ThaiSubWord:
                     return self.true_con_tup[0]
 
             elif true_con_len == 3:
+                # โทรม, เพลง
                 if self.true_con_tup[0][1] + self.true_con_tup[1][1] in ALL_CONSONANT_CLUSTER:
                     return self.true_con_tup[1]
                 elif self.true_con_tup[1][1] + self.true_con_tup[2][1] in DOUBLE_FINAL_CONSONANT:
                     return self.true_con_tup[0]
                 else:
-                    self._two_syllable = True  # ตลาด,สนม
+                    self._two_syllable = True  # ตลาด,สนม ,เกษม
                     print('check this case not sure')
                     return self.true_con_tup[1]
             elif true_con_len == 4:
@@ -132,14 +145,18 @@ class ThaiSubWord:
         else:
             return "Error Not implement"
 
-    # @property
-    # def init_con(self):
-    #     if len(self.true_con) == 1:
-    #         return self.true_con
-    #     elif len(self.true_con) > 2:
-    #         return self.true_con[0:2]
-    #     else:
-    #         return 1
+    def split_con(self):
+        self._init_con_tup = []
+        self._final_con_tup = []
+
+        for tup in self.true_con_tup:
+            if tup[0] <= self._con_split[0] and tup[0] != self._vowel_con_tup:
+                self._init_con_tup.append(tup)
+            else:
+                break
+
+        self._final_con_tup = [
+            tup for tup in self.true_con_tup if tup not in self._init_con_tup]
 
     def extract_vowel(self):
         self._ex_vw_form, self._ex_regex, self._ex_pattern = extract_vowel_form(
