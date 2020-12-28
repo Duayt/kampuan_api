@@ -120,11 +120,11 @@ DOUBLE_FINAL_CONSONANT = [
 # for sound tone
 SORONANT_SOUND = {
     'ง': 'ng',
-    'น': 'n', 'ณ': 'n',
+    'ณ': 'n', 'น': 'n',
     'ม': 'm',
-    'ย': 'y', 'ญ': 'y',
+    'ญ': 'y', 'ย': 'y',
     'ร': 'r',
-    'ล': 'l', 'ฬ': 'l',
+    'ฬ': 'l', 'ล': 'l',
     'ว': 'w',
 }
 
@@ -133,7 +133,7 @@ SORONANT = list(SORONANT_SOUND.keys())
 PLAIN_SOUND = {
     'ก': 'g',
     'จ': 'j',
-    'ด': 'd', 'ฎ': 'd',
+    'ฎ': 'd', 'ด': 'd',
     'ฏ': 'dt', 'ต': 'dt',
     'บ': 'b',
     'ป': 'bp',
@@ -141,16 +141,18 @@ PLAIN_SOUND = {
 }
 
 ASPIRATE_LOW_SOUND = {
-    'ค': 'kh', 'ฅ': 'kh', 'ฆ': 'kh',
-    'ช': 'ch', 'ฌ': 'ch',
-    'ท': 'th', 'ฑ': 'th', 'ฒ': 'th', 'ธ': 'th',
-    'พ': 'ph', 'ภ': 'ph',
+    'ฅ': 'kh', 'ฆ': 'kh', 'ค': 'kh',
+    'ฌ': 'ch', 'ช': 'ch',
+    'ฑ': 'th', 'ฒ': 'th', 'ธ': 'th', 'ท': 'th',
+    'ภ': 'ph', 'พ': 'ph',
     'ฟ': 'f',
-    'ซ': 's',
+    'ทร': 's', 'ซ': 's',
     'ฮ': 'h',
 
 }
-
+ASPIRATE_LOW_SOUND_INV = {v: k for k, v in
+                          ASPIRATE_LOW_SOUND.items()
+                          }
 ASPIRATE_HIGH_SOUND = {
     'ข': 'kh', 'ฃ': 'kh',
     'ฉ': 'ch',
@@ -159,5 +161,18 @@ ASPIRATE_HIGH_SOUND = {
     'ฝ': 'f',
     'ส': 's', 'ศ': 's', 'ษ': 's',
     'ห': 'h',
-
 }
+
+ASPIRATE_HIGH_SOUND_INV = {v: k for k, v in
+                           ASPIRATE_HIGH_SOUND.items()
+                           }
+
+ASPIRATE = list(ASPIRATE_LOW_SOUND.keys()) +list(ASPIRATE_HIGH_SOUND.keys()) 
+SOUND_CLASS = {
+    k: 'mid' if k in PLAIN_SOUND.keys() else 'high' if k in ASPIRATE_HIGH_SOUND.keys() else 'low' for k in THAI_CONS
+}
+
+ALL_SOUND = SORONANT_SOUND.copy()
+ALL_SOUND.update(ASPIRATE_LOW_SOUND)
+ALL_SOUND.update(ASPIRATE_HIGH_SOUND)
+ALL_SOUND.update(PLAIN_SOUND)
