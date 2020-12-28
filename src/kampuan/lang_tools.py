@@ -33,6 +33,7 @@ def get_vowel_form(REP: str = '[REP]', is_sort=True) -> List[str]:
     vowel_list = [ch.replace('-', REP).strip() for ch in VOWEL_FORMS]
     vowel_list.append(REP)
     if is_sort:
+        vowel_list.sort(reverse=True)
         vowel_list.sort(key=len, reverse=True)
     return vowel_list
 

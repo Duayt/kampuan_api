@@ -13,7 +13,7 @@ df_vowel_form = pd.read_excel(os.path.join(dirname,
                                            'assets/thai_vowel_forms.xlsx'), engine='openpyxl')
 
 df_tone_rule = pd.read_csv(os.path.join(dirname,
-                                           'assets/tone_rules_table.csv'))
+                                        'assets/tone_rules_table.csv'))
 
 
 MUTE_MARK = '\u0e4c'
@@ -64,7 +64,8 @@ VOWEL_FORM_BASIC = [
     '-็',
     'เ-ิ',
 ]
-VOWEL_FORMS = VOWEL_FORM_BASIC + VOWEL_FORMS_W_CONSONANT + VOWEL_FORMS_W_LEADING
+VOWEL_FORMS = VOWEL_FORMS_W_CONSONANT + VOWEL_FORMS_W_LEADING + VOWEL_FORM_BASIC
+
 SHORT_LIVE_VOWELS = [
     '-ำ',
     'ไ-',

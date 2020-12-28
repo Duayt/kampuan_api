@@ -36,6 +36,7 @@ class ThaiSubWord:
         self.split_con()
         self.init_con = ''.join(tup[1] for tup in self._init_con_tup)
         self.final_con = ''.join(tup[1] for tup in self._final_con_tup)
+        self._two_syllable = self.two_syllable
 
         # word types
         self._vowel_form_sound = self.vowel_form_sound
@@ -43,17 +44,22 @@ class ThaiSubWord:
         self._word_class = self.word_class
 
         #Tone and sound
-        self._main_init_sound = self.main_init_sound
-        self._init_sound_class = SOUND_CLASS[self._main_init_sound]
-        self._aspirate = self._main_init_sound in ASPIRATE
-        self._tone_mark_class = 0 if len(
-            self._tone_mark) == 0 else TONE_MARK_CLASS[self._tone_mark[0]]
-        self._tone_group_rule = self.tone_group_rule
-        self._two_syllable = self.two_syllable
-        self._tone = determine_tone_sound(tone_mark_class=self._tone_mark_class,
-                                          tone_group_rule=self._tone_group_rule,
-                                          word_class=self._word_class,
-                                          vowel_class=self._vowel_class)
+        if self.two_syllable:
+            pass
+        else:
+            self._main_init_sound = self.main_init_sound
+            self._init_sound_class = SOUND_CLASS[self._main_init_sound]
+            self._aspirate = self._main_init_sound in ASPIRATE
+            self._tone_mark_class = 0 if len(
+                self._tone_mark) == 0 else TONE_MARK_CLASS[self._tone_mark[0]]
+            self._tone_group_rule = self.tone_group_rule
+            try:
+                self._tone = determine_tone_sound(tone_mark_class=self._tone_mark_class,
+                                                tone_group_rule=self._tone_group_rule,
+                                                word_class=self._word_class,
+                                                vowel_class=self._vowel_class)
+            except:
+                print(self._raw, 'tone error')
 
     @property
     def vowel_form_sound(self):
@@ -86,7 +92,8 @@ class ThaiSubWord:
             elif self.init_con in LEADING_CONSONANT_CLUSTER:
                 return self._init_con_tup[1][1]
             else:
-                raise ValueError('not implement')
+                assert self._two_syllable ==True
+                # raise ValueError('not implement')
 
     @property
     def word_class(self):
