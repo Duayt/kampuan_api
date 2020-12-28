@@ -4,10 +4,11 @@ from dataclasses import dataclass
 from .const import *
 
 
-@dataclass
 class ThaiSubWord:
     def __init__(self, word: str = 'เกี๊ยว'):
         # Character base
+        if len(word) == 1 and word in THAI_CONS:
+            word = word + 'ะ'
         self._raw: str = word
         self._vowels_tup: List[str] = self.vowels_tup
         self._vowels: List[str] = self.vowels
@@ -15,7 +16,7 @@ class ThaiSubWord:
         self._consonants: List[str] = self.consonants
         self._tone_mark: List[str] = self.tone_mark
         self._mute_mark: int = self.mute_mark
-        self._two_syllable = False
+
         # extractions
         self.extract_vowel()
 
@@ -29,9 +30,9 @@ class ThaiSubWord:
         self._true_con_tup = self.true_con_tup
         self._con_split = self.consonant_split_index()
         self.split_con()
-        # self._init_con: str = self.init_con
-        # self._final_con: str = self._ex_regex.groups()[-1]
 
+        #Tone and sones
+        self._two_syllable = self.two_syllable
         self._tone: str = None
 
     @property
@@ -131,7 +132,7 @@ class ThaiSubWord:
                 elif self.true_con_tup[1][1] + self.true_con_tup[2][1] in DOUBLE_FINAL_CONSONANT:
                     return self.true_con_tup[0]
                 else:
-                    self._two_syllable = True  # ตลาด,สนม ,เกษม
+                    # self._two_syllable = True  # ตลาด,สนม ,เกษม
                     print('check this case not sure')
                     return self.true_con_tup[1]
             elif true_con_len == 4:
@@ -144,6 +145,13 @@ class ThaiSubWord:
 
         else:
             return "Error Not implement"
+
+    @property
+    def two_syllable(self):
+        if len(self._init_con_tup) >= 2 and (self._init_con_tup[0][1] + self._init_con_tup[1][1] not in ALL_CONSONANT_CLUSTER):
+            return True
+        else:
+            return False
 
     def split_con(self):
         self._init_con_tup = []
@@ -158,6 +166,9 @@ class ThaiSubWord:
         self._final_con_tup = [
             tup for tup in self.true_con_tup if tup not in self._init_con_tup]
 
+    def get_tup(self):
+        return [(i, j) for i, j in enumerate(self._raw)]
+
     def extract_vowel(self):
         self._ex_vw_form, self._ex_regex, self._ex_pattern = extract_vowel_form(
             self._raw)
@@ -167,3 +178,26 @@ class ThaiSubWord:
 
     def __setitem__(self, key, value):
         self._raw[key] = value
+
+    def __str__(self):
+        return self._raw
+
+    def __repr__(self):
+        return f"<{type(self).__qualname__ +' ' +str(self)} at {hex(id(self))}>"
+
+    def split_non_conform(self):
+        if self.two_syllable:
+            first_init, second_init = self._init_con_tup
+            first = ThaiSubWord(word=str(first_init[1])+'ะ')
+            new_word = self.raw
+            index = first_init[0]
+            if second_init[1] in SORONANT:
+                new_word = new_word[:index] + 'ห' + \
+                    new_word[index + 1:]  # สวัส =>  สะ หวัด
+            else:
+                new_word = new_word[:index] + '' + \
+                    new_word[index + 1:]  # ผดุง =>  ผะ ดุง
+            second = ThaiSubWord(word=new_word)
+            return [first, second]
+        else:
+            return [self]

@@ -11,6 +11,8 @@ df_fin_con = pd.read_excel(os.path.join(dirname,
 df_fin_con['sound'] = df_fin_con['sound'].fillna(method='ffill')
 df_vowel_form = pd.read_excel(os.path.join(dirname,
                                            'assets/thai_vowel_forms.xlsx'), engine='openpyxl')
+MUTE_MARK = '\u0e4c'
+REP = '[REP]'
 
 VOWEL_FORMS_W_CONSONANT = [
     '-ือ',
@@ -102,8 +104,8 @@ LEADING_CONSONANT_CLUSTER = [
     'หว',
     'อย'
 ]
-NON_CONFORMING_CONSONANT_CLUSTER=[
-    
+NON_CONFORMING_CONSONANT_CLUSTER = [
+
 ]
 ALL_CONSONANT_CLUSTER = list(
     set(TRUE_CONSONANT_CLUSTER + FALSE_CONSONANT_CLUSTER+LEADING_CONSONANT_CLUSTER))
@@ -115,6 +117,47 @@ DOUBLE_FINAL_CONSONANT = [
     'รถ',
     'รท',
 ]
+# for sound tone
+SORONANT_SOUND = {
+    'ง': 'ng',
+    'น': 'n', 'ณ': 'n',
+    'ม': 'm',
+    'ย': 'y', 'ญ': 'y',
+    'ร': 'r',
+    'ล': 'l', 'ฬ': 'l',
+    'ว': 'w',
+}
 
-MUTE_MARK = '\u0e4c'
-REP = '[REP]'
+SORONANT = list(SORONANT_SOUND.keys())
+
+PLAIN_SOUND = {
+    'ก': 'g',
+    'จ': 'j',
+    'ด': 'd', 'ฎ': 'd',
+    'ฏ': 'dt', 'ต': 'dt',
+    'บ': 'b',
+    'ป': 'bp',
+    'อ': 'o',
+}
+
+ASPIRATE_LOW_SOUND = {
+    'ค': 'kh', 'ฅ': 'kh', 'ฆ': 'kh',
+    'ช': 'ch', 'ฌ': 'ch',
+    'ท': 'th', 'ฑ': 'th', 'ฒ': 'th', 'ธ': 'th',
+    'พ': 'ph', 'ภ': 'ph',
+    'ฟ': 'f',
+    'ซ': 's',
+    'ฮ': 'h',
+
+}
+
+ASPIRATE_HIGH_SOUND = {
+    'ข': 'kh', 'ฃ': 'kh',
+    'ฉ': 'ch',
+    'ถ': 'th', 'ฐ': 'th',
+    'ผ': 'ph',
+    'ฝ': 'f',
+    'ส': 's', 'ศ': 's', 'ษ': 's',
+    'ห': 'h',
+
+}
