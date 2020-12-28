@@ -1,0 +1,13 @@
+﻿tone_group_rules,word_class,vowel_class,tone_0,tone_1,tone_2,tone_3,tone_4
+0,live,short,0,1,2,3,4
+0,live,long,0,1,2,3,4
+0,dead,short,,1,2,3,4
+0,dead,long,,1,2,3,4
+1,live,short,,1,2,,0
+1,live,long,,1,2,,0
+1,dead,short,,0,2,,
+1,dead,long,,0,2,,
+2,live,short,0,,1,2,
+2,live,long,0,,1,2,
+2,dead,short,,,1,0,4
+2,dead,long,,,0,2,4

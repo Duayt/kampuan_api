@@ -11,6 +11,11 @@ df_fin_con = pd.read_excel(os.path.join(dirname,
 df_fin_con['sound'] = df_fin_con['sound'].fillna(method='ffill')
 df_vowel_form = pd.read_excel(os.path.join(dirname,
                                            'assets/thai_vowel_forms.xlsx'), engine='openpyxl')
+
+df_tone_rule = pd.read_csv(os.path.join(dirname,
+                                           'assets/tone_rules_table.csv'))
+
+
 MUTE_MARK = '\u0e4c'
 REP = '[REP]'
 
@@ -60,6 +65,12 @@ VOWEL_FORM_BASIC = [
     'เ-ิ',
 ]
 VOWEL_FORMS = VOWEL_FORM_BASIC + VOWEL_FORMS_W_CONSONANT + VOWEL_FORMS_W_LEADING
+SHORT_LIVE_VOWELS = [
+    '-ำ',
+    'ไ-',
+    'ใ-',
+    'เ-า', ]
+
 SHORT_SOUND_VOWELS = [
     '-ะ',
     '-ิ',
@@ -77,11 +88,8 @@ SHORT_SOUND_VOWELS = [
     '-ัวะ',
     'ฤ',
     'ฦ',
-    '-ำ',
-    'ไ-',
-    'ใ-',
-    'เ-า',
-]
+] + SHORT_LIVE_VOWELS
+
 LONG_SOUND_VOWELS = [vw for vw in VOWEL_FORMS if vw not in SHORT_SOUND_VOWELS]
 THAI_CHARS = pythainlp.thai_characters
 THAI_CONS = pythainlp.thai_consonants
@@ -122,6 +130,7 @@ LEADING_CONSONANT_CLUSTER = [
     'หน',
     'หม',
     'หย',
+    'หญ',
     'หร',
     'หล',
     'หว',

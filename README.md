@@ -20,6 +20,9 @@ http://www.dekteen.com/%E0%B8%A1%E0%B8%B2%E0%B8%95%E0%B8%A3%E0%B8%B2%E0%B8%95%E0
 (https://sites.google.com/site/teacheroraya/kar-phan-wrrnyukt)
 (http://elsd.ssru.ac.th/nattakan_da/pluginfile.php/67/block_html/content/%E0%B9%83%E0%B8%9A%E0%B8%84%E0%B8%A7%E0%B8%B2%E0%B8%A1%E0%B8%A3%E0%B8%B9%E0%B9%89-%E0%B8%9C%E0%B8%B1%E0%B8%99%E0%B8%A7%E0%B8%A3%E0%B8%A3%E0%B8%93%E0%B8%A2%E0%B8%B8%E0%B8%81%E0%B8%95%E0%B9%8C%20%281%29.pdf)
 
+* dead or alive
+(http://nkw05245.circlecamp.com/index.php?page=8)
+
 # hard case not implemented yet
 กษัตริย์
 สมุทร
