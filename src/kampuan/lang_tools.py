@@ -1,9 +1,10 @@
 # %%
+import numpy as np
 import re
 from collections import namedtuple
 from typing import List, NamedTuple
 
-from kampuan.const import MUTE_MARK, THAI_CONS, THAI_TONE, VOWEL_FORMS
+from kampuan.const import MUTE_MARK, THAI_CONS, THAI_TONE, VOWEL_FORMS,df_tone_rule
 
 # %%
 # Tones
@@ -84,7 +85,7 @@ def extract_vowel_form(text: str, vowel_patterns: List[str] = None, vowel_forms:
     return vowel_extract(None, text, text)
 
 
-def find_main_mute_consonant(text:str):
+def find_main_mute_consonant(text: str):
     """extract main mute consonant การันต์
 
     Args:
@@ -93,25 +94,32 @@ def find_main_mute_consonant(text:str):
     Returns:
         List of tuple List[(int,str)]: return[] if no การันต์ , return [(index, consonant)]
     """
-    
+
     if MUTE_MARK not in text:
         return []
     else:
-        all_con=[]
-        mark_index=text.index(MUTE_MARK)
-        for i in range(len(text[:mark_index])-1,0-1,-1):
+        all_con = []
+        mark_index = text.index(MUTE_MARK)
+        for i in range(len(text[:mark_index])-1, 0-1, -1):
             if text[i] in THAI_CONS:
-                main_con = (i,text[i])
+                main_con = (i, text[i])
                 break
         all_con.append(main_con)
-        if len(all_con) >0:
+        if len(all_con) > 0:
             if main_con[1] == 'ร':
-                lead_con_index=main_con[0]-1
-                if text[lead_con_index] in ['ท','ต','ด']: #ทร์ ,ตร์ ,ดร์ 
-                    all_con.append((lead_con_index,text[lead_con_index]))
+                lead_con_index = main_con[0]-1
+                if text[lead_con_index] in ['ท', 'ต', 'ด']:  # ทร์ ,ตร์ ,ดร์
+                    all_con.append((lead_con_index, text[lead_con_index]))
             return all_con
         else:
             return []
+
+
+def determine_tone_sound(tone_mark_class, tone_group_rule, word_class, vowel_class):
+    filters = (df_tone_rule['tone_group_rules'] == tone_group_rule) &\
+        (df_tone_rule['word_class'] == word_class) &\
+        (df_tone_rule['vowel_class'] == vowel_class)
+    return np.where(df_tone_rule[filters].iloc[0, 3:] == tone_mark_class)[0].item()
 
 # extract_vowel_form('ไก่').vowel_form
 # %%

@@ -1,4 +1,4 @@
-from .lang_tools import extract_vowel_form, find_main_mute_consonant
+from .lang_tools import extract_vowel_form, find_main_mute_consonant, determine_tone_sound
 import pythainlp
 from dataclasses import dataclass
 from .const import *
@@ -20,21 +20,86 @@ class ThaiSubWord:
         # extractions
         self.extract_vowel()
 
-        # Type based
+        # Vowel based
         self._vowel_form: str = self._ex_vw_form
         self._vowel_con_tup = self.vowel_con_tup
         self._vowel_form_tup = self.vowel_form_tup
         self._vowel_form_tup.sort()
+
+        # Consonant stuff
         self._mute_con_tup = self.mute_con_tup
         self._mute_con = self.mute_con
         self._true_con_tup = self.true_con_tup
+        self._double_r = len(self._true_con_tup) > 2 and (
+            self.true_con_tup[1][1] + self.true_con_tup[2][1] == 'รร')
         self._con_split = self.consonant_split_index()
         self.split_con()
         self.init_con = ''.join(tup[1] for tup in self._init_con_tup)
         self.final_con = ''.join(tup[1] for tup in self._final_con_tup)
-        #Tone and sones
+
+        # word types
+        self._vowel_form_sound = self.vowel_form_sound
+        self._vowel_class = 'short' if self._vowel_form_sound in SHORT_SOUND_VOWELS else 'long'
+        self._word_class = self.word_class
+
+        #Tone and sound
+        self._main_init_sound = self.main_init_sound
+        self._init_sound_class = SOUND_CLASS[self._main_init_sound]
+        self._aspirate = self._main_init_sound in ASPIRATE
+        self._tone_mark_class = 0 if len(
+            self._tone_mark) == 0 else TONE_MARK_CLASS[self._tone_mark[0]]
+        self._tone_group_rule = self.tone_group_rule
         self._two_syllable = self.two_syllable
-        self._tone: str = None
+        self._tone = determine_tone_sound(tone_mark_class=self._tone_mark_class,
+                                          tone_group_rule=self._tone_group_rule,
+                                          word_class=self._word_class,
+                                          vowel_class=self._vowel_class)
+
+    @property
+    def vowel_form_sound(self):
+        if self._double_r:
+            return '-ั'
+        else:
+            return self._vowel_form
+
+    @property
+    def tone_group_rule(self):
+        if self._init_sound_class == 'mid':
+            return 0
+        elif self._init_sound_class == 'high' or (self.init_con in LEADING_CONSONANT_CLUSTER):
+            return 1
+        elif self._init_sound_class == 'low':
+            return 2
+
+    @property
+    def main_init_sound(self):
+        if len(self.init_con) < 2:
+            return self._init_con_tup[0][1]
+        else:
+            if 'ทร' == self.init_con:
+                if 'ทรั' in self._raw or 'ทร็' in self._raw:  # ทรัส
+                    return self._init_con_tup[0][1]
+                else:
+                    return 'ซ'
+            elif self.init_con in TRUE_CONSONANT_CLUSTER + FALSE_CONSONANT_CLUSTER:
+                return self._init_con_tup[0][1]
+            elif self.init_con in LEADING_CONSONANT_CLUSTER:
+                return self._init_con_tup[1][1]
+            else:
+                raise ValueError('not implement')
+
+    @property
+    def word_class(self):
+        if len(self.final_con) == 0:
+            if self._vowel_form_sound in LONG_SOUND_VOWELS + SHORT_LIVE_VOWELS:
+                return 'live'
+            else:
+                return 'dead'
+        else:
+            if self.final_con in SORONANT:
+                return 'live'
+            else:
+                return 'dead'
 
     @property
     def raw(self):
@@ -137,7 +202,7 @@ class ThaiSubWord:
                     print('check this case not sure')
                     return self.true_con_tup[1]
             elif true_con_len == 4:
-                if self.true_con_tup[1][1] + self.true_con_tup[2][1] == 'รร':  # บรรณ
+                if self._double_r:  # บรรณ
                     return self.true_con_tup[0]
                 else:
                     return self.true_con_tup[1]
@@ -166,6 +231,8 @@ class ThaiSubWord:
 
         self._final_con_tup = [
             tup for tup in self.true_con_tup if tup not in self._init_con_tup]
+        if self._double_r:
+            self._final_con_tup = [self._final_con_tup[-1]]
 
     def get_tup(self):
         return [(i, j) for i, j in enumerate(self._raw)]
