@@ -60,6 +60,29 @@ VOWEL_FORM_BASIC = [
     'เ-ิ',
 ]
 VOWEL_FORMS = VOWEL_FORM_BASIC + VOWEL_FORMS_W_CONSONANT + VOWEL_FORMS_W_LEADING
+SHORT_SOUND_VOWELS = [
+    '-ะ',
+    '-ิ',
+    '-ึ',
+    '-ุ',
+    'เ-ะ',
+    'แ-ะ',
+    'เ-็',
+    'แ-็',
+    'โ-ะ',
+    'เ-าะ',
+    'เ-อะ',
+    'เ-ียะ',
+    'เ-ือะ',
+    '-ัวะ',
+    'ฤ',
+    'ฦ',
+    '-ำ',
+    'ไ-',
+    'ใ-',
+    'เ-า',
+]
+LONG_SOUND_VOWELS = [vw for vw in VOWEL_FORMS if vw not in SHORT_SOUND_VOWELS]
 THAI_CHARS = pythainlp.thai_characters
 THAI_CONS = pythainlp.thai_consonants
 THAI_VOW = pythainlp.thai_vowels
@@ -167,7 +190,7 @@ ASPIRATE_HIGH_SOUND_INV = {v: k for k, v in
                            ASPIRATE_HIGH_SOUND.items()
                            }
 
-ASPIRATE = list(ASPIRATE_LOW_SOUND.keys()) +list(ASPIRATE_HIGH_SOUND.keys()) 
+ASPIRATE = list(ASPIRATE_LOW_SOUND.keys()) + list(ASPIRATE_HIGH_SOUND.keys())
 SOUND_CLASS = {
     k: 'mid' if k in PLAIN_SOUND.keys() else 'high' if k in ASPIRATE_HIGH_SOUND.keys() else 'low' for k in THAI_CONS
 }
@@ -176,3 +199,10 @@ ALL_SOUND = SORONANT_SOUND.copy()
 ALL_SOUND.update(ASPIRATE_LOW_SOUND)
 ALL_SOUND.update(ASPIRATE_HIGH_SOUND)
 ALL_SOUND.update(PLAIN_SOUND)
+
+TONE_MARK_CLASS = {
+    "\u0e48": 1,
+    "\u0e49": 2,
+    "\u0e4a": 3,
+    "\u0e4b": 4,
+}

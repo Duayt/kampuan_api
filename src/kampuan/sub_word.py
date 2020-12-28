@@ -31,6 +31,7 @@ class ThaiSubWord:
         self._con_split = self.consonant_split_index()
         self.split_con()
         self.init_con = ''.join(tup[1] for tup in self._init_con_tup)
+        self.final_con = ''.join(tup[1] for tup in self._final_con_tup)
         #Tone and sones
         self._two_syllable = self.two_syllable
         self._tone: str = None
