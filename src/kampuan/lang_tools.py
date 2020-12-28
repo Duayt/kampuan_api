@@ -4,7 +4,7 @@ import re
 from collections import namedtuple
 from typing import List, NamedTuple
 
-from kampuan.const import MUTE_MARK, THAI_CONS, THAI_TONE, VOWEL_FORMS,df_tone_rule
+from kampuan.const import MUTE_MARK, THAI_CONS,THAI_VOW, THAI_TONE, VOWEL_FORMS, df_tone_rule
 
 # %%
 # Tones
@@ -112,6 +112,27 @@ def find_main_mute_consonant(text: str):
                 if text[lead_con_index] in ['ท', 'ต', 'ด']:  # ทร์ ,ตร์ ,ดร์
                     all_con.append((lead_con_index, text[lead_con_index]))
             return all_con
+        else:
+            return []
+
+
+def find_mute_vowel(text: str):
+    """extract main mute vowel การันต์ case:('พันธุ์')
+
+    Args:
+        text (str): word to check
+
+    Returns:
+        List of tuple List[(int,str)]: return[] if no การันต์ , return [(index, consonant)]
+    """
+
+    if MUTE_MARK not in text:
+        return []
+    else:
+        mark_index = text.index(MUTE_MARK)
+        lead_mute = text[mark_index-1]
+        if lead_mute in THAI_VOW:
+            return [(mark_index-1, lead_mute)]
         else:
             return []
 

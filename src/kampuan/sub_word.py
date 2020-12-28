@@ -1,4 +1,4 @@
-from .lang_tools import extract_vowel_form, find_main_mute_consonant, determine_tone_sound
+from .lang_tools import extract_vowel_form, find_main_mute_consonant, find_mute_vowel, determine_tone_sound
 import pythainlp
 from dataclasses import dataclass
 from .const import *
@@ -20,6 +20,11 @@ class ThaiSubWord:
         # extractions
         self.extract_vowel()
 
+        # mute stuff
+        self._mute_con_tup = self.mute_con_tup
+        self._mute_con = self.mute_con
+        self._mute_vow_tup = self.mute_vow_tup
+
         # Vowel based
         self._vowel_form: str = self._ex_vw_form
         self._vowel_con_tup = self.vowel_con_tup
@@ -27,8 +32,6 @@ class ThaiSubWord:
         self._vowel_form_tup.sort()
 
         # Consonant stuff
-        self._mute_con_tup = self.mute_con_tup
-        self._mute_con = self.mute_con
         self._true_con_tup = self.true_con_tup
         self._double_r = len(self._true_con_tup) > 2 and (
             self.true_con_tup[1][1] + self.true_con_tup[2][1] == 'รร')
@@ -55,9 +58,9 @@ class ThaiSubWord:
             self._tone_group_rule = self.tone_group_rule
             try:
                 self._tone = determine_tone_sound(tone_mark_class=self._tone_mark_class,
-                                                tone_group_rule=self._tone_group_rule,
-                                                word_class=self._word_class,
-                                                vowel_class=self._vowel_class)
+                                                  tone_group_rule=self._tone_group_rule,
+                                                  word_class=self._word_class,
+                                                  vowel_class=self._vowel_class)
             except:
                 print(self._raw, 'tone error')
 
@@ -92,7 +95,7 @@ class ThaiSubWord:
             elif self.init_con in LEADING_CONSONANT_CLUSTER:
                 return self._init_con_tup[1][1]
             else:
-                assert self._two_syllable ==True
+                assert self._two_syllable == True
                 # raise ValueError('not implement')
 
     @property
@@ -149,10 +152,13 @@ class ThaiSubWord:
 
     @property
     def vowel_form_tup(self):
+        vowel_tup = self.vowels_tup.copy()
+        if len(self._mute_vow_tup) > 0:
+            vowel_tup.remove(self._mute_vow_tup[0])
         if self.vowel_con_tup[0] == -1:
-            return self.vowels_tup
+            return vowel_tup
         else:
-            vowel_form_tup = self.vowels_tup + [self._vowel_con_tup]
+            vowel_form_tup = vowel_tup + [self._vowel_con_tup]
             vowel_form_tup.sort()
             return vowel_form_tup
 
@@ -172,6 +178,10 @@ class ThaiSubWord:
         return find_main_mute_consonant(self._raw)
 
     @property
+    def mute_vow_tup(self):
+        return find_mute_vowel(self._raw)
+
+    @property
     def mute_con(self):
         return [ch[1] for ch in self.mute_con_tup]
 
@@ -179,9 +189,8 @@ class ThaiSubWord:
     def consonant_split_index(self):
         if len(self.tone_mark) > 0:
             return (self._raw.index(self.tone_mark[0]), self.tone_mark[0])
-
         elif self._vowel_form in VOWEL_FORM_BASIC:
-            return self._vowels_tup[-1]
+            return self._vowel_form_tup[-1]
 
         elif self._vowel_form in VOWEL_FORMS_W_CONSONANT:  # เลีย , ทอง
             return self._vowel_con_tup
