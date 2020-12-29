@@ -56,6 +56,7 @@ async def puan_kam(text: str = 'สวัสดี',
     - **all** (bool, optional): if True will provide all 4 puan results. Defaults to False.
 
     - **skip_tokenize** (bool, optional): if True will skip tokenzation and use user provided list of words (input pure string will force to False or dont skip tokenization). Defaults to None.
+    
     -Returns:
     - **results**: List of คำผวน
     """
@@ -81,6 +82,7 @@ async def pun_wunnayook(text: str = 'สวัสดี'):
     - **text** (str):  Defaults to 'สวัสดี'.
         - input string 'ไปเที่ยว' -> auto tokenize will apply and split to ไป and  เที่ยว
         - list of string which accepted 3 formats: ['ไป','กิน','ข้าว'] | 'ไป','กิน','ข้าว' | ไป,กิน,ข้าว, the list input will also neglect auto tokenization.
+    
     -Returns:
     - **results**: List of คำผัน
     """
@@ -96,6 +98,7 @@ async def extract_vowel(text: str = 'สวัสดี'):
     - **text** (str):  Defaults to 'สวัสดี'.
         - input string 'ไปเที่ยว' -> auto tokenize will apply and split to ไป and  เที่ยว
         - list of string which accepted 3 formats: ['ไป','กิน','ข้าว'] | 'ไป','กิน','ข้าว' | ไป,กิน,ข้าว, the list input will also neglect auto tokenization.
+    
     -Returns:
     - **results**: List of extracted vowel
     """
