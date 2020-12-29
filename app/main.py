@@ -40,7 +40,7 @@ def process_text_2_list(text):
 async def puan_kam(text: str = 'สวัสดี',
                    first: Optional[bool] = None,
                    keep_tone: Optional[bool] = None,
-                   all: Optional[bool] = False):
+                   all: Optional[bool] = None):
     """Puan kum (ผวนคำ) is a Thai toung twister, is API convert string into kampuan
 
     -Args:
@@ -58,7 +58,7 @@ async def puan_kam(text: str = 'สวัสดี',
     - **results**: List of คำผวน
     """
     text = process_text_2_list(text)
-    if all:
+    if all is not None and all:
         return {'input': text,
                 'results': kp.puan_kam_all(text=text)}
     else:
