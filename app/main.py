@@ -5,11 +5,11 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from starlette.responses import RedirectResponse
 app = FastAPI(title="Kampuan project",
-              description="Welcome, This is a project using python to do คำผวน by Tanawat C.",
+              description="Welcome, This is a project using python to do คำผวน by Tanawat C. \n https://www.linkedin.com/in/tanawat-chiewhawan",
               version="0.0.1",)
 
 
-@app.get("/")
+@app.get("/", include_in_schema=False)
 async def root():
     # return {'message': "Hello welcome to Kampuan API (คำผวน)",
     #         'author': "Tanawat C."}
@@ -36,7 +36,7 @@ async def puan_kam(text: str = 'สวัสดี',
     -Returns:
     - **results**: List of คำผวน
     """
-    text = eval(text) # can input list
+    text = eval(text)  # can input list
     if all:
         return {'input': text,
                 'results': kp.puan_kam_all(text=text)}
@@ -59,7 +59,7 @@ async def pun_wunnayook(text: str = 'สวัสดี'):
     """pun wunnayook (ผันเสียงวรรณยุกต์)
 
     -Args:
-    - ***text*** (str): text input to do pun wunnayook Defaults to 'สวัสดี'.
+    -**text** (str): text input to do pun wunnayook Defaults to 'สวัสดี'.
 
     -Returns:
     - **results**: List of คำผัน
@@ -72,10 +72,10 @@ async def extract_vowel(text: str = 'สวัสดีครับ'):
     """ Method to extract Thai vowel form out.
 
     -Args:
-    - **text*** (str, optional): [description]. Defaults to 'สวัสดีครับ'.
+    - **text** (str, optional): [description]. Defaults to 'สวัสดีครับ'.
 
     -Returns:
-    - **results***: List of extracted vowel
+    - **results**: List of extracted vowel
     """
     text = kp.tokenize(text)
     return {"input": text,
