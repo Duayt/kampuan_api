@@ -114,12 +114,14 @@ def puan_kam_base(text='สวัสดี', keep_tone=None, use_first=True, ind
 
 def puan_kam_all(text='สวัสดี'):
     use_first = [True, False]
+    keep_tone = [True, False]
     result = {}
     count = 0
     for j in use_first:
-        result[count] = puan_kam_base(
-            text=text, use_first=j)
-        count += 1
+        for k in keep_tone:
+            result[count] = puan_kam_base(
+                text=text, use_first=j, keep_tone=k)
+            count += 1
     return result
 
 

@@ -1,7 +1,7 @@
 # kampuan_api
 Kampuan api project, An API for คำผวน.
 
-server:
+The API:
 https://kampuan-api.herokuapp.com/
 
 # Requirements

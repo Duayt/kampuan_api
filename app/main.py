@@ -1,5 +1,6 @@
 import kampuan as kp
 import json
+from typing import Optional
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from starlette.responses import RedirectResponse
@@ -16,21 +17,66 @@ async def root():
     return response
 
 
+@app.get("/puan_kam/{text}")
+async def puan_kam(text: str = 'สวัสดี',
+                   first: Optional[bool] = None,
+                   keep_tone: Optional[bool] = None,
+                   all: Optional[bool] = False):
+    """Puan kum (ผวนคำ) is a Thai toung twister, is API convert string into kampuan
+
+    -Args:
+    - **text** (str): input string 'ไปเที่ยว' or list of string [ 'ไป','กิน','ข้าว']. Defaults to 'สวัสดี'.
+    - **first** (bool, optional): if True will use word letter to puan wiht the last other wise will select second word
+                                    (None will let us decide). Defaults to None.
+
+    - **keep_tone** (bool, optional): Force wheter to keep the tone when doing the puan (None will let us decide). Defaults to None.
+
+    - **all** (bool, optional): if True will provide all 4 puan results. Defaults to False.
+
+    -Returns:
+    - **results**: List of คำผวน
+    """
+    text = eval(text) # can input list
+    if all:
+        return {'input': text,
+                'results': kp.puan_kam_all(text=text)}
+    else:
+        if first is None and keep_tone is None:
+            return {'input': text,
+                    'results': kp.puan_kam(text=text)}
+        else:
+            return {'input': text,
+                    'results': kp.puan_kam_base(text=text, keep_tone=keep_tone, use_first=first)}
+
+
+# @app.get("/puan_kam_all/{text}")
+# def puan_kam_all(text: str = 'สวัสดี'):
+#     return kp.puan_kam_all(text=text)
+
+
+@app.get("/pun_wunnayook/{text}")
+async def pun_wunnayook(text: str = 'สวัสดี'):
+    """pun wunnayook (ผันเสียงวรรณยุกต์)
+
+    -Args:
+    - ***text*** (str): text input to do pun wunnayook Defaults to 'สวัสดี'.
+
+    -Returns:
+    - **results**: List of คำผัน
+    """
+    return kp.pun_wunayook(text=text)
+
+
 @app.get("/vowel/{text}")
-def extract_vowel(text: str = 'สวัสดีครับ'):
+async def extract_vowel(text: str = 'สวัสดีครับ'):
+    """ Method to extract Thai vowel form out.
+
+    -Args:
+    - **text*** (str, optional): [description]. Defaults to 'สวัสดีครับ'.
+
+    -Returns:
+    - **results***: List of extracted vowel
+    """
+    text = kp.tokenize(text)
     return {"input": text,
             "result": kp.extract_vowel(text)}
-
-
-@app.get("/puan_kam/{text}")
-def puan_kam_auto(text: str = 'สวัสดี'):
-    return kp.puan_kam(text=text)
-
-
-@app.get("/puan_kam_all/{text}")
-def puan_kam_all(text: str = 'สวัสดี'):
-    return kp.puan_kam_all(text=text)
-
-@app.get("/puan_wunnayook/{text}")
-def puan_kam_all(text: str = 'สวัสดี'):
-    return kp.pun_wunayook(text=text)
