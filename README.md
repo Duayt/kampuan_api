@@ -28,14 +28,21 @@ http://thailanguagept.blogspot.com/2016/08/
 * dead or alive
 (http://nkw05245.circlecamp.com/index.php?page=8)
 
+# Future plan
+* database for คำผวน
+* feed back incorrect cases
+* add hard language cases as listed below
+* add homonym conversion to give the closest meaning of kampuan
+* build dataset for NLP deep learning
+
 # hard case not implemented yet
-กษัตริย์
-สมุทร
-เล่ห์กล
-พราหมณ์
-บรรณ
-เจริญ vs จริง
-ฤ stuffs
-ภูมิ พยาธิ ชาติ สาเหตุ   ธาตุ
-เป็ด(เอะ) 
-อยาก
+* กษัตริย์
+* สมุทร
+* เล่ห์กล
+* พราหมณ์
+* บรรณ
+* เจริญ vs จริง
+* ฤ stuffs
+* ภูมิ พยาธิ ชาติ สาเหตุ   ธาตุ
+* เป็ด(เอะ) 
+* อยาก
