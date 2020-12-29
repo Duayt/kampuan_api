@@ -44,6 +44,7 @@ async def puan_kam(text: str = 'สวัสดี',
                    skip_tokenize: Optional[bool] = None):
     """Puan kum (ผวนคำ) is a Thai toung twister, is API convert string into kampuan
         Play around with the options to see different results.
+        
     -Args:
     - **text** (str):  Defaults to 'สวัสดี'.
         - input string 'ไปเที่ยว' -> auto tokenize will apply and split to ไป and  เที่ยว
@@ -95,6 +96,7 @@ async def extract_vowel(text: str = 'สวัสดี'):
     """ Method to extract Thai vowel form out.
 
     -Args:
+
     - **text** (str):  Defaults to 'สวัสดี'.
         - input string 'ไปเที่ยว' -> auto tokenize will apply and split to ไป and  เที่ยว
         - list of string which accepted 3 formats: ['ไป','กิน','ข้าว'] | 'ไป','กิน','ข้าว' | ไป,กิน,ข้าว, the list input will also neglect auto tokenization.
