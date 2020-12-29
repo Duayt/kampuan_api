@@ -36,7 +36,9 @@ async def puan_kam(text: str = 'สวัสดี',
     -Returns:
     - **results**: List of คำผวน
     """
-    text = eval(text)  # can input list
+    text = text.strip()
+    if text[0] == '[' and text[-1] == ']':
+        text = eval(text)  # can input list
     if all:
         return {'input': text,
                 'results': kp.puan_kam_all(text=text)}
