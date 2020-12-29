@@ -40,35 +40,37 @@ def process_text_2_list(text):
 async def puan_kam(text: str = 'สวัสดี',
                    first: Optional[bool] = None,
                    keep_tone: Optional[bool] = None,
-                   all: Optional[bool] = None,
+                   all: Optional[bool] = False,
                    skip_tokenize: Optional[bool] = None):
     """Puan kum (ผวนคำ) is a Thai toung twister, is API convert string into kampuan
-
+        Play around with the options to see different results.
     -Args:
     - **text** (str):  Defaults to 'สวัสดี'.
         - input string 'ไปเที่ยว' -> auto tokenize will apply and split to ไป and  เที่ยว
         - list of string which accepted 3 formats: ['ไป','กิน','ข้าว'] | 'ไป','กิน','ข้าว' | ไป,กิน,ข้าว, the list input will also neglect auto tokenization.
-    - **first** (bool, optional): if True will use word letter to puan wiht the last other wise will select second word
+    - **first** (bool, optional): if True use the first word  to puan together with the last word otherwise will select second word and last word
                                     (None will let us decide). Defaults to None.
 
-    - **keep_tone** (bool, optional): Force wheter to keep the tone when doing the puan (None will let us decide). Defaults to None.
+    - **keep_tone** (bool, optional): force whether to keep the tone when doing the puan (None will let us decide). Defaults to None.
 
     - **all** (bool, optional): if True will provide all 4 puan results. Defaults to False.
 
+    - **skip_tokenize** (bool, optional): if True will skip tokenzation and use user provided list of words (input pure string will force to False or dont skip tokenization). Defaults to None.
     -Returns:
     - **results**: List of คำผวน
     """
     text = process_text_2_list(text)
+    split_words = kp.puan_kam_preprocess(text,skip_tokenize=skip_tokenize)
     if all is not None and all:
         return {'input': text,
-                'results': kp.puan_kam_all(text=text)}
+                'results': kp.puan_kam_all(text=split_words)}
     else:
         if first is None and keep_tone is None:
             return {'input': text,
-                    'results': kp.puan_kam(text=text)}
+                    'results': kp.puan_kam(text=split_words)}
         else:
             return {'input': text,
-                    'results': kp.puan_kam_base(text=text, keep_tone=keep_tone, use_first=first)}
+                    'results': kp.puan_kam_base(text=split_words, keep_tone=keep_tone, use_first=first)}
 
 
 @app.get("/pun_wunnayook/{text}")
