@@ -1,11 +1,14 @@
+import logging
 from dataclasses import dataclass
 
 import pythainlp
 
 from .const import *
-from .lang_tools import (determine_tone_sound, extract_vowel_form,
-                         find_main_mute_consonant, find_mute_vowel,
-                         get_tone_sound_row,remove_tone_mark,insert_ch_after)
+from .lang_tools import (convert_tone_pair_double_init,
+                         convert_tone_pair_single_init, determine_tone_sound,
+                         extract_vowel_form, find_main_mute_consonant,
+                         find_mute_vowel, get_tone_sound_row, insert_ch_after,
+                         remove_tone_mark)
 
 
 class ThaiSubWord:
@@ -321,3 +324,68 @@ class ThaiSubWord:
             return [first, second]
         else:
             return [self]
+
+    @staticmethod
+    def pun_wunayook(text, tone_target: int = 0):
+        if not isinstance(text, ThaiSubWord):
+            taikoo = False
+            if isinstance(text, str):
+                # norm ไม้ไต่คู้
+                if '็' in text:
+                    if len(text) == 2:
+                        text = text.replace('็', '้อ')
+                    else:
+                        text = text
+                    taikoo = True
+                text = ThaiSubWord(text)
+            else:
+                raise ValueError('wrong type')
+        if text._two_syllable:
+            logging.warning(f'check two syllable, return default')
+            return text._raw
+
+        if text._tone == tone_target:
+            return text._raw
+        else:
+            tone_mark = text.get_tone_rule().iloc[tone_target]
+            if tone_mark == -1:  # need to transform init
+                if len(text.init_con) == 1:
+                    new_init = convert_tone_pair_single_init(text.init_con)
+                else:
+                    tractor_case = 'ทรั' in text._raw or 'ทร็' in text._raw
+                    new_init = convert_tone_pair_double_init(
+                        text.init_con, tractor_case)
+                new_text = text._vowel_form_sound.replace(
+                    '-', new_init)+text.final_con
+                new_text = ThaiSubWord(new_text)
+                tone_mark = new_text.get_tone_rule().iloc[tone_target]
+
+                if tone_mark == -1:
+                    logging.warning(
+                        f'{text._raw} with tone {tone_target} not availabe (Dead word type), return normalize')
+                    tone_ch = ''
+                else:
+                    tone_ch = TONE_MARK_CLASS_INV[tone_mark]
+
+            else:
+                new_text = text
+                tone_ch = TONE_MARK_CLASS_INV[tone_mark]
+            if taikoo and tone_ch != '':
+                new_text = ThaiSubWord(new_text._raw.replace('็', ''))
+                logging.warning(f'removing taikoo from {text._raw}')
+
+            return ThaiSubWord.add_wunayook(text=new_text._raw, tone_mark=tone_ch)
+            """test_text=[
+            'ไก่',
+            'เป็ด',  
+            'แคง',
+            'แข็ง',
+            'ขาว',
+            'ด๊วด',
+            'หมา',
+            'คราว',
+            'คน',
+            'ทราบ',
+            'ก็',
+            'ภูมิ',
+            ]"""
