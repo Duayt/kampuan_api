@@ -1,14 +1,22 @@
-from .lang_tools import extract_vowel_form, find_main_mute_consonant, find_mute_vowel, determine_tone_sound
-import pythainlp
 from dataclasses import dataclass
+
+import pythainlp
+
 from .const import *
+from .lang_tools import (determine_tone_sound, extract_vowel_form,
+                         find_main_mute_consonant, find_mute_vowel,
+                         get_tone_sound_row,remove_tone_mark,insert_ch_after)
 
 
 class ThaiSubWord:
     def __init__(self, word: str = 'เกี๊ยว'):
         # Character base
-        if len(word) == 1 and word in THAI_CONS:
-            word = word + 'ะ'
+        if len(word) == 1:
+            if word in THAI_CONS:
+                word = word + 'อ'
+            else:
+                raise ValueError('incorrect')
+
         self._raw: str = word
         self._vowels_tup: List[str] = self.vowels_tup
         self._vowels: List[str] = self.vowels
@@ -46,7 +54,7 @@ class ThaiSubWord:
         self._vowel_class = 'short' if self._vowel_form_sound in SHORT_SOUND_VOWELS else 'long'
         self._word_class = self.word_class
 
-        #Tone and sound
+        # Tone and sound
         if self.two_syllable:
             pass
         else:
@@ -63,6 +71,11 @@ class ThaiSubWord:
                                                   vowel_class=self._vowel_class)
             except:
                 print(self._raw, 'tone error')
+
+    def get_tone_rule(self):
+        return get_tone_sound_row(tone_group_rule=self._tone_group_rule,
+                                  word_class=self._word_class,
+                                  vowel_class=self._vowel_class)
 
     @property
     def vowel_form_sound(self):
@@ -257,6 +270,30 @@ class ThaiSubWord:
         self._ex_vw_form, self._ex_regex, self._ex_pattern = extract_vowel_form(
             self._raw)
 
+    @staticmethod
+    def add_wunayook(text: str, tone_mark='่'):
+        if isinstance(text, str):
+            text = remove_tone_mark(text)
+            if tone_mark == '':
+                return text
+            text = ThaiSubWord(text)
+        else:
+            raise ValueError('wrong type')
+        vowel_index_list = [vw_tup[0] for vw_tup in text._vowel_form_tup if vw_tup[1]
+                            in THAI_ABOVE_VOWELS+THAI_BELOW_VOWELS]
+        vowel_index = -1 if not vowel_index_list else max(vowel_index_list)
+        init_con_index = text._init_con_tup[-1][0]
+        insert_index = max(vowel_index, init_con_index)
+        # Test case to add
+        """text='ครัน'
+        text='เพลง'
+        text='เกียว'
+        text='กลุม'
+        text='แพร'
+        text='ตู'
+        text='บ'"""
+        return insert_ch_after(text._raw, tone_mark, insert_index)
+
     def __getitem__(self, key):
         return self._raw[key]
 
@@ -276,11 +313,10 @@ class ThaiSubWord:
             new_word = self.raw
             index = first_init[0]
             if second_init[1] in SORONANT:
-                new_word = new_word[:index] + 'ห' + \
-                    new_word[index + 1:]  # สวัส =>  สะ หวัด
+                new_word = 'ห' + \
+                    new_word[index + 1:]  # สวัส =>  สะ หวัส
             else:
-                new_word = new_word[:index] + '' + \
-                    new_word[index + 1:]  # ผดุง =>  ผะ ดุง
+                new_word = new_word[index + 1:]  # ผดุง =>  ผะ ดุง
             second = ThaiSubWord(word=new_word)
             return [first, second]
         else:

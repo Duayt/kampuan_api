@@ -14,7 +14,8 @@ df_vowel_form = pd.read_excel(os.path.join(dirname,
 
 df_tone_rule = pd.read_csv(os.path.join(dirname,
                                         'assets/tone_rules_table.csv'))
-
+df_tone_rule.iloc[:, -5:] = df_tone_rule.iloc[:, -
+                                              5:].astype('Int64').fillna(-1)
 
 MUTE_MARK = '\u0e4c'
 REP = '[REP]'
@@ -96,6 +97,8 @@ THAI_CHARS = pythainlp.thai_characters
 THAI_CONS = pythainlp.thai_consonants
 THAI_VOW = pythainlp.thai_vowels
 THAI_TONE = pythainlp.thai_tonemarks
+THAI_ABOVE_VOWELS = pythainlp.thai_above_vowels
+THAI_BELOW_VOWELS = pythainlp.thai_below_vowels
 TRUE_CONSONANT_CLUSTER = [
     'กร',
     'กล',
@@ -187,12 +190,12 @@ ASPIRATE_LOW_SOUND_INV = {v: k for k, v in
                           ASPIRATE_LOW_SOUND.items()
                           }
 ASPIRATE_HIGH_SOUND = {
-    'ข': 'kh', 'ฃ': 'kh',
+    'ฃ': 'kh', 'ข': 'kh',
     'ฉ': 'ch',
-    'ถ': 'th', 'ฐ': 'th',
+    'ฐ': 'th', 'ถ': 'th',
     'ผ': 'ph',
     'ฝ': 'f',
-    'ส': 's', 'ศ': 's', 'ษ': 's',
+    'ศ': 's', 'ษ': 's', 'ส': 's',
     'ห': 'h',
 }
 
@@ -216,3 +219,6 @@ TONE_MARK_CLASS = {
     "\u0e4a": 3,
     "\u0e4b": 4,
 }
+
+TONE_MARK_CLASS_INV = {v: k for k, v in TONE_MARK_CLASS.items()}
+TONE_MARK_CLASS_INV[0] = ''

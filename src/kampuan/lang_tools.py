@@ -1,19 +1,30 @@
 # %%
-import numpy as np
 import re
 from collections import namedtuple
 from typing import List, NamedTuple
 
-from kampuan.const import MUTE_MARK, THAI_CONS,THAI_VOW, THAI_TONE, VOWEL_FORMS, df_tone_rule
+import numpy as np
+
+from kampuan.const import (ASPIRATE, ASPIRATE_HIGH_SOUND,
+                           ASPIRATE_HIGH_SOUND_INV, ASPIRATE_LOW_SOUND,
+                           ASPIRATE_LOW_SOUND_INV, FALSE_CONSONANT_CLUSTER,
+                           LEADING_CONSONANT_CLUSTER, MUTE_MARK, SORONANT,
+                           SOUND_CLASS, THAI_CONS, THAI_TONE, THAI_VOW,
+                           TRUE_CONSONANT_CLUSTER, VOWEL_FORMS, df_tone_rule)
 
 # %%
 # Tones
+
+def insert_ch_after(text, ch, index):
+    return text[:index+1] + ch + text[index+1:]
 
 
 def remove_tone_mark(text, tone_marks=THAI_TONE):
     for mark in tone_marks:
         text = text.replace(mark, '')
     return text
+
+
 
 # %%
 
@@ -137,14 +148,64 @@ def find_mute_vowel(text: str):
             return []
 
 
-def determine_tone_sound(tone_mark_class, tone_group_rule, word_class, vowel_class):
+def get_tone_sound_row(tone_group_rule, word_class, vowel_class):
     filters = (df_tone_rule['tone_group_rules'] == tone_group_rule) &\
         (df_tone_rule['word_class'] == word_class) &\
         (df_tone_rule['vowel_class'] == vowel_class)
-    return np.where(df_tone_rule[filters].iloc[0, 3:] == tone_mark_class)[0].item()
-
-# extract_vowel_form('ไก่').vowel_form
-# %%
+    return df_tone_rule[filters].iloc[0, 3:]
 
 
-# %%
+def determine_tone_sound(tone_mark_class, tone_group_rule, word_class, vowel_class):
+    df_row = get_tone_sound_row(tone_group_rule, word_class, vowel_class)
+    return np.where(df_row == tone_mark_class)[0].item()
+
+
+def convert_tone_pair_single_init(ch: str):
+    assert len(ch) == 1
+    if ch in SORONANT:
+        if ch == 'ฬ':
+            return 'หล'
+        elif ch == 'ณ':
+            return 'หน'
+        else:
+            return 'ห'+ch  # neglect   'อ' นำ case
+    elif SOUND_CLASS[ch] == 'mid':
+        return ch
+    elif ch in ASPIRATE:
+        if ch in ASPIRATE_LOW_SOUND.keys():
+            en = ASPIRATE_LOW_SOUND[ch]
+            return ASPIRATE_HIGH_SOUND_INV[en]
+        else:
+            en = ASPIRATE_HIGH_SOUND[ch]
+            return ASPIRATE_LOW_SOUND_INV[en]
+
+
+def convert_tone_pair_double_init(ch: str, tractor_case=False):  # แทร็กเตอร์
+    assert len(ch) > 1
+    if ch in LEADING_CONSONANT_CLUSTER:
+        return ch[-1]
+    elif ch == 'ทร':
+        if tractor_case:
+            return 'ถร'
+        else:
+            return 'ส'
+    elif ch in TRUE_CONSONANT_CLUSTER+FALSE_CONSONANT_CLUSTER:
+        init = convert_tone_pair_single_init(ch[0])
+        final = ch[1]
+        return init+final
+    else:
+        raise ValueError(f'Not implement {ch}')
+
+        # %%
+# to move to test
+if False:
+    for ch in THAI_CONS:
+        new_ch = convert_tone_pair_single_init(ch)
+        if len(new_ch) > 1:
+            print(ch, new_ch, convert_tone_pair_double_init(new_ch))
+        else:
+            print(ch, new_ch)
+
+    for ch in TRUE_CONSONANT_CLUSTER:
+        print(ch, convert_tone_pair_double_init(ch))
+        # %%
