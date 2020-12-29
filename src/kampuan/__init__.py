@@ -9,27 +9,27 @@ def test(name: str = "World!"):
     return f'Hello {name}'
 
 
-def tokenize(phrase: str = "สวัสดี") -> List[str]:
+def tokenize(text: str = "สวัสดี") -> List[str]:
     # return tk.word_tokenize(text=phrase)
-    return syllable_tokenize(text=phrase)
+    return syllable_tokenize(text=text)
 
 
-def extract_vowel(phrases: str) -> Dict:
-    if isinstance(phrases, str):
-        phrases = tokenize(phrase=phrases)
+def extract_vowel(text: str) -> Dict:
+    if isinstance(text, str):
+        phrases = tokenize(text=text)
     results = {}
-    for word in phrases:
+    for word in text:
         results[word] = extract_vowel_form(word).vowel_form
 
     return results
 
 
-def puan_kam_preprocess(input_text):
+def puan_kam_preprocess(text):
     # 2. Split phrase to syllables
-    if isinstance(input_text, str):
-        tokenized = tokenize(input_text)
-    elif isinstance(input_text, List):
-        tokenized = [w for text in input_text for w in tokenize(text)]
+    if isinstance(text, str):
+        tokenized = tokenize(text)
+    elif isinstance(text, List):
+        tokenized = [w for txt in text for w in tokenize(txt)]
     else:
         raise ValueError('incorrect value')
     # 3. Sub word processing, types and tones
@@ -76,14 +76,14 @@ def puan_2_kam(a_raw, b_raw, keep_tone=None):
     return a_target, b_target
 
 
-def puan_kam_base(input_text='สวัสดี', keep_tone=None, use_first=True, index=None):
+def puan_kam_base(text='สวัสดี', keep_tone=None, use_first=True, index=None):
 
-    if isinstance(input_text, str):
-        split_words = puan_kam_preprocess(input_text)
-    elif isinstance(input_text[0], str):
-        split_words = puan_kam_preprocess(input_text)
+    if isinstance(text, str):
+        split_words = puan_kam_preprocess(text)
+    elif isinstance(text[0], str):
+        split_words = puan_kam_preprocess(text)
     else:
-        split_words = input_text
+        split_words = text
     # 5. Determine two syllable to do the puan
     if not index:
         n_subwords = len(split_words)
@@ -112,20 +112,20 @@ def puan_kam_base(input_text='สวัสดี', keep_tone=None, use_first=Tru
     return kam_puan
 
 
-def puan_kam_all(input_text='สวัสดี'):
+def puan_kam_all(text='สวัสดี'):
     use_first = [True, False]
     result = {}
     count = 0
     for j in use_first:
         result[count] = puan_kam_base(
-            input_text=input_text, use_first=j)
+            text=text, use_first=j)
         count += 1
     return result
 
 
-def puan_kam_auto(input_text='สวัสดี', use_first=None):
+def puan_kam_auto(text='สวัสดี', use_first=None):
 
-    split_words = puan_kam_preprocess(input_text)
+    split_words = puan_kam_preprocess(text)
 
     n_subwords = len(split_words)
 
@@ -141,22 +141,23 @@ def puan_kam_auto(input_text='สวัสดี', use_first=None):
             index = (0, -1)
     else:  # more than 3
         if use_first is None:
-            return [puan_kam_base(input_text=input_text, keep_tone=None, index=(i, -1)) for i in [0, 1]]
+            return [puan_kam_base(text=split_words, keep_tone=None, index=(i, -1)) for i in [0, 1]]
         elif use_first:
             index = (0, -1)
         else:
             index = (1, -1)
 
-    return puan_kam_base(input_text=split_words, keep_tone=None, index=index)
+    return puan_kam_base(text=split_words, keep_tone=None, index=index)
 
 
-def puan_kam(phrase: Union[List[str], str] = ['กิน', 'ข้าว']) -> List[str]:
-    return puan_kam_auto(input_text=phrase, use_first=None)
+def puan_kam(text: Union[List[str], str] = ['กิน', 'ข้าว']) -> List[str]:
+    return puan_kam_auto(text=text, use_first=None)
 
 
-def pun_wunayook(input_text):
-    input_text = puan_kam_preprocess(input_text)
-    result = {}
-    for i, txt in enumerate(input_text):
-        result[i] = [ThaiSubWord.pun_wunayook(txt._raw,tone_target=i) for i in range(0,5)]
+def pun_wunayook(text):
+    text = puan_kam_preprocess(text)
+    result = []
+    for i, txt in enumerate(text):
+        result.append([ThaiSubWord.pun_wunayook(txt._raw, tone_target=i)
+                       for i in range(0, 5)])
     return result
