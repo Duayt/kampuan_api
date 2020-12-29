@@ -49,12 +49,12 @@ VOWEL_FORM_BASIC = [
     '-ั',
     '-ำ',
     'เ-า',
-    '-า',
+    '-ุ',
     '-ิ',
+    '-า',  # this after  '-ิ', to avoid  ธาตุ ชาติ
     '-ี',
     '-ึ',
     '-ื',
-    '-ุ',
     '-ู',
     'เ-ะ',
     'เ-็',
@@ -152,6 +152,7 @@ DOUBLE_FINAL_CONSONANT = [
     'ทร',
     'รถ',
     'รท',
+    'คร'
 ]
 # for sound tone
 SORONANT_SOUND = {
