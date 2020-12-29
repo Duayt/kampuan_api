@@ -18,7 +18,7 @@ class ThaiSubWord:
             if word in THAI_CONS:
                 word = word + 'อ'
             else:
-                raise ValueError('incorrect')
+                raise ValueError('I am not good enough to understand your words, separate into syllables please?')
 
         self._raw: str = word
         self._vowels_tup: List[str] = self.vowels_tup
