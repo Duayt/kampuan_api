@@ -35,3 +35,4 @@ http://thailanguagept.blogspot.com/2016/08/
 ฤ stuffs
 ภูมิ พยาธิ ชาติ สาเหตุ   ธาตุ
 เป็ด(เอะ) 
+# อยาก
