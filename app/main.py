@@ -40,7 +40,8 @@ def process_text_2_list(text):
 async def puan_kam(text: str = 'สวัสดี',
                    first: Optional[bool] = None,
                    keep_tone: Optional[bool] = None,
-                   all: Optional[bool] = None):
+                   all: Optional[bool] = None,
+                   skip_tokenize: Optional[bool] = None):
     """Puan kum (ผวนคำ) is a Thai toung twister, is API convert string into kampuan
 
     -Args:
@@ -97,7 +98,7 @@ async def extract_vowel(text: str = 'สวัสดี'):
     - **results**: List of extracted vowel
     """
     text = process_text_2_list(text)
-    if isinstance(text,str):
+    if isinstance(text, str):
         text = kp.tokenize(text)
     return {"input": text,
             "result": kp.extract_vowel(text)}

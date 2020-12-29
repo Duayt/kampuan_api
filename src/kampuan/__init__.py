@@ -130,7 +130,12 @@ def puan_kam_all(text='สวัสดี'):
 
 def puan_kam_auto(text='สวัสดี', use_first=None):
 
-    split_words = puan_kam_preprocess(text)
+    if isinstance(text, str):
+        split_words = puan_kam_preprocess(text)
+    elif isinstance(text[0], str):
+        split_words = puan_kam_preprocess(text)
+    else:
+        split_words = text
 
     n_subwords = len(split_words)
 
@@ -155,7 +160,7 @@ def puan_kam_auto(text='สวัสดี', use_first=None):
     return puan_kam_base(text=split_words, keep_tone=None, index=index)
 
 
-def puan_kam(text: Union[List[str], str] = ['กิน', 'ข้าว']) -> List[str]:
+def puan_kam(text) -> List[str]:
     return puan_kam_auto(text=text, use_first=None)
 
 
