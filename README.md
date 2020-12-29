@@ -29,6 +29,7 @@ http://thailanguagept.blogspot.com/2016/08/
 (http://nkw05245.circlecamp.com/index.php?page=8)
 
 # Future plan
+* inverse of kampuan not seems to work
 * database for คำผวน
 * feed back incorrect cases
 * add hard language cases as listed below
