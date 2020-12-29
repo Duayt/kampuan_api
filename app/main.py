@@ -29,8 +29,8 @@ async def puan_kam(text: str = 'สวัสดี',
     """Puan kum (ผวนคำ) is a Thai toung twister, is API convert string into kampuan
 
     -Args:
-    - **text** (str): input string 'ไปเที่ยว' 
-                    or list of string which accepted 3 formats ['ไป','กิน','ข้าว'] | 'ไป','กิน','ข้าว' | ไป,กิน,ข้าว. Defaults to 'สวัสดี'.
+    - **text** (str): input string 'ไปเที่ยว' -> auto tokenize will apply and split to ไป and  เที่ยว
+                    or list of string which accepted 3 formats: ['ไป','กิน','ข้าว'] | 'ไป','กิน','ข้าว' | ไป,กิน,ข้าว, the list input will also neglect auto tokenization. Defaults to 'สวัสดี'.
     - **first** (bool, optional): if True will use word letter to puan wiht the last other wise will select second word
                                     (None will let us decide). Defaults to None.
 
