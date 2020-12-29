@@ -24,12 +24,15 @@ def extract_vowel(text: str) -> Dict:
     return results
 
 
-def puan_kam_preprocess(text):
+def puan_kam_preprocess(text, skip_tokenize=True):
     # 2. Split phrase to syllables
     if isinstance(text, str):
         tokenized = tokenize(text)
     elif isinstance(text, List):
-        tokenized = [w for txt in text for w in tokenize(txt)]
+        if skip_tokenize:
+            tokenized = text
+        else:
+            tokenized = [w for txt in text for w in tokenize(txt)]
     else:
         raise ValueError('incorrect value')
     # 3. Sub word processing, types and tones

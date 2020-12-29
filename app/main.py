@@ -17,6 +17,10 @@ async def root():
     return response
 
 
+def check_if_list(text):
+    return (text[0] == '[' and text[-1] == ']') or (',' in text)
+
+
 @app.get("/puan_kam/{text}")
 async def puan_kam(text: str = 'สวัสดี',
                    first: Optional[bool] = None,
@@ -25,7 +29,8 @@ async def puan_kam(text: str = 'สวัสดี',
     """Puan kum (ผวนคำ) is a Thai toung twister, is API convert string into kampuan
 
     -Args:
-    - **text** (str): input string 'ไปเที่ยว' or list of string [ 'ไป','กิน','ข้าว']. Defaults to 'สวัสดี'.
+    - **text** (str): input string 'ไปเที่ยว' 
+                    or list of string which accepted 3 formats ['ไป','กิน','ข้าว'] | 'ไป','กิน','ข้าว' | ไป,กิน,ข้าว. Defaults to 'สวัสดี'.
     - **first** (bool, optional): if True will use word letter to puan wiht the last other wise will select second word
                                     (None will let us decide). Defaults to None.
 
@@ -37,7 +42,15 @@ async def puan_kam(text: str = 'สวัสดี',
     - **results**: List of คำผวน
     """
     text = text.strip()
-    if text[0] == '[' and text[-1] == ']':
+
+    if check_if_list(text):
+        # convert string to properlist
+        if not (text[0] == '[' and text[-1] == ']'):
+            text = '[' + text + ']'
+        if '"' not in text and "'" not in text:
+            text = text.replace(',', '","').replace(
+                '[', '["').replace(']', '"]')
+
         text = eval(text)  # can input list
     if all:
         return {'input': text,
@@ -49,11 +62,6 @@ async def puan_kam(text: str = 'สวัสดี',
         else:
             return {'input': text,
                     'results': kp.puan_kam_base(text=text, keep_tone=keep_tone, use_first=first)}
-
-
-# @app.get("/puan_kam_all/{text}")
-# def puan_kam_all(text: str = 'สวัสดี'):
-#     return kp.puan_kam_all(text=text)
 
 
 @app.get("/pun_wunnayook/{text}")
