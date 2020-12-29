@@ -135,7 +135,7 @@ def puan_kam_auto(input_text='สวัสดี', use_first=None):
     elif n_subwords == 2:
         index = (0, 1)
     elif n_subwords == 3:
-        if split_words[0]._word_class == 'dead': # not sure
+        if split_words[0]._word_class == 'dead':  # not sure
             index = (1, -1)
         else:
             index = (0, -1)
@@ -152,3 +152,11 @@ def puan_kam_auto(input_text='สวัสดี', use_first=None):
 
 def puan_kam(phrase: Union[List[str], str] = ['กิน', 'ข้าว']) -> List[str]:
     return puan_kam_auto(input_text=phrase, use_first=None)
+
+
+def pun_wunayook(input_text):
+    input_text = puan_kam_preprocess(input_text)
+    result = {}
+    for i, txt in enumerate(input_text):
+        result[i] = [ThaiSubWord.pun_wunayook(txt._raw,tone_target=i) for i in range(0,5)]
+    return result
