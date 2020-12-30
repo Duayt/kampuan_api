@@ -27,12 +27,13 @@ async def callback(request: Request):
     # get X-Line-Signature header value]
     # get request body as text
     # body = request.get_data(as_text=True)
-    print('before:',request.headers)
-    body = await request.json()
-    body = str(json.dumps(body))
-    print('after:',request.headers)
     signature = request.headers['x-line-signature']
     print(signature)
+
+    body = await request.body()
+    print('body type:', type(body))
+    body = body.decode('utf-8')
+    print('body type:', type(body))
     print("Request body: " + body)
     # app.logger.info("Request body: " + body)
 
@@ -49,8 +50,8 @@ async def callback(request: Request):
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     line_bot_api.reply_message(
-    event.reply_token,
-    TextSendMessage(text=event.message.text))
+        event.reply_token,
+        TextSendMessage(text=event.message.text))
 
 
 @app.get("/", include_in_schema=False)
