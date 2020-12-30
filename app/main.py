@@ -27,9 +27,10 @@ async def callback(request: Request):
     # get X-Line-Signature header value]
     # get request body as text
     # body = request.get_data(as_text=True)
-    
+    print('before:',request.headers)
     body = await request.json()
     body = str(json.dumps(body))
+    print('after:',request.headers)
     signature = request.headers['x-line-signature']
     print(signature)
     print("Request body: " + body)
