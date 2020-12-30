@@ -1,12 +1,51 @@
-import kampuan as kp
 import json
 from typing import Optional
+
+import kampuan as kp
 from fastapi import FastAPI, HTTPException
+from starlette.requests import Request
 from fastapi.responses import JSONResponse
+from linebot import LineBotApi, WebhookHandler
+from linebot.exceptions import InvalidSignatureError
+from linebot.models import MessageEvent, TextMessage, TextSendMessage
 from starlette.responses import RedirectResponse
+
+CHANNEL_SECRET = str(os.getenv('CHANNEL_SECRET'))
+CHANNEL_ACCESS_TOKEN = str(os.getenv('CHANNEL_ACCESS_TOKEN'))
+port = int(os.getenv("PORT", 5000))
 app = FastAPI(title="Kampuan project",
               description="Welcome, This is a project using python to do คำผวน by Tanawat C. \n https://www.linkedin.com/in/tanawat-chiewhawan",
               version="0.0.1",)
+
+line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
+handler = WebhookHandler(CHANNEL_SECRET)
+
+
+@app.post("/callback")
+def callback(request:Request):
+    # get X-Line-Signature header value
+    signature = request.headers['X-Line-Signature']
+
+    # get request body as text
+    # body = request.get_data(as_text=True)
+    body = str(request.body()
+    app.logger.info("Request body: " + body)
+
+    # handle webhook body
+    try:
+        handler.handle(body, signature)
+    except InvalidSignatureError:
+        print("Invalid signature. Please check your channel access token/channel secret.")
+        return HTTPException(400, detail=f'error')
+
+    return 'OK'
+
+
+@handler.add(MessageEvent, message=TextMessage)
+def handle_message(event):
+    line_bot_api.reply_message(
+        event.reply_token,
+        TextSendMessage(text=event.message.text))
 
 
 @app.get("/", include_in_schema=False)
@@ -84,6 +123,7 @@ async def puan_kam(text: str = 'สวัสดี',
         else:
             return {'input': text,
                     'results': kp.puan_kam_base(text=split_words, keep_tone=keep_tone, use_first=first)}
+
 
 @app.get("/pun_wunnayook/{text}")
 async def pun_wunnayook(text: str = 'สวัสดี'):

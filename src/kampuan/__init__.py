@@ -1,6 +1,8 @@
-from typing import List, Union, Dict
+from typing import Dict, List, Union
+
 import pythainlp.tokenize as tk
 from pythainlp.tokenize import syllable_tokenize
+
 from kampuan.lang_tools import extract_vowel_form
 from kampuan.sub_word import ThaiSubWord
 
