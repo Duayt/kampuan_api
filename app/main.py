@@ -46,10 +46,13 @@ async def callback(request: Request):
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     text = event.message.text
-    puan_text = puan_kam(text=text)
+    # puan process
+    puan_result = puan_kam(text=text, skip_tokenize=True)
+    msg = ''.join(puan_result['results'])
+
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=puan_text))
+        TextSendMessage(text=msg))
 
 
 @app.get("/", include_in_schema=False)

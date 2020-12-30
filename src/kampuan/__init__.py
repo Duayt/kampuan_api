@@ -163,7 +163,7 @@ def puan_kam_auto(text='สวัสดี', use_first=None):
 
 
 def puan_kam(text) -> List[str]:
-    return puan_kam_auto(text=text, use_first=None)
+    return puan_kam_auto(text=text, use_first=False)
 
 
 def pun_wunayook(text):
