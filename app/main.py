@@ -26,7 +26,7 @@ handler = WebhookHandler(CHANNEL_SECRET)
 async def callback(request: Request):
     # get X-Line-Signature header value
     signature = request.headers
-
+    print(signature)
     if 'X-Line-Signature' in signature:
         signature = signature.headers['X-Line-Signature']
     # get request body as text
