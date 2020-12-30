@@ -24,13 +24,13 @@ handler = WebhookHandler(CHANNEL_SECRET)
 
 @app.post("/callback", include_in_schema=False)
 async def callback(request: Request):
-    
-    
+
     # get X-Line-Signature header value]
     signature = request.headers['x-line-signature']
 
     # get request body as text
-    body = await request.body().decode('utf-8')
+    body = await request.body()
+    body = body.decode('utf-8')
     print("Request body: " + body)
 
     # handle webhook body
@@ -45,8 +45,8 @@ async def callback(request: Request):
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    text=event.message.text
-    puan_text=puan_kam(text=text)
+    text = event.message.text
+    puan_text = puan_kam(text=text)
     line_bot_api.reply_message(
         event.reply_token,
         TextSendMessage(text=puan_text))
