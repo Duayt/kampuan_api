@@ -35,8 +35,11 @@ async def callback(request: Request):
     # app.logger.info("Request body: " + body)
 
     # handle webhook body
+    
+    handler.handle(body, signature)
+
     try:
-        handler.handle(body, signature)
+        print(1)
     except InvalidSignatureError:
         print("Invalid signature. Please check your channel access token/channel secret.")
         return HTTPException(400, detail=f'error')
@@ -84,7 +87,7 @@ async def puan_kam(text: str = 'สวัสดี',
                    keep_tone: Optional[bool] = None,
                    all: Optional[bool] = False,
                    skip_tokenize: Optional[bool] = None):
-    """Puan kum (ผวนคำ) is a Thai toung twister, is API convert string into kampuan
+    """Puan kum (ผวนคำ) is a Thai toung twister, This API convert string into kampuan
         Play around with the options to see different results.
 
     -Args:
