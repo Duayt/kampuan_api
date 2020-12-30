@@ -1,6 +1,7 @@
 import json
-from typing import Optional
 import os
+import re
+from typing import Optional
 
 import kampuan as kp
 from fastapi import FastAPI, HTTPException, Request
@@ -8,7 +9,8 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse, Response
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
-from linebot.models import MessageEvent, TextMessage, TextSendMessage
+from linebot.models import (JoinEvent, MessageEvent, TextMessage,
+                            TextSendMessage)
 from starlette.responses import RedirectResponse
 
 CHANNEL_SECRET = str(os.getenv('CHANNEL_SECRET'))
@@ -40,19 +42,38 @@ async def callback(request: Request):
         print("Invalid signature. Please check your channel access token/channel secret.")
         return HTTPException(400, detail=f'error')
 
-    return 'OK' 
+    return 'OK'
 
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     text = event.message.text
     # puan process
-    puan_result =  puan_kam(text=text, skip_tokenize=True)
+    use_first = text.startswith('@')
+    text = text.replace('@', '')
+
+    puan_result = puan_kam(text=text, skip_tokenize=True, first=use_first)
     msg = ''.join(puan_result['results'])
 
     line_bot_api.reply_message(
         event.reply_token,
         TextSendMessage(text=msg))
+
+
+@handler.add(JoinEvent)
+def handle_join(event):
+    print(event.source)
+    # puan process
+    msg = 'สะวีดัส หยวนนักพอด มาแล้ว'
+
+    line_bot_api.reply_message(
+        event.reply_token,
+        TextSendMessage(text=msg))
+
+
+@handler.default()
+def default(event):
+    print(event)
 
 
 @app.get("/", include_in_schema=False)
@@ -67,9 +88,14 @@ def check_if_list(text):
     return (text[0] == '[' and text[-1] == ']') or (',' in text)
 
 
+def handle_white_spaces(text):
+    text = re.sub(' +', ',', text)
+    return text
+
+
 def process_text_2_list(text):
     text = text.strip()
-
+    text = handle_white_spaces(text)
     if check_if_list(text):
         # convert string to properlist
         if not (text[0] == '[' and text[-1] == ']'):
@@ -84,10 +110,10 @@ def process_text_2_list(text):
 
 @app.get("/puan_kam/{text}")
 def puan_kam(text: str = 'สวัสดี',
-                   first: Optional[bool] = None,
-                   keep_tone: Optional[bool] = None,
-                   all: Optional[bool] = False,
-                   skip_tokenize: Optional[bool] = None):
+             first: Optional[bool] = None,
+             keep_tone: Optional[bool] = None,
+             all: Optional[bool] = False,
+             skip_tokenize: Optional[bool] = None):
     """Puan kum (ผวนคำ) is a Thai toung twister, This API convert string into kampuan
         Play around with the options to see different results.
 
