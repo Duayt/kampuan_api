@@ -23,13 +23,14 @@ handler = WebhookHandler(CHANNEL_SECRET)
 
 
 @app.post("/callback", include_in_schema=False)
-def callback(request: Request):
+async def callback(request: Request):
     # get X-Line-Signature header value
     signature = request.headers['x-line-signature']
     # get request body as text
     # body = request.get_data(as_text=True)
-    body = json.dumps(request.json())
-    print("Request body: " + body)
+    body = await request.body()
+
+    # print("Request body: " + body)
     # app.logger.info("Request body: " + body)
 
     # handle webhook body
