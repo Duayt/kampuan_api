@@ -3,9 +3,9 @@ from typing import Optional
 import os
 
 import kampuan as kp
-from fastapi import FastAPI, HTTPException,Request
+from fastapi import FastAPI, HTTPException, Request
 # from starlette.requests import Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse,Response
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
@@ -23,13 +23,13 @@ handler = WebhookHandler(CHANNEL_SECRET)
 
 
 @app.post("/callback", include_in_schema=False)
-def callback(request: Request):
+def callback(request: Response):
     # get X-Line-Signature header value
     signature = request.headers['X-Line-Signature']
 
     # get request body as text
     # body = request.get_data(as_text=True)
-    body = json.dumps(request.json())
+    body = json.loads(request.content)
     print("Request body: " + body)
     # app.logger.info("Request body: " + body)
 
