@@ -28,9 +28,10 @@ async def callback(request: Request):
     signature = request.headers['x-line-signature']
     # get request body as text
     # body = request.get_data(as_text=True)
-    body = await request.body()
+    body = await request.json()
+    body= json.dumps(body)
 
-    # print("Request body: " + body)
+    print("Request body: " + body)
     # app.logger.info("Request body: " + body)
 
     # handle webhook body
