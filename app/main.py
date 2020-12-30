@@ -50,12 +50,14 @@ def handle_message(event):
     text = event.message.text
 
     pun_result = pun_wunnayook(text=text)
+    msg = ''
 
     for pun in pun_result:
-        msg = ''.join(pun)
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text=msg))
+        msg = msg+''.join(pun)+'\n'
+
+    line_bot_api.reply_message(
+        event.reply_token,
+        TextSendMessage(text=msg))
 
 
 @handler.add(JoinEvent)
