@@ -35,11 +35,9 @@ async def callback(request: Request):
     # app.logger.info("Request body: " + body)
 
     # handle webhook body
-    
-    handler.handle(body, signature)
-
     try:
-        print(1)
+        # handler.handle(body, signature)
+        return 'OK'
     except InvalidSignatureError:
         print("Invalid signature. Please check your channel access token/channel secret.")
         return HTTPException(400, detail=f'error')
