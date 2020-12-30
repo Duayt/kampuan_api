@@ -28,7 +28,7 @@ async def callback(request: Request):
     signature = request.headers['x-line-signature']
     # get request body as text
     # body = request.get_data(as_text=True)
-    body = json.loads(request.content)
+    body = request.json()
     print("Request body: " + body)
     # app.logger.info("Request body: " + body)
 
