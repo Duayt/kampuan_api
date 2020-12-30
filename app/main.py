@@ -40,14 +40,14 @@ async def callback(request: Request):
         print("Invalid signature. Please check your channel access token/channel secret.")
         return HTTPException(400, detail=f'error')
 
-    return 'OK'
+    return 'OK' 
 
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     text = event.message.text
     # puan process
-    puan_result = await puan_kam(text=text, skip_tokenize=True)
+    puan_result =  puan_kam(text=text, skip_tokenize=True)
     msg = ''.join(puan_result['results'])
 
     line_bot_api.reply_message(
@@ -83,7 +83,7 @@ def process_text_2_list(text):
 
 
 @app.get("/puan_kam/{text}")
-async def puan_kam(text: str = 'สวัสดี',
+def puan_kam(text: str = 'สวัสดี',
                    first: Optional[bool] = None,
                    keep_tone: Optional[bool] = None,
                    all: Optional[bool] = False,
@@ -133,7 +133,7 @@ async def puan_kam(text: str = 'สวัสดี',
 
 
 @app.get("/pun_wunnayook/{text}")
-async def pun_wunnayook(text: str = 'สวัสดี'):
+def pun_wunnayook(text: str = 'สวัสดี'):
     """pun wunnayook (ผันเสียงวรรณยุกต์)
 
     -Args:
@@ -149,7 +149,7 @@ async def pun_wunnayook(text: str = 'สวัสดี'):
 
 
 @app.get("/vowel/{text}")
-async def extract_vowel(text: str = 'สวัสดี'):
+def extract_vowel(text: str = 'สวัสดี'):
     """ Method to extract Thai vowel form out.
 
     -Args:
