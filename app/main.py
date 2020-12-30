@@ -48,16 +48,14 @@ async def callback(request: Request):
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     text = event.message.text
-    # puan process
-    use_first = text.startswith('@')
-    text = text.replace('@', '')
 
-    puan_result = puan_kam(text=text, skip_tokenize=True, first=use_first)
-    msg = ''.join(puan_result['results'])
+    pun_result = pun_wunnayook(text=text)
 
-    line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(text=msg))
+    for pun in pun_result:
+        msg = ''.join(pun)
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=msg))
 
 
 @handler.add(JoinEvent)
