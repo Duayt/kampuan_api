@@ -47,7 +47,7 @@ async def callback(request: Request):
 def handle_message(event):
     text = event.message.text
     # puan process
-    puan_result = puan_kam(text=text, skip_tokenize=True)
+    puan_result = await puan_kam(text=text, skip_tokenize=True)
     msg = ''.join(puan_result['results'])
 
     line_bot_api.reply_message(
