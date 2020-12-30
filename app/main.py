@@ -1,5 +1,6 @@
 import json
 from typing import Optional
+import os
 
 import kampuan as kp
 from fastapi import FastAPI, HTTPException
@@ -21,8 +22,8 @@ line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(CHANNEL_SECRET)
 
 
-@app.post("/callback")
-def callback(request:Request):
+@app.post("/callback", include_in_schema=False)
+def callback(request: Request):
     # get X-Line-Signature header value
     signature = request.headers['X-Line-Signature']
 
