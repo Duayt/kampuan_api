@@ -64,7 +64,7 @@ def handle_message(event):
 def handle_join(event):
     print(event.source)
     # puan process
-    msg = 'สะวีดัส หยวนนักพอด มาแล้ว'
+    msg = 'สะวีดัส หยวนนักพอด แมวล้า'
 
     line_bot_api.reply_message(
         event.reply_token,
