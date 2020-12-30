@@ -48,8 +48,8 @@ async def callback(request: Request):
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(text=puan_kam(event.message.text)))
+    event.reply_token,
+    TextSendMessage(text=event.message.text))
 
 
 @app.get("/", include_in_schema=False)
