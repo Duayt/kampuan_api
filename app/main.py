@@ -25,7 +25,7 @@ handler = WebhookHandler(CHANNEL_SECRET)
 @app.post("/callback", include_in_schema=False)
 async def callback(request: Request):
     # get X-Line-Signature header value
-    signature = str(request.headers['x-line-signature'])
+    signature = request.headers['x-line-signature']
     # get request body as text
     # body = request.get_data(as_text=True)
     body = await request.json()
@@ -36,8 +36,7 @@ async def callback(request: Request):
 
     # handle webhook body
     try:
-        # handler.handle(body, signature)
-        return 'OK'
+        handler.handle(body, signature)
     except InvalidSignatureError:
         print("Invalid signature. Please check your channel access token/channel secret.")
         return HTTPException(400, detail=f'error')
