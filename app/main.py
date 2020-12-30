@@ -5,7 +5,7 @@ import os
 import kampuan as kp
 from fastapi import FastAPI, HTTPException, Request
 # from starlette.requests import Request
-from fastapi.responses import JSONResponse,Response
+from fastapi.responses import JSONResponse, Response
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
@@ -47,7 +47,7 @@ def callback(request: Response):
 def handle_message(event):
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=event.message.text))
+        TextSendMessage(text=puan_kam(event.message.text)))
 
 
 @app.get("/", include_in_schema=False)
