@@ -1,6 +1,8 @@
-from typing import List, Union, Dict
+from typing import Dict, List, Union
+
 import pythainlp.tokenize as tk
 from pythainlp.tokenize import syllable_tokenize
+
 from kampuan.lang_tools import extract_vowel_form
 from kampuan.sub_word import ThaiSubWord
 
@@ -198,7 +200,7 @@ def puan_kam_auto(text='สวัสดี', use_first=None, flag_puan_2_lu=Fals
 
 
 def puan_kam(text) -> List[str]:
-    return puan_kam_auto(text=text, use_first=None)
+    return puan_kam_auto(text=text, use_first=False)
 
 def puan_lu(text) -> List[str]:
     return puan_kam_auto(text=text, use_first=None, flag_puan_2_lu=True)

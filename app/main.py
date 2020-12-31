@@ -1,12 +1,75 @@
-import kampuan as kp
 import json
+import os
+import re
 from typing import Optional
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import JSONResponse
+
+import kampuan as kp
+from fastapi import FastAPI, HTTPException, Request
+# from starlette.requests import Request
+from fastapi.responses import JSONResponse, Response
+from linebot import LineBotApi, WebhookHandler
+from linebot.exceptions import InvalidSignatureError
+from linebot.models import (JoinEvent, MessageEvent, TextMessage,
+                            TextSendMessage)
 from starlette.responses import RedirectResponse
+
+CHANNEL_SECRET = str(os.getenv('CHANNEL_SECRET'))
+CHANNEL_ACCESS_TOKEN = str(os.getenv('CHANNEL_ACCESS_TOKEN'))
+port = int(os.getenv("PORT", 5000))
 app = FastAPI(title="Kampuan project",
               description="Welcome, This is a project using python to do คำผวน by Tanawat C. \n https://www.linkedin.com/in/tanawat-chiewhawan",
               version="0.0.1",)
+
+line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
+handler = WebhookHandler(CHANNEL_SECRET)
+
+
+@app.post("/callback", include_in_schema=False)
+async def callback(request: Request):
+
+    # get X-Line-Signature header value]
+    signature = request.headers['x-line-signature']
+
+    # get request body as text
+    body = await request.body()
+    body = body.decode('utf-8')
+    print("Request body: " + body)
+
+    # handle webhook body
+    try:
+        handler.handle(body, signature)
+    except InvalidSignatureError:
+        print("Invalid signature. Please check your channel access token/channel secret.")
+        return HTTPException(400, detail=f'error')
+
+    return 'OK'
+
+
+@handler.add(MessageEvent, message=TextMessage)
+def handle_message(event):
+    text = event.message.text
+
+    puan_result = puan_lu(text=text)
+    msg = ''.join(puan_result['results'])
+    line_bot_api.reply_message(
+        event.reply_token,
+        TextSendMessage(text=msg))
+
+
+@handler.add(JoinEvent)
+def handle_join(event):
+    print(event.source)
+    # puan process
+    msg = 'สวัสดี ยอดลู มาแล้ว'
+
+    line_bot_api.reply_message(
+        event.reply_token,
+        TextSendMessage(text=msg))
+
+
+@handler.default()
+def default(event):
+    print(event)
 
 
 @app.get("/", include_in_schema=False)
@@ -21,9 +84,14 @@ def check_if_list(text):
     return (text[0] == '[' and text[-1] == ']') or (',' in text)
 
 
+def handle_white_spaces(text):
+    text = re.sub(' +', ',', text)
+    return text
+
+
 def process_text_2_list(text):
     text = text.strip()
-
+    text = handle_white_spaces(text)
     if check_if_list(text):
         # convert string to properlist
         if not (text[0] == '[' and text[-1] == ']'):
@@ -42,7 +110,7 @@ def puan_kam(text: str = 'สวัสดี',
              keep_tone: Optional[bool] = None,
              all: Optional[bool] = False,
              skip_tokenize: Optional[bool] = None):
-    """Puan kum (ผวนคำ) is a Thai toung twister, is API convert string into kampuan
+    """Puan kum (ผวนคำ) is a Thai toung twister, This API convert string into kampuan
         Play around with the options to see different results.
 
     -Args:
