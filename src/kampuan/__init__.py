@@ -44,6 +44,42 @@ def puan_kam_preprocess(text, skip_tokenize=True):
 
     return split_words
 
+def lu_2_thai(text):
+    """ module that converts Lu words to somewhat readable Thai words
+        Lu module does not need index so should be able to wrap everything in one module cleanly
+    """
+    
+    if isinstance(text, str):
+        subwords = puan_kam_preprocess(text)
+    elif isinstance(text[0], str):
+        subwords = puan_kam_preprocess(text)
+    else:
+        subwords = text
+
+    output_thai = []
+    # Need to tokenize and take every 2 words
+    print(subwords)
+    for pair_index in range(0, len(subwords),2):
+        # Get a pair of lu words, if cannot get a pair continue
+        a_first = subwords[pair_index]
+        if pair_index + 1 < len(subwords): a_second = subwords[pair_index+1]
+        else: continue
+
+        # Check special case รอ ลอ สอ ซอ
+        if a_first.init_con not in ['ซ', 'ส']:
+            thai_out = a_first._vowel_form_sound.replace('-', a_second.init_con) + a_first.final_con            
+        else:
+            thai_out = a_first._vowel_form_sound.replace('-', 'ล') + a_first.final_con
+        # No need to check case อุ อู
+
+        thai_out = ThaiSubWord(thai_out)        
+        
+        # Assign tone of second lu words to that_out, this tone should be the same with original Thai word
+        thai_out = ThaiSubWord.pun_wunayook(thai_out.raw, a_first._tone)
+        output_thai.append(thai_out)            
+
+    return output_thai
+
 def puan_2_lu(subwords):
     """ Leverage existing puan kum method to convert to lu language"""
     output_lu = []
@@ -68,7 +104,7 @@ def puan_2_lu(subwords):
             
         a_first = ThaiSubWord(a_first)
         a_second = ThaiSubWord(a_second)    
-
+        
         # Assign tone of original word to both first and second lu
         a_first = ThaiSubWord.pun_wunayook(a_first.raw, a_raw._tone)    
         a_second = ThaiSubWord.pun_wunayook(a_second.raw, a_raw._tone)
@@ -204,6 +240,9 @@ def puan_kam(text) -> List[str]:
 
 def puan_lu(text) -> List[str]:
     return puan_kam_auto(text=text, use_first=None, flag_puan_2_lu=True)
+
+def translate_lu(text) -> List[str]:
+    return lu_2_thai(text=text)
 
 def pun_wunayook(text):
     text = puan_kam_preprocess(text)
