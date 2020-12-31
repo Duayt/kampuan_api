@@ -50,14 +50,21 @@ def puan_2_lu(subwords):
     for subword in subwords:
         a_raw = subword
         # get vowel and change init consonant to ล, also keep oritinal form and sound for first
-        if len(a_raw.tone_mark) > 0: a_first = a_raw._vowel_form_sound.replace('-', 'ล') + a_raw.tone_mark[0] + a_raw.final_con    
-        else: a_first = a_raw._vowel_form_sound.replace('-', 'ล') + a_raw.final_con
-        #print(a_raw._vowel_form_sound)
-        a_second = a_raw.main_init_sound + "ู" + a_raw.final_con
+        # Check special case รอ ลอ สอ ซอ
+        if a_raw.init_con not in ['ล', 'ร', 'ฤ', 'หล', 'หร']:
+            if len(a_raw.tone_mark) > 0: a_first = a_raw._vowel_form_sound.replace('-', 'ล') + a_raw.tone_mark[0] + a_raw.final_con    
+            else: a_first = a_raw._vowel_form_sound.replace('-', 'ล') + a_raw.final_con
+        else:
+            if len(a_raw.tone_mark) > 0: a_first = a_raw._vowel_form_sound.replace('-', 'ซ') + a_raw.tone_mark[0] + a_raw.final_con    
+            else: a_first = a_raw._vowel_form_sound.replace('-', 'ซ') + a_raw.final_con
+        
+        # Check special case อุ อู
+        if a_raw._vowel_form_sound.replace('-', '') == "ู": a_second = a_raw.main_init_sound + "ี" + a_raw.final_con
+        elif a_raw._vowel_form_sound.replace('-', '') == "ุ": a_second = a_raw.main_init_sound + "ิ" + a_raw.final_con            
+        else: a_second = a_raw.main_init_sound + "ู" + a_raw.final_con
             
         a_first = ThaiSubWord(a_first)
         a_second = ThaiSubWord(a_second)    
-        print(a_first._tone, a_second._tone)   
 
         # Assign tone of original word to both first and second lu
         a_first = ThaiSubWord.pun_wunayook(a_first.raw, a_raw._tone)    
@@ -175,7 +182,7 @@ def puan_kam_auto(text='สวัสดี', use_first=None, flag_puan_2_lu=Fals
             index = (1, -1)
         else:
             index = (0, -1)
-    else:  # more than 3
+    else and not flag_puan_2_lu:  # more than 3
         if use_first is None:
             return [puan_kam_base(text=split_words, keep_tone=None, index=(i, -1)) for i in [0, 1]]
         elif use_first:
