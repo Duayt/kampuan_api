@@ -37,11 +37,11 @@ def process_text_2_list(text):
 
 
 @app.get("/puan_kam/{text}")
-async def puan_kam(text: str = 'สวัสดี',
-                   first: Optional[bool] = None,
-                   keep_tone: Optional[bool] = None,
-                   all: Optional[bool] = False,
-                   skip_tokenize: Optional[bool] = None):
+def puan_kam(text: str = 'สวัสดี',
+             first: Optional[bool] = None,
+             keep_tone: Optional[bool] = None,
+             all: Optional[bool] = False,
+             skip_tokenize: Optional[bool] = None):
     """Puan kum (ผวนคำ) is a Thai toung twister, is API convert string into kampuan
         Play around with the options to see different results.
 
@@ -85,8 +85,38 @@ async def puan_kam(text: str = 'สวัสดี',
             return {'input': text,
                     'results': kp.puan_kam_base(text=split_words, keep_tone=keep_tone, use_first=first)}
 
+
+@app.get("/puan_lu/{text}")
+def puan_lu(text: str = 'สวัสดี',
+            skip_tokenize: Optional[bool] = None):
+    """ภาษาลู
+
+    -Args:
+    - **text** (str):  Defaults to 'สวัสดี'.
+        - input string 'ไปเที่ยว' -> auto tokenize will apply and split to ไป and  เที่ยว
+        - list of string which accepted 3 formats: ['ไป','กิน','ข้าว'] | 'ไป','กิน','ข้าว' | ไป,กิน,ข้าว, the list input will also neglect auto tokenization.
+
+    -Returns:
+    - **results**: List of คำผันลู
+    """
+    if not check_thai_ch(text):
+        return HTTPException(400, detail=f'Input contains non Thai')
+
+    text = process_text_2_list(text)
+    try:
+        split_words = kp.puan_kam_preprocess(text, skip_tokenize=skip_tokenize)
+    except ValueError as e:
+        try:
+            split_words = kp.puan_kam_preprocess(text, skip_tokenize=True)
+        except ValueError as e:
+            return HTTPException(422, detail=f'Input error: {e}')
+
+    return {'input': text,
+            'results': kp.puan_lu(text=split_words)}
+
+
 @app.get("/pun_wunnayook/{text}")
-async def pun_wunnayook(text: str = 'สวัสดี'):
+def pun_wunnayook(text: str = 'สวัสดี'):
     """pun wunnayook (ผันเสียงวรรณยุกต์)
 
     -Args:
@@ -97,12 +127,15 @@ async def pun_wunnayook(text: str = 'สวัสดี'):
     -Returns:
     - **results**: List of คำผัน
     """
+    if not check_thai_ch(text):
+        return HTTPException(400, detail=f'Input contains non Thai')
+
     text = process_text_2_list(text)
     return kp.pun_wunayook(text=text)
 
 
 @app.get("/vowel/{text}")
-async def extract_vowel(text: str = 'สวัสดี'):
+def extract_vowel(text: str = 'สวัสดี'):
     """ Method to extract Thai vowel form out.
 
     -Args:
@@ -114,6 +147,9 @@ async def extract_vowel(text: str = 'สวัสดี'):
     -Returns:
     - **results**: List of extracted vowel
     """
+    if not check_thai_ch(text):
+        return HTTPException(400, detail=f'Input contains non Thai')
+
     text = process_text_2_list(text)
     if isinstance(text, str):
         text = kp.tokenize(text)
