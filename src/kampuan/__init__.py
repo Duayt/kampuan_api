@@ -58,34 +58,27 @@ def puan_2_lu(a_raw, b_raw, keep_tone=None):
     b_second = b_raw.main_init_sound + "ู" + b_raw.final_con
 
     #print tone of first and second a and b
-    print(ThaiSubWord(a_first)._tone, ThaiSubWord(a_second)._tone)
-    print(ThaiSubWord(b_first)._tone, ThaiSubWord(b_second)._tone) 
+    a_first = ThaiSubWord(a_first)
+    a_second = ThaiSubWord(a_second)
+    b_first = ThaiSubWord(b_first)
+    b_second = ThaiSubWord(b_second)
+    print(a_first._tone, a_second._tone)
+    print(b_first._tone, b_second._tone) 
 
-    # Assign tone of a,b first to a,b second    
-    #a_target = ThaiSubWord.pun_wunayook(a_target._raw, a_target_tone)
-    #b_target = ThaiSubWord.pun_wunayook(b_target._raw, b_target_tone)
+    # Assign tone of a_raw, b_raw first to a,b 
+    a_first = ThaiSubWord.pun_wunayook(a_first.raw, a_raw._tone)    
+    a_second = ThaiSubWord.pun_wunayook(a_second.raw, a_raw._tone)
+    b_first = ThaiSubWord.pun_wunayook(b_first.raw, b_raw._tone)
+    b_second = ThaiSubWord.pun_wunayook(b_second.raw, b_raw._tone)
 
-    # combine into 1
-    a_target = ThaiSubWord(a_first + a_second)    
-    b_target = ThaiSubWord(b_first + b_second)
-    
-    # assign tones
-    if keep_tone is None:
-        if a_target._word_class == 'dead' or b_target._word_class == 'dead':
-            keep_tone = False
-        else:
-            keep_tone = True
-
-    if keep_tone:
-        a_target_tone = a_raw_tone
-        b_target_tone = b_raw_tone
-    else:
-        a_target_tone = b_raw_tone
-        b_target_tone = a_raw_tone
-    
+    # combine into 1 object
+    a_target = a_first + a_second
+    b_target = b_first + b_second
+    #a_target = ThaiSubWord(a_first + a_second)    
+    #b_target = ThaiSubWord(b_first + b_second)
 
     #return a_target, b_target
-    #return a_target.raw, b_target.raw
+    return a_target, b_target
 
 def puan_2_kam(a_raw, b_raw, keep_tone=None):
     a_raw_tone = a_raw._tone
