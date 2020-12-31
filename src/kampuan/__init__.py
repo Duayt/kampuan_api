@@ -47,15 +47,16 @@ def puan_kam_preprocess(text, skip_tokenize=True):
 def puan_2_lu(subwords):
     """ Leverage existing puan kum method to convert to lu language"""
     output_lu = []
-    for subword in subwords:
+    
+    for subword in subwords:        
         a_raw = subword
         # get vowel and change init consonant to ล, also keep oritinal form and sound for first
         # Check special case รอ ลอ สอ ซอ
         if a_raw.init_con not in ['ล', 'ร', 'ฤ', 'หล', 'หร']:
-            if len(a_raw.tone_mark) > 0: a_first = a_raw._vowel_form_sound.replace('-', 'ล') + a_raw.tone_mark[0] + a_raw.final_con    
+            if len(a_raw.tone_mark) > 0: a_first = a_raw._vowel_form_sound.replace('-', 'ล') + a_raw.final_con    
             else: a_first = a_raw._vowel_form_sound.replace('-', 'ล') + a_raw.final_con
         else:
-            if len(a_raw.tone_mark) > 0: a_first = a_raw._vowel_form_sound.replace('-', 'ซ') + a_raw.tone_mark[0] + a_raw.final_con    
+            if len(a_raw.tone_mark) > 0: a_first = a_raw._vowel_form_sound.replace('-', 'ซ') + a_raw.final_con    
             else: a_first = a_raw._vowel_form_sound.replace('-', 'ซ') + a_raw.final_con
         
         # Check special case อุ อู
@@ -171,6 +172,9 @@ def puan_kam_auto(text='สวัสดี', use_first=None, flag_puan_2_lu=Fals
         split_words = text
 
     n_subwords = len(split_words)
+    
+    # Flag to return without having to find index
+    if flag_puan_2_lu: return puan_kam_base(text=split_words, keep_tone=None, flag_puan_2_lu=flag_puan_2_lu)
 
     index = (0, 0)
     if n_subwords == 1:
@@ -182,7 +186,7 @@ def puan_kam_auto(text='สวัสดี', use_first=None, flag_puan_2_lu=Fals
             index = (1, -1)
         else:
             index = (0, -1)
-    else and not flag_puan_2_lu:  # more than 3
+    else:  # more than 3        
         if use_first is None:
             return [puan_kam_base(text=split_words, keep_tone=None, index=(i, -1)) for i in [0, 1]]
         elif use_first:
