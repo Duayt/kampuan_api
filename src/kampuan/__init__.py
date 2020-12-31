@@ -44,6 +44,39 @@ def puan_kam_preprocess(text, skip_tokenize=True):
 
     return split_words
 
+def puan_2_lu(subwords):
+    """ Leverage existing puan kum method to convert to lu language"""
+    output_lu = []
+    
+    for subword in subwords:        
+        a_raw = subword
+        # get vowel and change init consonant to ล, also keep oritinal form and sound for first
+        # Check special case รอ ลอ สอ ซอ
+        if a_raw.init_con not in ['ล', 'ร', 'ฤ', 'หล', 'หร']:
+            if len(a_raw.tone_mark) > 0: a_first = a_raw._vowel_form_sound.replace('-', 'ล') + a_raw.final_con    
+            else: a_first = a_raw._vowel_form_sound.replace('-', 'ล') + a_raw.final_con
+        else:
+            if len(a_raw.tone_mark) > 0: a_first = a_raw._vowel_form_sound.replace('-', 'ซ') + a_raw.final_con    
+            else: a_first = a_raw._vowel_form_sound.replace('-', 'ซ') + a_raw.final_con
+        
+        # Check special case อุ อู
+        if a_raw._vowel_form_sound.replace('-', '') == "ู": a_second = a_raw.main_init_sound + "ี" + a_raw.final_con
+        elif a_raw._vowel_form_sound.replace('-', '') == "ุ": a_second = a_raw.main_init_sound + "ิ" + a_raw.final_con            
+        else: a_second = a_raw.main_init_sound + "ู" + a_raw.final_con
+            
+        a_first = ThaiSubWord(a_first)
+        a_second = ThaiSubWord(a_second)    
+
+        # Assign tone of original word to both first and second lu
+        a_first = ThaiSubWord.pun_wunayook(a_first.raw, a_raw._tone)    
+        a_second = ThaiSubWord.pun_wunayook(a_second.raw, a_raw._tone)
+    
+        # combine into 1 object
+        a_target = a_first + a_second
+        output_lu.append(a_target)
+
+    #return a_target, b_target
+    return output_lu
 
 def puan_2_kam(a_raw, b_raw, keep_tone=None):
     a_raw_tone = a_raw._tone
@@ -79,7 +112,7 @@ def puan_2_kam(a_raw, b_raw, keep_tone=None):
     return a_target, b_target
 
 
-def puan_kam_base(text='สวัสดี', keep_tone=None, use_first=True, index=None):
+def puan_kam_base(text='สวัสดี', keep_tone=None, use_first=True, index=None, flag_puan_2_lu=False):
 
     if isinstance(text, str):
         split_words = puan_kam_preprocess(text)
@@ -105,7 +138,8 @@ def puan_kam_base(text='สวัสดี', keep_tone=None, use_first=True, ind
     b_raw = split_words[index[1]]
 
     # apply tone rules
-    a_target, b_target = puan_2_kam(a_raw, b_raw, keep_tone=keep_tone)
+    if not flag_puan_2_lu: a_target, b_target = puan_2_kam(a_raw, b_raw)
+    else: return puan_2_lu(split_words)
 
     # 7. combine
     kam_puan = [w._raw for w in split_words]
@@ -128,7 +162,7 @@ def puan_kam_all(text='สวัสดี'):
     return result
 
 
-def puan_kam_auto(text='สวัสดี', use_first=None):
+def puan_kam_auto(text='สวัสดี', use_first=None, flag_puan_2_lu=False):
 
     if isinstance(text, str):
         split_words = puan_kam_preprocess(text)
@@ -138,6 +172,9 @@ def puan_kam_auto(text='สวัสดี', use_first=None):
         split_words = text
 
     n_subwords = len(split_words)
+    
+    # Flag to return without having to find index
+    if flag_puan_2_lu: return puan_kam_base(text=split_words, keep_tone=None, flag_puan_2_lu=flag_puan_2_lu)
 
     index = (0, 0)
     if n_subwords == 1:
@@ -149,7 +186,7 @@ def puan_kam_auto(text='สวัสดี', use_first=None):
             index = (1, -1)
         else:
             index = (0, -1)
-    else:  # more than 3
+    else:  # more than 3        
         if use_first is None:
             return [puan_kam_base(text=split_words, keep_tone=None, index=(i, -1)) for i in [0, 1]]
         elif use_first:
@@ -157,12 +194,14 @@ def puan_kam_auto(text='สวัสดี', use_first=None):
         else:
             index = (1, -1)
 
-    return puan_kam_base(text=split_words, keep_tone=None, index=index)
+    return puan_kam_base(text=split_words, keep_tone=None, index=index, flag_puan_2_lu=flag_puan_2_lu)
 
 
 def puan_kam(text) -> List[str]:
     return puan_kam_auto(text=text, use_first=None)
 
+def puan_lu(text) -> List[str]:
+    return puan_kam_auto(text=text, use_first=None, flag_puan_2_lu=True)
 
 def pun_wunayook(text):
     text = puan_kam_preprocess(text)
