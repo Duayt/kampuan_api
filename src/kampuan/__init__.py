@@ -44,41 +44,31 @@ def puan_kam_preprocess(text, skip_tokenize=True):
 
     return split_words
 
-def puan_2_lu(a_raw, b_raw, keep_tone=None):
+def puan_2_lu(subwords):
     """ Leverage existing puan kum method to convert to lu language"""
-    a_raw_tone = a_raw._tone
-    b_raw_tone = b_raw._tone
-    # get vowel from a and change init consonant to ล, also keep oritinal form and sound for a_first
-    if len(a_raw.tone_mark) > 0: a_first = a_raw._vowel_form_sound.replace('-', 'ล') + a_raw.tone_mark[0] + a_raw.final_con    
-    else: a_first = a_raw._vowel_form_sound.replace('-', 'ล') + a_raw.final_con    
-    a_second = a_raw.main_init_sound + "ู" + a_raw.final_con
+    output_lu = []
+    for subword in subwords:
+        a_raw = subword
+        # get vowel and change init consonant to ล, also keep oritinal form and sound for first
+        if len(a_raw.tone_mark) > 0: a_first = a_raw._vowel_form_sound.replace('-', 'ล') + a_raw.tone_mark[0] + a_raw.final_con    
+        else: a_first = a_raw._vowel_form_sound.replace('-', 'ล') + a_raw.final_con
+        #print(a_raw._vowel_form_sound)
+        a_second = a_raw.main_init_sound + "ู" + a_raw.final_con
+            
+        a_first = ThaiSubWord(a_first)
+        a_second = ThaiSubWord(a_second)    
+        print(a_first._tone, a_second._tone)   
+
+        # Assign tone of original word to both first and second lu
+        a_first = ThaiSubWord.pun_wunayook(a_first.raw, a_raw._tone)    
+        a_second = ThaiSubWord.pun_wunayook(a_second.raw, a_raw._tone)
     
-    if len(b_raw.tone_mark) > 0: b_first = b_raw._vowel_form_sound.replace('-', 'ล') + b_raw.tone_mark[0] + b_raw.final_con    
-    else: b_first = b_raw._vowel_form_sound.replace('-', 'ล') + b_raw.final_con    
-    b_second = b_raw.main_init_sound + "ู" + b_raw.final_con
-
-    #print tone of first and second a and b
-    a_first = ThaiSubWord(a_first)
-    a_second = ThaiSubWord(a_second)
-    b_first = ThaiSubWord(b_first)
-    b_second = ThaiSubWord(b_second)
-    print(a_first._tone, a_second._tone)
-    print(b_first._tone, b_second._tone) 
-
-    # Assign tone of a_raw, b_raw first to a,b 
-    a_first = ThaiSubWord.pun_wunayook(a_first.raw, a_raw._tone)    
-    a_second = ThaiSubWord.pun_wunayook(a_second.raw, a_raw._tone)
-    b_first = ThaiSubWord.pun_wunayook(b_first.raw, b_raw._tone)
-    b_second = ThaiSubWord.pun_wunayook(b_second.raw, b_raw._tone)
-
-    # combine into 1 object
-    a_target = a_first + a_second
-    b_target = b_first + b_second
-    #a_target = ThaiSubWord(a_first + a_second)    
-    #b_target = ThaiSubWord(b_first + b_second)
+        # combine into 1 object
+        a_target = a_first + a_second
+        output_lu.append(a_target)
 
     #return a_target, b_target
-    return a_target, b_target
+    return output_lu
 
 def puan_2_kam(a_raw, b_raw, keep_tone=None):
     a_raw_tone = a_raw._tone
@@ -140,8 +130,8 @@ def puan_kam_base(text='สวัสดี', keep_tone=None, use_first=True, ind
     b_raw = split_words[index[1]]
 
     # apply tone rules
-    if not flag_puan_2_lu: a_target, b_target = puan_2_kam(a_raw, b_raw, keep_tone=keep_tone)
-    else: a_target, b_target = puan_2_lu(a_raw, b_raw, keep_tone=keep_tone)
+    if not flag_puan_2_lu: a_target, b_target = puan_2_kam(a_raw, b_raw)
+    else: return puan_2_lu(split_words)
 
     # 7. combine
     kam_puan = [w._raw for w in split_words]
