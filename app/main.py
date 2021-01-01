@@ -78,7 +78,7 @@ def handle_message_pun(event):
     puan_result = {}
     puan_result = pun_wunnayook(text=text)
     puan_result['msg'] = '\n'.join([' '.join(pun)
-                                    for pun in puan_result['result']])
+                                    for k, pun in puan_result['results'].items()])
     return puan_result
 
 
@@ -104,6 +104,8 @@ def reply_howto():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event: MessageEvent):
     text = event.message.text
+    profile = line_bot_api.get_profile(event.source.user_id)
+
     event_dict = {}
     event_dict['timestamp'] = datetime.now(timezone.utc)
     event_dict['event'] = event.as_json_dict()
@@ -113,6 +115,14 @@ def handle_message(event: MessageEvent):
 
     elif text == '#hi':
         msg = bot_info.display_name
+
+    elif text == '#ออกไปเลยชิ่วๆ':
+        if event.source.type == 'user':
+            msg = f'ไม่ออก! นี่มันไม่ใช่ห้องจ้า{profile.display_name}'
+        else:
+            msg = f'{bot_info.display_name} ลาก่อนจ้า'
+            event_dict['bot_action'] == 'leave'
+
     else:
         try:
             # puan process usage
@@ -120,7 +130,6 @@ def handle_message(event: MessageEvent):
             msg = puan_result['msg']
             event_dict['puan_result'] = puan_result
         except Exception as e:
-            profile = line_bot_api.get_profile(event.source.user_id)
             msg = f"""{profile.display_name}:{text}
             \n ประโยคเหนือชั้นมาก! {bot_info.display_name} ยังต้องเรียนรู้อีก! 
             \n ลองใช้เฉพาะอักษรไทย หรือ เว้นวรรค ระว่าง คำ/พยางค์ ให้หน่อยจ้า
@@ -144,6 +153,14 @@ def handle_message(event: MessageEvent):
     line_bot_api.reply_message(
         event.reply_token,
         TextSendMessage(text=msg))
+
+    # manage bot leave
+    if 'bot_action' in event_dict:
+        if event_dict['bot_action'] == 'leave':
+            if event.source.type == 'room':
+                line_bot_api.leave_room(event.source.room_id)
+            elif event.source.type == 'group':
+                line_bot_api.leave_group(event.source.group_id)
 
 
 @handler.add(JoinEvent)
