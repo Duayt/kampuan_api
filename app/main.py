@@ -37,6 +37,7 @@ line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(CHANNEL_SECRET)
 db = FireBaseDb(DB, credential_json=GOOGLE_APPLICATION_CREDENTIALS)
 # db.test()
+bot_info = line_bot_api.get_bot_info()
 
 
 @app.post("/callback", include_in_schema=False)
@@ -80,37 +81,64 @@ def handle_message_pun(event):
 
 
 def handle_message_lu(event):
-    pass
+    text = event.message.text
+    puan_result = puan_lu(text=text)
+    puan_result['msg'] = ''.join(puan_result['results'])
+    return puan_result
+
+
+handle_dict = {
+    'puan': handle_message_puan,
+    'pun': handle_message_pun,
+    'lu': handle_message_lu
+}
+handle_funct = handle_dict[ENV]
+
+
+def reply_howto():
+    return CONST['how_to']
 
 
 @handler.add(MessageEvent, message=TextMessage)
-def handle_message(event: MessageEvent, handle_funct=handle_message_puan):
+def handle_message(event: MessageEvent):
     text = event.message.text
-    puan_result = {}
-    try:
-        # puan process usage
-        puan_result = handle_funct(event)
-        msg = puan_result['msg']
-    except Exception as e:
-        profile = line_bot_api.get_profile(event.source.user_id)
-        msg = f"""{profile.display_name}: [{text}] 
-        \n ประโยคเหนือชั้นมาก! ข้าอาจจะยังไม่รองรับ 
-        \n ลองใช้เฉพาะอักษรไทย หรือ เว้นวรรค ระว่าง คำ/พยางค์ ให้หน่อยจ้า' 
-        """
-        error_msg = f'{str(repr(e))}'
-        print(error_msg)
-        puan_result['error'] = error_msg
-    finally:
-        puan_result['event'] = event.as_json_dict()
-        puan_result['msg'] = msg
-        print(puan_result)
-        db.write(puan_result, DB)
-        if 'error' in puan_result:
-            db.write(puan_result, DB_ERR)
-        print(f'write to {DB}')
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text=msg))
+    event_dict = {}
+    event_dict['event'] = event.as_json_dict()
+    msg = ''
+    if text == '#'+bot_info.display_name: # show manual
+        msg = reply_howto()
+
+    else:
+        try:
+            # puan process usage
+            puan_result = handle_funct(event)
+            msg = puan_result['msg']
+            event_dict['puan_result'] = puan_result
+        except Exception as e:
+            profile = line_bot_api.get_profile(event.source.user_id)
+            msg = f"""{profile.display_name}: [{text}] 
+            \n ประโยคเหนือชั้นมาก! ข้า {bot_info.display_name} ยังต้องเรียนรู้อีก! 
+            \n ลองใช้เฉพาะอักษรไทย หรือ เว้นวรรค ระว่าง คำ/พยางค์ ให้หน่อยจ้า' 
+            """
+            error_msg = f'{str(repr(e))}'
+            print(error_msg)
+            event_dict['error'] = error_msg
+        finally:
+            pass
+
+    # write databse
+    event_dict['msg'] = msg
+    print(event_dict)
+    db.write(event_dict, DB)
+    # if error keep another record too
+    if 'error' in event_dict:
+        db.write(event_dict, DB_ERR)
+        
+    # reply bot
+    print(f'write to {DB}')
+    line_bot_api.reply_message(
+        event.reply_token,
+        TextSendMessage(text=msg))
 
 
 @handler.add(JoinEvent)
