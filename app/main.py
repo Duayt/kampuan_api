@@ -71,11 +71,12 @@ def handle_message(event: MessageEvent):
         puan_result = puan_kam(text=text, skip_tokenize=True, first=use_first)
         msg = ''.join(puan_result['results'])
     except Exception as e:
+        puan_result = {}
         profile = line_bot_api.get_profile(event.source.user_id)
         msg = f'{profile.display_name} ประโยคเหนือชั้นมาก! ทำข้างง!  \n ใช้คำไทยสะกดถูกต้อง หรือ เว้นวรรคคำให้หน่อยจ้า'
-        error_msg = f'error {str(repr(e))}'
+        error_msg = f'{str(repr(e))}'
         print(error_msg)
-        puan_result['error'] = 'something wrong'
+        puan_result['error'] = error_msg
     else:
         puan_result['event'] = event.as_json_dict()
         puan_result['msg'] = msg
