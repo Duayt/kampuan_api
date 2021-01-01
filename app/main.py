@@ -135,7 +135,7 @@ def handle_message(event: MessageEvent):
             event_dict['puan_result'] = puan_result
             event_dict['bot_reply'] = True
         except Exception as e:
-            msg = """ขออภัย {bot_info.display_name} ไม่เข้าใจ {text}"""
+            msg = f"""ขออภัย {bot_info.display_name} ไม่เข้าใจ {text}"""
             # f"""{profile.display_name}:{text}
             # \n ประโยคเหนือชั้นมาก! {bot_info.display_name} ยังต้องเรียนรู้อีก!
             # \n ลองใช้เฉพาะอักษรไทย หรือ เว้นวรรค ระว่าง คำ/พยางค์ ให้หน่อยจ้า
