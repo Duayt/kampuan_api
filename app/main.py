@@ -143,7 +143,7 @@ def handle_message(event: MessageEvent):
             error_msg = f'{str(repr(e))}'
             print(error_msg)
             event_dict['error'] = error_msg
-            event_dict['bot_reply'] = False
+            event_dict['bot_reply'] = True
         finally:
             pass
 
