@@ -13,11 +13,12 @@ from linebot.models import (JoinEvent, MessageEvent, TextMessage,
                             TextSendMessage)
 from starlette.responses import RedirectResponse
 
-from test_firebase import test_firebase_function
+from test_firebase import test_firebase_function, FireBaseDb
 
 CHANNEL_SECRET = str(os.getenv('CHANNEL_SECRET'))
 CHANNEL_ACCESS_TOKEN = str(os.getenv('CHANNEL_ACCESS_TOKEN'))
-GOOGLE_APPLICATION_CREDENTIALS = str(os.getenv('GOOGLE_APPLICATION_CREDENTIALS'))
+GOOGLE_APPLICATION_CREDENTIALS = str(
+    os.getenv('GOOGLE_APPLICATION_CREDENTIALS'))
 port = int(os.getenv("PORT", 5000))
 app = FastAPI(title="Kampuan project",
               description="Welcome, This is a project using python to do คำผวน by Tanawat C. \n https://www.linkedin.com/in/tanawat-chiewhawan",
@@ -26,7 +27,10 @@ app = FastAPI(title="Kampuan project",
 line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(CHANNEL_SECRET)
 
-test_firebase_function(credential_json=GOOGLE_APPLICATION_CREDENTIALS)
+db = FireBaseDb(u'test', credential_json=GOOGLE_APPLICATION_CREDENTIALS)
+db.test()
+# test_firebase_function(credential_json=GOOGLE_APPLICATION_CREDENTIALS)
+
 
 @app.post("/callback", include_in_schema=False)
 async def callback(request: Request):
@@ -38,7 +42,7 @@ async def callback(request: Request):
     body = await request.body()
     body = body.decode('utf-8')
     print("Request body: " + body)
-
+    db.write(body, u'puan_bot_user_chat')
     # handle webhook body
     try:
         handler.handle(body, signature)
@@ -58,6 +62,7 @@ def handle_message(event):
 
     puan_result = puan_kam(text=text, skip_tokenize=True, first=use_first)
     msg = ''.join(puan_result['results'])
+    db.write(puan_result, u'puan_bot_reply')
 
     line_bot_api.reply_message(
         event.reply_token,
