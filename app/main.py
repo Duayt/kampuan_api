@@ -78,7 +78,7 @@ def handle_message_pun(event):
     puan_result = {}
     puan_result = pun_wunnayook(text=text)
     puan_result['msg'] = '\n'.join([' '.join(pun)
-                                    for pun in puan_result['results']])
+                                    for k, pun in puan_result['results'].items()])
     return puan_result
 
 
