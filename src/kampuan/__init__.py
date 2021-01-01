@@ -62,7 +62,9 @@ def puan_2_lu(subwords):
         # Check special case อุ อู
         if a_raw._vowel_form_sound.replace('-', '') == "ู": a_second = a_raw.main_init_sound + "ี" + a_raw.final_con
         elif a_raw._vowel_form_sound.replace('-', '') == "ุ": a_second = a_raw.main_init_sound + "ิ" + a_raw.final_con            
-        else: a_second = a_raw.main_init_sound + "ู" + a_raw.final_con
+        else:
+            if a_raw._vowel_class == 'short': a_second = a_raw.main_init_sound + "ุ" + a_raw.final_con
+            else: a_second = a_raw.main_init_sound + "ู" + a_raw.final_con
             
         a_first = ThaiSubWord(a_first)
         a_second = ThaiSubWord(a_second)    
