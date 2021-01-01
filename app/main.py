@@ -33,7 +33,7 @@ app = FastAPI(title="Kampuan project",
 
 line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(CHANNEL_SECRET)
-db = FireBaseDb(DB', credential_json=GOOGLE_APPLICATION_CREDENTIALS)
+db = FireBaseDb(DB, credential_json=GOOGLE_APPLICATION_CREDENTIALS)
 # db.test()
 
 
@@ -72,7 +72,7 @@ def handle_message(event: MessageEvent):
         msg = ''.join(puan_result['results'])
     except Exception as e:
         profile = line_bot_api.get_profile(event.source.user_id)
-        msg = f'ประโยคเหนือชั้นมาก! ทำข้างง! {profile.display_name} \n เว้นวรรคคำให้หน่อยจ้า'
+        msg = f'ประโยคเหนือชั้นมาก! ทำข้างง! {profile.display_name} \n ใช้คำไทยสะกดถูกต้อง หรือ เว้นวรรคคำให้หน่อยจ้า'
         puan_result['error'] = e
     else:
         puan_result['event'] = event.as_json_dict()
