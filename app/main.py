@@ -113,16 +113,20 @@ def handle_message(event: MessageEvent):
     msg = ''
     if text == '#'+str(bot_info.display_name):  # show manual
         msg = reply_howto()
+        event_dict['bot_reply'] = True
 
     elif text == '#hi':
         msg = bot_info.display_name
+        event_dict['bot_reply'] = True
 
     elif text == '#ออกไปเลยชิ่วๆ':
         if event.source.type == 'user':
             msg = f'ไม่ออก! นี่มันไม่ใช่ห้องจ้า{profile.display_name}'
+            event_dict['bot_reply'] = True
         else:
             msg = f'{bot_info.display_name} ลาก่อนจ้า'
             event_dict['bot_action'] = 'leave'
+            event_dict['bot_reply'] = True
 
     else:
         try:
@@ -130,14 +134,17 @@ def handle_message(event: MessageEvent):
             puan_result = handle_funct(event)
             msg = puan_result['msg']
             event_dict['puan_result'] = puan_result
+            event_dict['bot_reply'] = True
         except Exception as e:
-            msg = f"""{profile.display_name}:{text}
-            \n ประโยคเหนือชั้นมาก! {bot_info.display_name} ยังต้องเรียนรู้อีก! 
-            \n ลองใช้เฉพาะอักษรไทย หรือ เว้นวรรค ระว่าง คำ/พยางค์ ให้หน่อยจ้า
-            """
+            msg = f"""ขออภัย {bot_info.display_name} ไม่เข้าใจ {text}"""
+            # f"""{profile.display_name}:{text}
+            # \n ประโยคเหนือชั้นมาก! {bot_info.display_name} ยังต้องเรียนรู้อีก!
+            # \n ลองใช้เฉพาะอักษรไทย หรือ เว้นวรรค ระว่าง คำ/พยางค์ ให้หน่อยจ้า
+            # """
             error_msg = f'{str(repr(e))}'
             print(error_msg)
             event_dict['error'] = error_msg
+            event_dict['bot_reply'] = True
         finally:
             pass
 
@@ -151,9 +158,11 @@ def handle_message(event: MessageEvent):
 
     # reply bot
     print(f'write to {DB}')
-    line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(text=msg))
+    if 'bot_reply' in event_dict or msg == '':
+        if event_dict['bot_reply'] or msg == '':
+            line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(text=msg))
 
     # manage bot leave
     if 'bot_action' in event_dict:
@@ -175,7 +184,10 @@ def handle_join(event):
 
 @handler.default()
 def default(event):
-    print(event)
+    event_dict = {}
+    event_dict['timestamp'] = datetime.now(timezone.utc)
+    event_dict['event'] = event.as_json_dict()
+    db.write(event_dict, DB)
 
 
 @app.get("/", include_in_schema=False)
