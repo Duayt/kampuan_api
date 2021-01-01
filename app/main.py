@@ -41,7 +41,7 @@ async def callback(request: Request):
     body = await request.body()
     body = body.decode('utf-8')
     print("Request body: " + body)
-    db.write(json.loads(body), u'puan_bot_user_chat')
+    # db.write(json.loads(body), u'puan_bot_user_chat')
     # handle webhook body
     try:
         handler.handle(body, signature)
@@ -58,11 +58,10 @@ def handle_message(event):
     # puan process
     use_first = text.startswith('@')
     text = text.replace('@', '')
-
     puan_result = puan_kam(text=text, skip_tokenize=True, first=use_first)
     msg = ''.join(puan_result['results'])
     db.write(puan_result, u'puan_bot_reply')
-
+    db.write(event, u'puan_bot_user_chat')
     line_bot_api.reply_message(
         event.reply_token,
         TextSendMessage(text=msg))
