@@ -73,7 +73,8 @@ def handle_message(event: MessageEvent):
     except Exception as e:
         profile = line_bot_api.get_profile(event.source.user_id)
         msg = f'{profile.display_name} ประโยคเหนือชั้นมาก! ทำข้างง!  \n ใช้คำไทยสะกดถูกต้อง หรือ เว้นวรรคคำให้หน่อยจ้า'
-        puan_result['error'] = str(e)
+        print(e)
+        puan_result['error'] = repr(e)
     else:
         puan_result['event'] = event.as_json_dict()
         puan_result['msg'] = msg
