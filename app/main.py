@@ -15,7 +15,9 @@ from starlette.responses import RedirectResponse
 
 from .firebase import FireBaseDb
 from .const import ALL_CONST
+
 # variables
+ENV = 'puan'
 CHANNEL_SECRET = str(os.getenv('CHANNEL_SECRET'))
 CHANNEL_ACCESS_TOKEN = str(os.getenv('CHANNEL_ACCESS_TOKEN'))
 GOOGLE_APPLICATION_CREDENTIALS = str(
@@ -24,8 +26,6 @@ GOOGLE_APPLICATION_CREDENTIALS = str(
 DB = str(os.getenv('FIRESTORE_DB'))
 DB_ERR = str(os.getenv('FIRESTORE_DB_ERR'))
 port = int(os.getenv("PORT", 5000))
-
-ENV = 'puan'
 CONST = ALL_CONST[ENV]
 
 # setup
@@ -50,7 +50,7 @@ async def callback(request: Request):
     body = await request.body()
     body = body.decode('utf-8')
     print("Request body: " + body)
-    # db.write(json.loads(body), u'puan_bot_user_chat')
+
     # handle webhook body
     try:
         handler.handle(body, signature)
@@ -105,9 +105,11 @@ def handle_message(event: MessageEvent):
     event_dict = {}
     event_dict['event'] = event.as_json_dict()
     msg = ''
-    if text == '#'+bot_info.display_name: # show manual
+    if text == '#'+bot_info.display_name:  # show manual
         msg = reply_howto()
 
+    elif text == '#hi':
+        msg = bot_info.display_name
     else:
         try:
             # puan process usage
@@ -133,7 +135,7 @@ def handle_message(event: MessageEvent):
     # if error keep another record too
     if 'error' in event_dict:
         db.write(event_dict, DB_ERR)
-        
+
     # reply bot
     print(f'write to {DB}')
     line_bot_api.reply_message(
