@@ -14,7 +14,7 @@ from linebot.models import (JoinEvent, MessageEvent, TextMessage,
 from starlette.responses import RedirectResponse
 
 from .firebase import FireBaseDb
-
+from .const import ALL_CONST
 # variables
 CHANNEL_SECRET = str(os.getenv('CHANNEL_SECRET'))
 CHANNEL_ACCESS_TOKEN = str(os.getenv('CHANNEL_ACCESS_TOKEN'))
@@ -25,6 +25,8 @@ DB = str(os.getenv('FIRESTORE_DB'))
 DB_ERR = str(os.getenv('FIRESTORE_DB_ERR'))
 port = int(os.getenv("PORT", 5000))
 
+ENV = 'puan'
+CONST = ALL_CONST[ENV]
 
 # setup
 app = FastAPI(title="Kampuan project",
@@ -58,22 +60,43 @@ async def callback(request: Request):
     return 'OK'
 
 
-@handler.add(MessageEvent, message=TextMessage)
-def handle_message(event: MessageEvent):
+def handle_message_puan(event: MessageEvent):
+    text = event.message.text
+    # puan process usage
+    use_first = text.startswith('@')
+    text = text.replace('@', '')
+    puan_result = puan_kam(text=text, skip_tokenize=True, first=use_first)
+    puan_result['msg'] = ''.join(puan_result['results'])
+    return puan_result
 
+
+def handle_message_pun(event):
+    text = event.message.text
+    puan_result = {}
+    puan_result = pun_wunnayook(text=text)
+    puan_result['msg'] = '\n'.join([' '.join(pun)
+                                    for pun in puan_result['result']])
+    return puan_result
+
+
+def handle_message_lu(event):
+    pass
+
+
+@handler.add(MessageEvent, message=TextMessage)
+def handle_message(event: MessageEvent, handle_funct=handle_message_puan):
     text = event.message.text
     puan_result = {}
     try:
-        # puan process
-
-        use_first = text.startswith('@')
-        text = text.replace('@', '')
-        puan_result = puan_kam(text=text, skip_tokenize=True, first=use_first)
-        msg = ''.join(puan_result['results'])
+        # puan process usage
+        puan_result = handle_funct(event)
+        msg = puan_result['msg']
     except Exception as e:
-        puan_result = {}
         profile = line_bot_api.get_profile(event.source.user_id)
-        msg = f'{profile.display_name} ประโยคเหนือชั้นมาก! ทำข้างง!  \n ใช้คำไทยสะกดถูกต้อง หรือ เว้นวรรคคำให้หน่อยจ้า'
+        msg = f"""{profile.display_name}: [{text}] 
+        \n ประโยคเหนือชั้นมาก! ข้าอาจจะยังไม่รองรับ 
+        \n ลองใช้เฉพาะอักษรไทย หรือ เว้นวรรค ระว่าง คำ/พยางค์ ให้หน่อยจ้า' 
+        """
         error_msg = f'{str(repr(e))}'
         print(error_msg)
         puan_result['error'] = error_msg
@@ -88,14 +111,12 @@ def handle_message(event: MessageEvent):
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text=msg))
-    
+
 
 @handler.add(JoinEvent)
 def handle_join(event):
     print(event.source)
-    # puan process
-    msg = 'สะวีดัส หยวนนักพอด แมวล้า'
-
+    msg = CONST['greeting']
     line_bot_api.reply_message(
         event.reply_token,
         TextSendMessage(text=msg))
@@ -164,7 +185,7 @@ def puan_kam(text: str = 'สวัสดี',
     - **results**: List of คำผวน
     """
     if not check_thai_ch(text):
-        return HTTPException(400, detail=f'Input contains non Thai')
+        raise HTTPException(400, detail=f'Input contains non Thai')
 
     text = process_text_2_list(text)
 
@@ -174,7 +195,7 @@ def puan_kam(text: str = 'สวัสดี',
         try:
             split_words = kp.puan_kam_preprocess(text, skip_tokenize=True)
         except ValueError as e:
-            return HTTPException(422, detail=f'Input error: {e}')
+            raise HTTPException(422, detail=f'Input error: {e}')
 
     if all is not None and all:
         return {'input': text,
@@ -202,7 +223,7 @@ def puan_lu(text: str = 'สวัสดี',
     - **results**: List of คำผันลู
     """
     if not check_thai_ch(text):
-        return HTTPException(400, detail=f'Input contains non Thai')
+        raise HTTPException(400, detail=f'Input contains non Thai')
 
     text = process_text_2_list(text)
     try:
@@ -211,7 +232,7 @@ def puan_lu(text: str = 'สวัสดี',
         try:
             split_words = kp.puan_kam_preprocess(text, skip_tokenize=True)
         except ValueError as e:
-            return HTTPException(422, detail=f'Input error: {e}')
+            raise HTTPException(422, detail=f'Input error: {e}')
 
     return {'input': text,
             'results': kp.puan_lu(text=split_words)}
@@ -230,10 +251,11 @@ def pun_wunnayook(text: str = 'สวัสดี'):
     - **results**: List of คำผัน
     """
     if not check_thai_ch(text):
-        return HTTPException(400, detail=f'Input contains non Thai')
+        raise HTTPException(400, detail=f'Input contains non Thai')
 
     text = process_text_2_list(text)
-    return kp.pun_wunayook(text=text)
+    return {'input': text,
+            'results': kp.pun_wunayook(text=text)}
 
 
 @app.get("/vowel/{text}")
