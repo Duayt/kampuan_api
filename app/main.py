@@ -1,12 +1,109 @@
-import kampuan as kp
 import json
+import os
+import re
 from typing import Optional
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import JSONResponse
+
+import kampuan as kp
+from fastapi import FastAPI, HTTPException, Request
+# from starlette.requests import Request
+from fastapi.responses import JSONResponse, Response
+from linebot import LineBotApi, WebhookHandler
+from linebot.exceptions import InvalidSignatureError
+from linebot.models import (JoinEvent, MessageEvent, TextMessage,
+                            TextSendMessage)
 from starlette.responses import RedirectResponse
+
+from .firebase import FireBaseDb
+
+# variables
+CHANNEL_SECRET = str(os.getenv('CHANNEL_SECRET'))
+CHANNEL_ACCESS_TOKEN = str(os.getenv('CHANNEL_ACCESS_TOKEN'))
+GOOGLE_APPLICATION_CREDENTIALS = str(
+    os.getenv('GOOGLE_APPLICATION_CREDENTIALS'))
+
+DB = str(os.getenv('FIRESTORE_DB'))
+DB_ERR = str(os.getenv('FIRESTORE_DB_ERR'))
+port = int(os.getenv("PORT", 5000))
+
+
+# setup
 app = FastAPI(title="Kampuan project",
               description="Welcome, This is a project using python to do คำผวน by Tanawat C. \n https://www.linkedin.com/in/tanawat-chiewhawan",
               version="0.0.1",)
+
+line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
+handler = WebhookHandler(CHANNEL_SECRET)
+db = FireBaseDb(DB, credential_json=GOOGLE_APPLICATION_CREDENTIALS)
+# db.test()
+
+
+@app.post("/callback", include_in_schema=False)
+async def callback(request: Request):
+
+    # get X-Line-Signature header value]
+    signature = request.headers['x-line-signature']
+
+    # get request body as text
+    body = await request.body()
+    body = body.decode('utf-8')
+    print("Request body: " + body)
+    # db.write(json.loads(body), u'puan_bot_user_chat')
+    # handle webhook body
+    try:
+        handler.handle(body, signature)
+    except InvalidSignatureError:
+        print("Invalid signature. Please check your channel access token/channel secret.")
+        return HTTPException(400, detail=f'error')
+
+    return 'OK'
+
+
+@handler.add(MessageEvent, message=TextMessage)
+def handle_message(event: MessageEvent):
+
+    text = event.message.text
+    puan_result = {}
+    try:
+        # puan process
+
+        use_first = text.startswith('@')
+        text = text.replace('@', '')
+        puan_result = puan_kam(text=text, skip_tokenize=True, first=use_first)
+        msg = ''.join(puan_result['results'])
+    except Exception as e:
+        puan_result = {}
+        profile = line_bot_api.get_profile(event.source.user_id)
+        msg = f'{profile.display_name} ประโยคเหนือชั้นมาก! ทำข้างง!  \n ใช้คำไทยสะกดถูกต้อง หรือ เว้นวรรคคำให้หน่อยจ้า'
+        error_msg = f'{str(repr(e))}'
+        print(error_msg)
+        puan_result['error'] = error_msg
+    finally:
+        puan_result['event'] = event.as_json_dict()
+        puan_result['msg'] = msg
+        print(puan_result)
+        db.write(puan_result, DB)
+        if 'error' in puan_result:
+            db.write(puan_result, DB_ERR)
+        print(f'write to {DB}')
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=msg))
+    
+
+@handler.add(JoinEvent)
+def handle_join(event):
+    print(event.source)
+    # puan process
+    msg = 'สะวีดัส หยวนนักพอด แมวล้า'
+
+    line_bot_api.reply_message(
+        event.reply_token,
+        TextSendMessage(text=msg))
+
+
+@handler.default()
+def default(event):
+    print(event)
 
 
 @app.get("/", include_in_schema=False)
@@ -21,9 +118,14 @@ def check_if_list(text):
     return (text[0] == '[' and text[-1] == ']') or (',' in text)
 
 
+def handle_white_spaces(text):
+    text = re.sub(' +', ',', text)
+    return text
+
+
 def process_text_2_list(text):
     text = text.strip()
-
+    text = handle_white_spaces(text)
     if check_if_list(text):
         # convert string to properlist
         if not (text[0] == '[' and text[-1] == ']'):
@@ -42,7 +144,7 @@ def puan_kam(text: str = 'สวัสดี',
              keep_tone: Optional[bool] = None,
              all: Optional[bool] = False,
              skip_tokenize: Optional[bool] = None):
-    """Puan kum (ผวนคำ) is a Thai toung twister, is API convert string into kampuan
+    """Puan kum (ผวนคำ) is a Thai toung twister, This API convert string into kampuan
         Play around with the options to see different results.
 
     -Args:
