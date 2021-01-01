@@ -15,19 +15,25 @@ from starlette.responses import RedirectResponse
 
 from .firebase import FireBaseDb
 
+# variables
 CHANNEL_SECRET = str(os.getenv('CHANNEL_SECRET'))
 CHANNEL_ACCESS_TOKEN = str(os.getenv('CHANNEL_ACCESS_TOKEN'))
 GOOGLE_APPLICATION_CREDENTIALS = str(
     os.getenv('GOOGLE_APPLICATION_CREDENTIALS'))
+
+DB = str(os.getenv('FIRESTORE_DB'))
+DB_ERR = str(os.getenv('FIRESTORE_DB_ERR'))
 port = int(os.getenv("PORT", 5000))
+
+
+# setup
 app = FastAPI(title="Kampuan project",
               description="Welcome, This is a project using python to do คำผวน by Tanawat C. \n https://www.linkedin.com/in/tanawat-chiewhawan",
               version="0.0.1",)
 
 line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(CHANNEL_SECRET)
-
-db = FireBaseDb(u'test', credential_json=GOOGLE_APPLICATION_CREDENTIALS)
+db = FireBaseDb(DB', credential_json=GOOGLE_APPLICATION_CREDENTIALS)
 # db.test()
 
 
@@ -53,20 +59,32 @@ async def callback(request: Request):
 
 
 @handler.add(MessageEvent, message=TextMessage)
-def handle_message(event):
-    text = event.message.text
-    # puan process
-    use_first = text.startswith('@')
-    text = text.replace('@', '')
-    puan_result = puan_kam(text=text, skip_tokenize=True, first=use_first)
+def handle_message(event: MessageEvent):
 
-    msg = ''.join(puan_result['results'])
-    puan_result['event'] = event.as_json_dict()
-    db.write(puan_result, u'puan_bot_reply')
-    # db.write(, u'puan_bot_user_chat')
-    line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(text=msg))
+    text = event.message.text
+    puan_result = {}
+    try:
+        # puan process
+
+        use_first = text.startswith('@')
+        text = text.replace('@', '')
+        puan_result = puan_kam(text=text, skip_tokenize=True, first=use_first)
+        msg = ''.join(puan_result['results'])
+    except Exception as e:
+        profile = line_bot_api.get_profile(event.source.user_id)
+        msg = f'ประโยคเหนือชั้นมาก! ทำข้างง! {profile.display_name} \n เว้นวรรคคำให้หน่อยจ้า'
+        puan_result['error'] = e
+    else:
+        puan_result['event'] = event.as_json_dict()
+        puan_result['msg'] = msg
+        print(puan_result)
+        db.write(puan_result, DB)
+        if 'error' in puan_result:
+            db.write(puan_result, DB_ERR)
+        print(f'write to {DB}')
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=msg))
 
 
 @handler.add(JoinEvent)
