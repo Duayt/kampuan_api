@@ -77,7 +77,7 @@ def handle_message(event: MessageEvent):
         error_msg = f'{str(repr(e))}'
         print(error_msg)
         puan_result['error'] = error_msg
-    else:
+    finally:
         puan_result['event'] = event.as_json_dict()
         puan_result['msg'] = msg
         print(puan_result)
@@ -88,7 +88,7 @@ def handle_message(event: MessageEvent):
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(text=msg))
-
+    
 
 @handler.add(JoinEvent)
 def handle_join(event):
