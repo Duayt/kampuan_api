@@ -59,8 +59,9 @@ def handle_message(event):
     use_first = text.startswith('@')
     text = text.replace('@', '')
     puan_result = puan_kam(text=text, skip_tokenize=True, first=use_first)
+
     msg = ''.join(puan_result['results'])
-    puan_result['event'] = event.__dict__
+    puan_result['event'] = event.as_json_dict()
     db.write(puan_result, u'puan_bot_reply')
     # db.write(, u'puan_bot_user_chat')
     line_bot_api.reply_message(
