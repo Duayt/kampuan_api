@@ -121,7 +121,7 @@ def handle_message(event: MessageEvent):
             msg = f'ไม่ออก! นี่มันไม่ใช่ห้องจ้า{profile.display_name}'
         else:
             msg = f'{bot_info.display_name} ลาก่อนจ้า'
-            event_dict['bot_action'] == 'leave'
+            event_dict['bot_action'] = 'leave'
 
     else:
         try:
