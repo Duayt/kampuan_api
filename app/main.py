@@ -74,7 +74,8 @@ def handle_message(event: MessageEvent):
         profile = line_bot_api.get_profile(event.source.user_id)
         msg = f'{profile.display_name} ประโยคเหนือชั้นมาก! ทำข้างง!  \n ใช้คำไทยสะกดถูกต้อง หรือ เว้นวรรคคำให้หน่อยจ้า'
         print(e)
-        puan_result['error'] = repr(e)
+        error_msg = str(repr(e))
+        puan_result['error'] = error_msg
     else:
         puan_result['event'] = event.as_json_dict()
         puan_result['msg'] = msg
