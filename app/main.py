@@ -2,6 +2,8 @@ import json
 import os
 import re
 from typing import Optional
+from datetime import datetime
+from datetime import datetime, timezone
 
 import kampuan as kp
 from fastapi import FastAPI, HTTPException, Request
@@ -103,6 +105,7 @@ def reply_howto():
 def handle_message(event: MessageEvent):
     text = event.message.text
     event_dict = {}
+    event_dict['timestamp'] = datetime.now(timezone.utc)
     event_dict['event'] = event.as_json_dict()
     msg = ''
     if text == '#'+str(bot_info.display_name):  # show manual
@@ -119,8 +122,8 @@ def handle_message(event: MessageEvent):
         except Exception as e:
             profile = line_bot_api.get_profile(event.source.user_id)
             msg = f"""{profile.display_name}:{text}
-            \n ประโยคเหนือชั้นมาก! ข้า {bot_info.display_name} ยังต้องเรียนรู้อีก! 
-            \n ลองใช้เฉพาะอักษรไทย หรือ เว้นวรรค ระว่าง คำ/พยางค์ ให้หน่อยจ้า' 
+            \n ประโยคเหนือชั้นมาก! {bot_info.display_name} ยังต้องเรียนรู้อีก! 
+            \n ลองใช้เฉพาะอักษรไทย หรือ เว้นวรรค ระว่าง คำ/พยางค์ ให้หน่อยจ้า
             """
             error_msg = f'{str(repr(e))}'
             print(error_msg)
