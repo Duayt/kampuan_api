@@ -13,7 +13,7 @@ from linebot.models import (JoinEvent, MessageEvent, TextMessage,
                             TextSendMessage)
 from starlette.responses import RedirectResponse
 
-from .test_firebase import FireBaseDb
+from .firebase import FireBaseDb
 
 CHANNEL_SECRET = str(os.getenv('CHANNEL_SECRET'))
 CHANNEL_ACCESS_TOKEN = str(os.getenv('CHANNEL_ACCESS_TOKEN'))
@@ -60,8 +60,9 @@ def handle_message(event):
     text = text.replace('@', '')
     puan_result = puan_kam(text=text, skip_tokenize=True, first=use_first)
     msg = ''.join(puan_result['results'])
+    puan_result['event'] = event.__dict__
     db.write(puan_result, u'puan_bot_reply')
-    db.write(event, u'puan_bot_user_chat')
+    # db.write(, u'puan_bot_user_chat')
     line_bot_api.reply_message(
         event.reply_token,
         TextSendMessage(text=msg))
