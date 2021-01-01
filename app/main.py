@@ -75,7 +75,7 @@ def handle_message(event: MessageEvent):
         msg = f'{profile.display_name} ประโยคเหนือชั้นมาก! ทำข้างง!  \n ใช้คำไทยสะกดถูกต้อง หรือ เว้นวรรคคำให้หน่อยจ้า'
         error_msg = f'error {str(repr(e))}'
         print(error_msg)
-        puan_result['error'] = error_msg
+        puan_result['error'] = 'something wrong'
     else:
         puan_result['event'] = event.as_json_dict()
         puan_result['msg'] = msg
