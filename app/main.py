@@ -105,7 +105,7 @@ def handle_message(event: MessageEvent):
     event_dict = {}
     event_dict['event'] = event.as_json_dict()
     msg = ''
-    if text == '#'+bot_info.display_name:  # show manual
+    if text == '#'+str(bot_info.display_name):  # show manual
         msg = reply_howto()
 
     elif text == '#hi':
@@ -118,7 +118,7 @@ def handle_message(event: MessageEvent):
             event_dict['puan_result'] = puan_result
         except Exception as e:
             profile = line_bot_api.get_profile(event.source.user_id)
-            msg = f"""{profile.display_name}: [{text}] 
+            msg = f"""{profile.display_name}:{text}
             \n ประโยคเหนือชั้นมาก! ข้า {bot_info.display_name} ยังต้องเรียนรู้อีก! 
             \n ลองใช้เฉพาะอักษรไทย หรือ เว้นวรรค ระว่าง คำ/พยางค์ ให้หน่อยจ้า' 
             """
