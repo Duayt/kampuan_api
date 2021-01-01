@@ -28,7 +28,8 @@ line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(CHANNEL_SECRET)
 
 db = FireBaseDb(u'test', credential_json=GOOGLE_APPLICATION_CREDENTIALS)
-db.test()
+# db.test()
+
 
 @app.post("/callback", include_in_schema=False)
 async def callback(request: Request):
@@ -40,7 +41,7 @@ async def callback(request: Request):
     body = await request.body()
     body = body.decode('utf-8')
     print("Request body: " + body)
-    db.write(body, u'puan_bot_user_chat')
+    db.write(json.loads(body), u'puan_bot_user_chat')
     # handle webhook body
     try:
         handler.handle(body, signature)
