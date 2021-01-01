@@ -13,7 +13,7 @@ from linebot.models import (JoinEvent, MessageEvent, TextMessage,
                             TextSendMessage)
 from starlette.responses import RedirectResponse
 
-from test_firebase import test_firebase_function, FireBaseDb
+from .test_firebase import FireBaseDb
 
 CHANNEL_SECRET = str(os.getenv('CHANNEL_SECRET'))
 CHANNEL_ACCESS_TOKEN = str(os.getenv('CHANNEL_ACCESS_TOKEN'))
@@ -29,8 +29,6 @@ handler = WebhookHandler(CHANNEL_SECRET)
 
 db = FireBaseDb(u'test', credential_json=GOOGLE_APPLICATION_CREDENTIALS)
 db.test()
-# test_firebase_function(credential_json=GOOGLE_APPLICATION_CREDENTIALS)
-
 
 @app.post("/callback", include_in_schema=False)
 async def callback(request: Request):
