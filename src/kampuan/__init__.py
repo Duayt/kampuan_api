@@ -3,9 +3,13 @@ import pythainlp.tokenize as tk
 from pythainlp.tokenize import syllable_tokenize
 from kampuan.lang_tools import extract_vowel_form
 from kampuan.sub_word import ThaiSubWord
-from pythainlp.tokenize import word_tokenize
-from pythainlp.corpus.common import thai_syllables
 
+# Lu2Thai related libraries
+import json
+from kampuan.const import LU_SYLLABLE_FILENAME
+from pythainlp.tokenize import word_tokenize
+from pythainlp.tokenize import Trie as dict_trie
+from pythainlp.corpus.common import thai_syllables
 
 def test(name: str = "World!"):
     return f'Hello {name}'
@@ -34,12 +38,16 @@ def syllable_tokenize_lu(text: str) -> List[str]:
     # Read lu syllable list
     with open(LU_SYLLABLE_FILENAME, 'r') as f:
         syllable_lu_dict = json.load(f) 
-    lu_syllable = syllable_lu_dict['data']
     
-    if text:
-        words = word_tokenize(text)
-        dict_source = frozenset(set(lu_syllable).union(set(thai_syllables())))
-        trie = dict_trie(dict_source=dict_source)
+    # Create custom dict trie for Lu
+    lu_syllable = syllable_lu_dict['data']
+    dict_source = frozenset(set(lu_syllable))
+    trie = dict_trie(dict_source)
+
+    if text:        
+        words = word_tokenize(text, custom_dict=trie)
+        print("lu", words)
+        #dict_source = frozenset(set(lu_syllable).union(set(thai_syllables())))        
         for word in words:
             tokens.extend(word_tokenize(text=word, custom_dict=trie))
 
@@ -49,6 +57,7 @@ def puan_kam_preprocess(text, skip_tokenize=True, flag_lu_2_thai=False):
     # 2. Split phrase to syllables
     if isinstance(text, str):
         tokenized = tokenize(text)
+        if flag_lu_2_thai: tokenized = syllable_tokenize_lu(text)
     elif isinstance(text, List):
         if skip_tokenize:
             tokenized = text
