@@ -93,11 +93,12 @@ def lu_2_thai(text):
     output_thai = []    
     # Need to tokenize and take every 2 words
     print(subwords)
-    for pair_index in range(0, len(subwords),2):
-        # Get a pair of lu words, if cannot get a pair continue
-        a_first = subwords[pair_index]
-        if pair_index + 1 < len(subwords): a_second = subwords[pair_index+1]
-        else: continue
+    #for pair_index in range(0, len(subwords),2):
+    for subword in subwords:
+        # Probably should not need with customdict --> Get a pair of lu words, if cannot get a pair continue
+        # a_first = subwords[pair_index]
+        # if pair_index + 1 < len(subwords): a_second = subwords[pair_index+1]
+        # else: continue
 
         # Check special case รอ ลอ สอ ซอ
         if a_first.init_con not in ['ซ', 'ส']:
@@ -105,8 +106,9 @@ def lu_2_thai(text):
         else:
             thai_out = a_first._vowel_form_sound.replace('-', 'ล') + a_first.final_con
         # No need to check case อุ อู
-
-        thai_out = ThaiSubWord(thai_out)        
+        
+        print(thai_out)
+        thai_out = ThaiSubWord(thai_out)
         
         # Assign tone of second lu words to that_out, this tone should be the same with original Thai word
         thai_out = ThaiSubWord.pun_wunayook(thai_out.raw, a_first._tone)
@@ -114,7 +116,7 @@ def lu_2_thai(text):
 
     return output_thai
 
-def puan_2_lu(subwords):
+def puan_2_lu(subwords, lu_tuple=False):
     """ Leverage existing puan kum method to convert to lu language"""
     output_lu = []
     
@@ -142,12 +144,16 @@ def puan_2_lu(subwords):
         # Assign tone of original word to both first and second lu
         a_first = ThaiSubWord.pun_wunayook(a_first.raw, a_raw._tone)    
         a_second = ThaiSubWord.pun_wunayook(a_second.raw, a_raw._tone)
-    
-        # combine into 1 object
-        a_target = a_first + a_second
-        output_lu.append(a_target)
-
-    #return a_target, b_target
+        
+        # Default to return as list of all lu syllables
+        if not lu_tuple:
+            output_lu.append(a_first)
+            output_lu.append(a_second)
+        else:
+        # Return as tuple of lu rather than concat together        
+            output_lu.append((a_first, a_second))
+        #output_lu.append(a_target)        
+            
     return output_lu
 
 def puan_2_kam(a_raw, b_raw, keep_tone=None):
@@ -184,7 +190,7 @@ def puan_2_kam(a_raw, b_raw, keep_tone=None):
     return a_target, b_target
 
 
-def puan_kam_base(text='สวัสดี', keep_tone=None, use_first=True, index=None, flag_puan_2_lu=False):
+def puan_kam_base(text='สวัสดี', keep_tone=None, use_first=True, index=None, lu_tuple=False):
 
     if isinstance(text, str):
         split_words = puan_kam_preprocess(text)
@@ -211,7 +217,7 @@ def puan_kam_base(text='สวัสดี', keep_tone=None, use_first=True, ind
 
     # apply tone rules
     if not flag_puan_2_lu: a_target, b_target = puan_2_kam(a_raw, b_raw)
-    else: return puan_2_lu(split_words)
+    else: return puan_2_lu(split_words, lu_tuple=lu_tuple)
 
     # 7. combine
     kam_puan = [w._raw for w in split_words]
@@ -233,9 +239,8 @@ def puan_kam_all(text='สวัสดี'):
             count += 1
     return result
 
-
-def puan_kam_auto(text='สวัสดี', use_first=None, flag_puan_2_lu=False):
-
+def puan_kam_lu(text):
+    """Seperate module for lu for greater simplicity"""
     if isinstance(text, str):
         split_words = puan_kam_preprocess(text)
     elif isinstance(text[0], str):
@@ -246,7 +251,18 @@ def puan_kam_auto(text='สวัสดี', use_first=None, flag_puan_2_lu=Fals
     n_subwords = len(split_words)
     
     # Flag to return without having to find index
-    if flag_puan_2_lu: return puan_kam_base(text=split_words, keep_tone=None, flag_puan_2_lu=flag_puan_2_lu)
+    return puan_kam_base(text=split_words, keep_tone=None, flag_puan_2_lu=flag_puan_2_lu)
+
+def puan_kam_auto(text='สวัสดี', use_first=None):
+
+    if isinstance(text, str):
+        split_words = puan_kam_preprocess(text)
+    elif isinstance(text[0], str):
+        split_words = puan_kam_preprocess(text)
+    else:
+        split_words = text
+
+    n_subwords = len(split_words)
 
     index = (0, 0)
     if n_subwords == 1:
@@ -266,14 +282,14 @@ def puan_kam_auto(text='สวัสดี', use_first=None, flag_puan_2_lu=Fals
         else:
             index = (1, -1)
 
-    return puan_kam_base(text=split_words, keep_tone=None, index=index, flag_puan_2_lu=flag_puan_2_lu)
+    return puan_kam_base(text=split_words, keep_tone=None, index=index)
 
 
 def puan_kam(text) -> List[str]:
     return puan_kam_auto(text=text, use_first=None)
 
 def puan_lu(text) -> List[str]:
-    return puan_kam_auto(text=text, use_first=None, flag_puan_2_lu=True)
+    return puan_kam_lu(text=text)
 
 def translate_lu(text) -> List[str]:
     return lu_2_thai(text=text)
