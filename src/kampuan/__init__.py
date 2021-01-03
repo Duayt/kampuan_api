@@ -3,6 +3,8 @@ import pythainlp.tokenize as tk
 from pythainlp.tokenize import syllable_tokenize
 from kampuan.lang_tools import extract_vowel_form
 from kampuan.sub_word import ThaiSubWord
+from pythainlp.tokenize import word_tokenize
+from pythainlp.corpus.common import thai_syllables
 
 
 def test(name: str = "World!"):
@@ -23,8 +25,27 @@ def extract_vowel(text: str) -> Dict:
 
     return results
 
+def syllable_tokenize_lu(text: str) -> List[str]:    
+    """Reference https://thainlp.org/pythainlp/docs/2.0/_modules/pythainlp/tokenize.html#syllable_tokenize"""
+    if not text or not isinstance(text, str):
+        return []
 
-def puan_kam_preprocess(text, skip_tokenize=True):
+    tokens = []
+    # Read lu syllable list
+    with open(LU_SYLLABLE_FILENAME, 'r') as f:
+        syllable_lu_dict = json.load(f) 
+    lu_syllable = syllable_lu_dict['data']
+    
+    if text:
+        words = word_tokenize(text)
+        dict_source = frozenset(set(lu_syllable).union(set(thai_syllables())))
+        trie = dict_trie(dict_source=dict_source)
+        for word in words:
+            tokens.extend(word_tokenize(text=word, custom_dict=trie))
+
+    return tokens
+
+def puan_kam_preprocess(text, skip_tokenize=True, flag_lu_2_thai=False):
     # 2. Split phrase to syllables
     if isinstance(text, str):
         tokenized = tokenize(text)
@@ -32,15 +53,19 @@ def puan_kam_preprocess(text, skip_tokenize=True):
         if skip_tokenize:
             tokenized = text
         else:
-            tokenized = [w for txt in text for w in tokenize(txt)]
+            if not flag_lu_2_thai: tokenized = [w for txt in text for w in tokenize(txt)]
+            else: tokenized = [w for txt in text for w in syllable_tokenize_lu(txt)]
     else:
         raise ValueError('incorrect value')
     # 3. Sub word processing, types and tones
-    sub_words = [ThaiSubWord(word) for word in tokenized]
+    sub_words = [ThaiSubWord(word, lu_word=flag_lu_2_thai) for word in tokenized]
 
     # 4. preprocessing on two syllable words
-    split_words = [
-        word_split for word in sub_words for word_split in word.split_non_conform()]
+    # Lu2Thai remark : should not need to check non_conform word
+    if not flag_lu_2_thai:
+        split_words = [
+            word_split for word in sub_words for word_split in word.split_non_conform()]
+    else: split_words = sub_words
 
     return split_words
 
@@ -50,13 +75,13 @@ def lu_2_thai(text):
     """
     
     if isinstance(text, str):
-        subwords = puan_kam_preprocess(text)
+        subwords = puan_kam_preprocess(text, flag_lu_2_thai=True)
     elif isinstance(text[0], str):
-        subwords = puan_kam_preprocess(text)
+        subwords = puan_kam_preprocess(text, flag_lu_2_thai=True)
     else:
         subwords = text
 
-    output_thai = []
+    output_thai = []    
     # Need to tokenize and take every 2 words
     print(subwords)
     for pair_index in range(0, len(subwords),2):
