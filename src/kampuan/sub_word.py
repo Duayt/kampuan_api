@@ -15,12 +15,13 @@ class ThaiSubWord:
     def __init__(self, word: str = 'เกี๊ยว', lu_word=False):
         # Character base
         # Apply normal Thai word rules to Thai word only
-        if not lu_word:
-            if len(word) == 1:
-                if word in THAI_CONS:
-                    word = word + 'อ'
-                else:
-                    raise ValueError('I am not good enough to understand your words, separate into syllables please?')
+        #if not lu_word:
+        if len(word) == 1:
+            print(word)
+            if word in THAI_CONS:
+                word = word + 'อ'
+            else:
+                raise ValueError('I am not good enough to understand your words, separate into syllables please?')
 
         self._raw: str = word
         self._vowels_tup: List[str] = self.vowels_tup

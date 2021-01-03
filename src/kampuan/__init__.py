@@ -11,6 +11,11 @@ from pythainlp.tokenize import word_tokenize
 from pythainlp.tokenize import Trie as dict_trie
 from pythainlp.corpus.common import thai_syllables
 
+def pairwise(iterable):
+    "s -> (s0, s1), (s2, s3), (s4, s5), ..., ref https://stackoverflow.com/questions/5389507/iterating-over-every-two-elements-in-a-list"
+    a = iter(iterable)
+    return zip(a, a)
+
 def test(name: str = "World!"):
     return f'Hello {name}'
 
@@ -46,7 +51,7 @@ def syllable_tokenize_lu(text: str) -> List[str]:
 
     if text:        
         words = word_tokenize(text, custom_dict=trie)
-        print("lu", words)
+        #print("lu", words)
         #dict_source = frozenset(set(lu_syllable).union(set(thai_syllables())))        
         for word in words:
             tokens.extend(word_tokenize(text=word, custom_dict=trie))
@@ -91,23 +96,15 @@ def lu_2_thai(text):
         subwords = text
 
     output_thai = []    
-    # Need to tokenize and take every 2 words
-    print(subwords)
-    #for pair_index in range(0, len(subwords),2):
-    for subword in subwords:
-        # Probably should not need with customdict --> Get a pair of lu words, if cannot get a pair continue
-        # a_first = subwords[pair_index]
-        # if pair_index + 1 < len(subwords): a_second = subwords[pair_index+1]
-        # else: continue
-
+    # Iterate every 2 syllable 
+    for a_first, a_second in pairwise(subwords):    
         # Check special case รอ ลอ สอ ซอ
         if a_first.init_con not in ['ซ', 'ส']:
             thai_out = a_first._vowel_form_sound.replace('-', a_second.init_con) + a_first.final_con            
         else:
             thai_out = a_first._vowel_form_sound.replace('-', 'ล') + a_first.final_con
         # No need to check case อุ อู
-        
-        print(thai_out)
+                
         thai_out = ThaiSubWord(thai_out)
         
         # Assign tone of second lu words to that_out, this tone should be the same with original Thai word
