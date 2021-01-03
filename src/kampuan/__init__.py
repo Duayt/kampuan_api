@@ -190,7 +190,7 @@ def puan_2_kam(a_raw, b_raw, keep_tone=None):
     return a_target, b_target
 
 
-def puan_kam_base(text='สวัสดี', keep_tone=None, use_first=True, index=None, lu_tuple=False):
+def puan_kam_base(text='สวัสดี', keep_tone=None, use_first=True, index=None, flag_puan_2_lu=False, lu_tuple=False):
 
     if isinstance(text, str):
         split_words = puan_kam_preprocess(text)
@@ -239,7 +239,7 @@ def puan_kam_all(text='สวัสดี'):
             count += 1
     return result
 
-def puan_kam_lu(text):
+def puan_kam_lu(text, lu_tuple=False):
     """Seperate module for lu for greater simplicity"""
     if isinstance(text, str):
         split_words = puan_kam_preprocess(text)
@@ -251,7 +251,7 @@ def puan_kam_lu(text):
     n_subwords = len(split_words)
     
     # Flag to return without having to find index
-    return puan_kam_base(text=split_words, keep_tone=None, flag_puan_2_lu=flag_puan_2_lu)
+    return puan_kam_base(text=split_words, keep_tone=None, lu_tuple=lu_tuple, flag_puan_2_lu=True)
 
 def puan_kam_auto(text='สวัสดี', use_first=None):
 
@@ -288,8 +288,8 @@ def puan_kam_auto(text='สวัสดี', use_first=None):
 def puan_kam(text) -> List[str]:
     return puan_kam_auto(text=text, use_first=None)
 
-def puan_lu(text) -> List[str]:
-    return puan_kam_lu(text=text)
+def puan_lu(text, lu_tuple=False) -> List[str]:
+    return puan_kam_lu(text=text, lu_tuple=lu_tuple)
 
 def translate_lu(text) -> List[str]:
     return lu_2_thai(text=text)
