@@ -119,8 +119,11 @@ def handle_message(event: MessageEvent):
     profile = line_bot_api.get_profile(event.source.user_id)
 
     if ENV == 'test':
-        text, env_test = process_test(text)
-        handle_funct = handle_dict[env_test]
+        try:
+            text, env_test = process_test(text)
+            handle_funct = handle_dict[env_test]
+        except:
+            handle_funct = handle_dict['puan']
     else:
         handle_funct = handle_dict[ENV]
 
