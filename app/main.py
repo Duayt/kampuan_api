@@ -90,6 +90,7 @@ def handle_message_pun(event):
 def handle_message_lu(event):
     text = event.message.text
     translate = text.startswith('@')
+    text = text.replace('@', '')
     puan_result = puan_lu(text=text, translate=translate)
     puan_result['msg'] = ''.join(puan_result['results'])
     return puan_result
