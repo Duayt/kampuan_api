@@ -19,7 +19,7 @@ from .firebase import FireBaseDb
 from .const import ALL_CONST
 
 # variables
-ENV = str(os.getenv('ENV', 'test')))
+ENV = str(os.getenv('ENV', 'test'))
 
 CHANNEL_SECRET=str(os.getenv('CHANNEL_SECRET'))
 CHANNEL_ACCESS_TOKEN=str(os.getenv('CHANNEL_ACCESS_TOKEN'))
