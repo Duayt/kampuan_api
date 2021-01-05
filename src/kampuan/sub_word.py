@@ -12,9 +12,9 @@ from .lang_tools import (convert_tone_pair_double_init,
 
 
 class ThaiSubWord:
-    def __init__(self, word: str = 'เกี๊ยว'):
+    def __init__(self, word: str = 'เกี๊ยว', lu_word=False):
         # Character base
-        if len(word) == 1:
+        if len(word) == 1:            
             if word in THAI_CONS:
                 word = word + 'อ'
             else:

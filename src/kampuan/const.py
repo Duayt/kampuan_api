@@ -94,7 +94,8 @@ SHORT_SOUND_VOWELS = [
 
 LONG_SOUND_VOWELS = [vw for vw in VOWEL_FORMS if vw not in SHORT_SOUND_VOWELS]
 THAI_CHARS = pythainlp.thai_characters
-ACCEPT_CHARS = ['[', ']', ',', "'", '"',' ']+[k for k in THAI_CHARS]
+ACCEPT_CHARS = ['[', ']', ',', "'", '"', ' '] + \
+    [k for k in THAI_CHARS]+[str(i) for i in range(0, 10)]
 THAI_CONS = pythainlp.thai_consonants
 THAI_VOW = pythainlp.thai_vowels
 THAI_TONE = pythainlp.thai_tonemarks
@@ -224,3 +225,5 @@ TONE_MARK_CLASS = {
 
 TONE_MARK_CLASS_INV = {v: k for k, v in TONE_MARK_CLASS.items()}
 TONE_MARK_CLASS_INV[0] = ''
+
+LU_SYLLABLE_FILENAME = os.path.join(dirname,'assets/Lu_syllable_1.0.json')
