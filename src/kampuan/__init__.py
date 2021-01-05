@@ -1,7 +1,9 @@
-from typing import List, Union, Dict
+from typing import Dict, List, Union
+
 import pythainlp.tokenize as tk
 from pythainlp.tokenize import syllable_tokenize
-from kampuan.lang_tools import extract_vowel_form
+
+from kampuan.lang_tools import extract_vowel_form, process_double
 from kampuan.sub_word import ThaiSubWord
 
 # Lu2Thai related libraries
@@ -71,6 +73,9 @@ def puan_kam_preprocess(text, skip_tokenize=True, flag_lu_2_thai=False):
             else: tokenized = [w for txt in text for w in syllable_tokenize_lu(txt)]
     else:
         raise ValueError('incorrect value')
+
+    tokenized = process_double(tokenized)
+    # tokenized = process_double(tokenize)
     # 3. Sub word processing, types and tones
     sub_words = [ThaiSubWord(word, lu_word=flag_lu_2_thai) for word in tokenized]
 
@@ -116,31 +121,45 @@ def lu_2_thai(text):
 def puan_2_lu(subwords, lu_tuple=False):
     """ Leverage existing puan kum method to convert to lu language"""
     output_lu = []
-    
-    for subword in subwords:        
+
+    for subword in subwords:
         a_raw = subword
         # get vowel and change init consonant to ล, also keep oritinal form and sound for first
         # Check special case รอ ลอ สอ ซอ
         if a_raw.init_con not in ['ล', 'ร', 'ฤ', 'หล', 'หร']:
-            if len(a_raw.tone_mark) > 0: a_first = a_raw._vowel_form_sound.replace('-', 'ล') + a_raw.final_con    
-            else: a_first = a_raw._vowel_form_sound.replace('-', 'ล') + a_raw.final_con
+            if len(a_raw.tone_mark) > 0:
+                a_first = a_raw._vowel_form_sound.replace(
+                    '-', 'ล') + a_raw.final_con
+            else:
+                a_first = a_raw._vowel_form_sound.replace(
+                    '-', 'ล') + a_raw.final_con
         else:
-            if len(a_raw.tone_mark) > 0: a_first = a_raw._vowel_form_sound.replace('-', 'ซ') + a_raw.final_con    
-            else: a_first = a_raw._vowel_form_sound.replace('-', 'ซ') + a_raw.final_con
-        
+            if len(a_raw.tone_mark) > 0:
+                a_first = a_raw._vowel_form_sound.replace(
+                    '-', 'ซ') + a_raw.final_con
+            else:
+                a_first = a_raw._vowel_form_sound.replace(
+                    '-', 'ซ') + a_raw.final_con
+
         # Check special case อุ อู
-        if a_raw._vowel_form_sound.replace('-', '') == "ู": a_second = a_raw.main_init_sound + "ี" + a_raw.final_con
-        elif a_raw._vowel_form_sound.replace('-', '') == "ุ": a_second = a_raw.main_init_sound + "ิ" + a_raw.final_con            
+        if a_raw._vowel_form_sound.replace('-', '') == "ู":
+            a_second = a_raw.main_init_sound + "ี" + a_raw.final_con
+        elif a_raw._vowel_form_sound.replace('-', '') == "ุ":
+            a_second = a_raw.main_init_sound + "ิ" + a_raw.final_con
         else:
-            if a_raw._vowel_class == 'short': a_second = a_raw.main_init_sound + "ุ" + a_raw.final_con
-            else: a_second = a_raw.main_init_sound + "ู" + a_raw.final_con
-            
+            if a_raw._vowel_class == 'short':
+                a_second = a_raw.main_init_sound + "ุ" + a_raw.final_con
+            else:
+                a_second = a_raw.main_init_sound + "ู" + a_raw.final_con
+
         a_first = ThaiSubWord(a_first)
         a_second = ThaiSubWord(a_second)    
         
+
         # Assign tone of original word to both first and second lu
-        a_first = ThaiSubWord.pun_wunayook(a_first.raw, a_raw._tone)    
+        a_first = ThaiSubWord.pun_wunayook(a_first.raw, a_raw._tone)
         a_second = ThaiSubWord.pun_wunayook(a_second.raw, a_raw._tone)
+
         
         # Default to return as list of all lu syllables
         if not lu_tuple:
@@ -150,8 +169,9 @@ def puan_2_lu(subwords, lu_tuple=False):
         # Return as tuple of lu rather than concat together        
             output_lu.append((a_first, a_second))
         #output_lu.append(a_target)        
-            
+
     return output_lu
+
 
 def puan_2_kam(a_raw, b_raw, keep_tone=None):
     a_raw_tone = a_raw._tone
@@ -213,8 +233,10 @@ def puan_kam_base(text='สวัสดี', keep_tone=None, use_first=True, ind
     b_raw = split_words[index[1]]
 
     # apply tone rules
+
     if not flag_puan_2_lu: a_target, b_target = puan_2_kam(a_raw, b_raw)
     else: return puan_2_lu(split_words, lu_tuple=lu_tuple)
+
 
     # 7. combine
     kam_puan = [w._raw for w in split_words]
@@ -246,8 +268,9 @@ def puan_kam_lu(text, lu_tuple=False):
         split_words = text
 
     n_subwords = len(split_words)
-    
+
     # Flag to return without having to find index
+
     return puan_kam_base(text=split_words, keep_tone=None, lu_tuple=lu_tuple, flag_puan_2_lu=True)
 
 def puan_kam_auto(text='สวัสดี', use_first=None):
@@ -261,6 +284,7 @@ def puan_kam_auto(text='สวัสดี', use_first=None):
 
     n_subwords = len(split_words)
 
+
     index = (0, 0)
     if n_subwords == 1:
         index = (0, 0)
@@ -271,7 +295,7 @@ def puan_kam_auto(text='สวัสดี', use_first=None):
             index = (1, -1)
         else:
             index = (0, -1)
-    else:  # more than 3        
+    else:  # more than 3
         if use_first is None:
             return [puan_kam_base(text=split_words, keep_tone=None, index=(i, -1)) for i in [0, 1]]
         elif use_first:
@@ -283,7 +307,8 @@ def puan_kam_auto(text='สวัสดี', use_first=None):
 
 
 def puan_kam(text) -> List[str]:
-    return puan_kam_auto(text=text, use_first=None)
+    return puan_kam_auto(text=text, use_first=False)
+
 
 def puan_lu(text, lu_tuple=False) -> List[str]:
     return puan_kam_lu(text=text, lu_tuple=lu_tuple)
@@ -291,10 +316,11 @@ def puan_lu(text, lu_tuple=False) -> List[str]:
 def translate_lu(text) -> List[str]:
     return lu_2_thai(text=text)
 
+
 def pun_wunayook(text):
     text = puan_kam_preprocess(text)
-    result = []
+    result = {}
     for i, txt in enumerate(text):
-        result.append([ThaiSubWord.pun_wunayook(txt._raw, tone_target=i)
-                       for i in range(0, 5)])
+        result[txt._raw] = [ThaiSubWord.pun_wunayook(txt._raw, tone_target=j)
+                            for j in range(0, 5)]
     return result

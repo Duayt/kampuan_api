@@ -292,3 +292,6 @@ dmypy.json
 .DS_Store
 .AppleDouble
 .LSOverride
+
+credentials/
+google-credentials.json

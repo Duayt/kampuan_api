@@ -8,4 +8,6 @@ python-jose[cryptography]
 python-multipart
 python-dotenv
 openpyxl
+line-bot-sdk==1.18.0
+firebase-admin
 -e .
