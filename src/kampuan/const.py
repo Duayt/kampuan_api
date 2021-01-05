@@ -225,3 +225,5 @@ TONE_MARK_CLASS = {
 
 TONE_MARK_CLASS_INV = {v: k for k, v in TONE_MARK_CLASS.items()}
 TONE_MARK_CLASS_INV[0] = ''
+
+LU_SYLLABLE_FILENAME = os.path.join(dirname,'assets/Lu_syllable_1.0.json')
