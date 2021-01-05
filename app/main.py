@@ -102,7 +102,7 @@ handle_dict={
 
 
 
-def process_test(text)
+def process_test(text):
     list_text = text.split('$$')
     text = list_text[1]
     env_test = list_text[0]
