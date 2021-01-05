@@ -21,41 +21,41 @@ from .const import ALL_CONST
 # variables
 ENV = str(os.getenv('ENV', 'test'))
 
-CHANNEL_SECRET=str(os.getenv('CHANNEL_SECRET'))
-CHANNEL_ACCESS_TOKEN=str(os.getenv('CHANNEL_ACCESS_TOKEN'))
-GOOGLE_APPLICATION_CREDENTIALS=str(
+CHANNEL_SECRET = str(os.getenv('CHANNEL_SECRET'))
+CHANNEL_ACCESS_TOKEN = str(os.getenv('CHANNEL_ACCESS_TOKEN'))
+GOOGLE_APPLICATION_CREDENTIALS = str(
     os.getenv('GOOGLE_APPLICATION_CREDENTIALS'))
 
-DB=str(os.getenv('FIRESTORE_DB'))
-DB_ERR=str(os.getenv('FIRESTORE_DB_ERR'))
-port=int(os.getenv("PORT", 5000))
+DB = str(os.getenv('FIRESTORE_DB'))
+DB_ERR = str(os.getenv('FIRESTORE_DB_ERR'))
+port = int(os.getenv("PORT", 5000))
 
 if ENV == 'test':
-    CONST=ALL_CONST['puan']
+    CONST = ALL_CONST['puan']
 else:
-    CONST=ALL_CONST[ENV]
+    CONST = ALL_CONST[ENV]
 
 # setup
-app=FastAPI(title = "Kampuan project",
-              description = "Welcome, This is a project using python to do คำผวน by Tanawat C. \n https://www.linkedin.com/in/tanawat-chiewhawan",
-              version = "0.0.1",)
+app = FastAPI(title="Kampuan project",
+              description="Welcome, This is a project using python to do คำผวน by Tanawat C. \n https://www.linkedin.com/in/tanawat-chiewhawan",
+              version="0.0.1",)
 
-line_bot_api=LineBotApi(CHANNEL_ACCESS_TOKEN)
-handler=WebhookHandler(CHANNEL_SECRET)
-db=FireBaseDb(DB, credential_json = GOOGLE_APPLICATION_CREDENTIALS)
+line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
+handler = WebhookHandler(CHANNEL_SECRET)
+db = FireBaseDb(DB, credential_json=GOOGLE_APPLICATION_CREDENTIALS)
 # db.test()
-bot_info=line_bot_api.get_bot_info()
+bot_info = line_bot_api.get_bot_info()
 
 
-@ app.post("/callback", include_in_schema = False)
+@ app.post("/callback", include_in_schema=False)
 async def callback(request: Request):
 
     # get X-Line-Signature header value]
-    signature=request.headers['x-line-signature']
+    signature = request.headers['x-line-signature']
 
     # get request body as text
-    body=await request.body()
-    body=body.decode('utf-8')
+    body = await request.body()
+    body = body.decode('utf-8')
     print("Request body: " + body)
 
     # handle webhook body
@@ -63,43 +63,42 @@ async def callback(request: Request):
         handler.handle(body, signature)
     except InvalidSignatureError:
         print("Invalid signature. Please check your channel access token/channel secret.")
-        return HTTPException(400, detail = f'error')
+        return HTTPException(400, detail=f'error')
 
     return 'OK'
 
 
 def handle_message_puan(event: MessageEvent):
-    text=event.message.text
+    text = event.message.text
     # puan process usage
-    use_first=text.startswith('@')
-    text=text.replace('@', '')
-    puan_result=puan_kam(text = text, skip_tokenize = True, first = use_first)
-    puan_result['msg']=''.join(puan_result['results'])
+    use_first = text.startswith('@')
+    text = text.replace('@', '')
+    puan_result = puan_kam(text=text, skip_tokenize=True, first=use_first)
+    puan_result['msg'] = ''.join(puan_result['results'])
     return puan_result
 
 
 def handle_message_pun(event):
-    text=event.message.text
-    puan_result={}
-    puan_result=pun_wunnayook(text = text)
-    puan_result['msg']='\n'.join([' '.join(pun)
+    text = event.message.text
+    puan_result = {}
+    puan_result = pun_wunnayook(text=text)
+    puan_result['msg'] = '\n'.join([' '.join(pun)
                                     for k, pun in puan_result['results'].items()])
     return puan_result
 
 
 def handle_message_lu(event):
-    text=event.message.text
-    puan_result=puan_lu(text = text)
-    puan_result['msg']=''.join(puan_result['results'])
+    text = event.message.text
+    puan_result = puan_lu(text=text)
+    puan_result['msg'] = ''.join(puan_result['results'])
     return puan_result
 
 
-handle_dict={
+handle_dict = {
     'puan': handle_message_puan,
     'pun': handle_message_pun,
     'lu': handle_message_lu
 }
-
 
 
 def process_test(text):
@@ -107,6 +106,7 @@ def process_test(text):
     text = list_text[1]
     env_test = list_text[0]
     return text, env_test
+
 
 def reply_howto():
 
@@ -117,19 +117,20 @@ def reply_howto():
 def handle_message(event: MessageEvent):
     text = event.message.text
     profile = line_bot_api.get_profile(event.source.user_id)
-
+    event_dict = {}
+    event_dict['timestamp'] = datetime.now(timezone.utc)
+    event_dict['event'] = event.as_json_dict()
+    
     if ENV == 'test':
         try:
             text, env_test = process_test(text)
+            event.message.text = text
             handle_funct = handle_dict[env_test]
         except:
             handle_funct = handle_dict['puan']
     else:
         handle_funct = handle_dict[ENV]
 
-    event_dict = {}
-    event_dict['timestamp'] = datetime.now(timezone.utc)
-    event_dict['event'] = event.as_json_dict()
     msg = ''
     if text == '#'+str(bot_info.display_name):  # show manual
         msg = reply_howto()
@@ -196,7 +197,7 @@ def handle_message(event: MessageEvent):
 @ handler.add(JoinEvent)
 def handle_join(event):
     print(event.source)
-    msg=CONST['greeting']
+    msg = CONST['greeting']
     line_bot_api.reply_message(
         event.reply_token,
         TextSendMessage(text=msg))
@@ -225,6 +226,7 @@ def check_if_list(text):
 def handle_white_spaces(text):
     text = re.sub(' +', ',', text)
     return text
+
 
 def process_555(text: str):
     text = text.replace('5', 'ฮ่า')
@@ -372,8 +374,6 @@ def extract_vowel(text: str = 'สวัสดี'):
 @app.get("/is_thai/{text}")
 def check_thai_ch(text):
     return all(w in kp.const.ACCEPT_CHARS for w in text)
-
-
 
 
 # %%
