@@ -3,7 +3,7 @@ from typing import Dict, List, Union
 import pythainlp.tokenize as tk
 from pythainlp.tokenize import syllable_tokenize
 
-from kampuan.lang_tools import extract_vowel_form
+from kampuan.lang_tools import extract_vowel_form, process_double
 from kampuan.sub_word import ThaiSubWord
 
 
@@ -37,6 +37,9 @@ def puan_kam_preprocess(text, skip_tokenize=True):
             tokenized = [w for txt in text for w in tokenize(txt)]
     else:
         raise ValueError('incorrect value')
+
+    tokenized = process_double(tokenized)
+    # tokenized = process_double(tokenize)
     # 3. Sub word processing, types and tones
     sub_words = [ThaiSubWord(word) for word in tokenized]
 

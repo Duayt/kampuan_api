@@ -24,6 +24,20 @@ def remove_tone_mark(text, tone_marks=THAI_TONE):
         text = text.replace(mark, '')
     return text
 
+# %%
+test= ['ได้','ๆ','ไป','กิน','บ่อย','ๆ','ๆ']
+test_result =['ได้', 'ได้', 'ไป', 'กิน', 'บ่อย', 'บ่อย', 'บ่อย']
+def process_double(text):
+    result=[]
+    for i, word in enumerate(text):
+        if word == 'ๆ' and i >0:
+            result.append(result[i-1])
+        else:
+            result.append(word)
+
+    return result
+
+assert process_double(test) ==test_result
 
 
 # %%
