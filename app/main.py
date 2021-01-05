@@ -19,7 +19,12 @@ from .firebase import FireBaseDb
 from .const import ALL_CONST
 
 # variables
+<<<<<<< HEAD
 ENV = 'pun'
+=======
+ENV = str(os.getenv('ENV', 'test'))
+
+>>>>>>> master
 CHANNEL_SECRET = str(os.getenv('CHANNEL_SECRET'))
 CHANNEL_ACCESS_TOKEN = str(os.getenv('CHANNEL_ACCESS_TOKEN'))
 GOOGLE_APPLICATION_CREDENTIALS = str(
@@ -28,7 +33,11 @@ GOOGLE_APPLICATION_CREDENTIALS = str(
 DB = str(os.getenv('FIRESTORE_DB'))
 DB_ERR = str(os.getenv('FIRESTORE_DB_ERR'))
 port = int(os.getenv("PORT", 5000))
-CONST = ALL_CONST[ENV]
+
+if ENV == 'test':
+    CONST = ALL_CONST['puan']
+else:
+    CONST = ALL_CONST[ENV]
 
 # setup
 app = FastAPI(title="Kampuan project",
@@ -42,7 +51,7 @@ db = FireBaseDb(DB, credential_json=GOOGLE_APPLICATION_CREDENTIALS)
 bot_info = line_bot_api.get_bot_info()
 
 
-@app.post("/callback", include_in_schema=False)
+@ app.post("/callback", include_in_schema=False)
 async def callback(request: Request):
 
     # get X-Line-Signature header value]
@@ -84,7 +93,9 @@ def handle_message_pun(event):
 
 def handle_message_lu(event):
     text = event.message.text
-    puan_result = puan_lu(text=text)
+    translate_lu = text.startswith('@')
+    text = text.replace('@', '')
+    puan_result = puan_lu(text=text, translate_lu=translate_lu)
     puan_result['msg'] = ''.join(puan_result['results'])
     return puan_result
 
@@ -94,21 +105,38 @@ handle_dict = {
     'pun': handle_message_pun,
     'lu': handle_message_lu
 }
-handle_funct = handle_dict[ENV]
+
+
+def process_test(text):
+    list_text = text.split('$$')
+    text = list_text[1]
+    env_test = list_text[0]
+    return text, env_test
 
 
 def reply_howto():
+
     return CONST['how_to']
 
 
-@handler.add(MessageEvent, message=TextMessage)
+@ handler.add(MessageEvent, message=TextMessage)
 def handle_message(event: MessageEvent):
     text = event.message.text
     profile = line_bot_api.get_profile(event.source.user_id)
-
     event_dict = {}
     event_dict['timestamp'] = datetime.now(timezone.utc)
     event_dict['event'] = event.as_json_dict()
+
+    if ENV == 'test':
+        try:
+            text, env_test = process_test(text)
+            event.message.text = text
+            handle_funct = handle_dict[env_test]
+        except:
+            handle_funct = handle_dict['puan']
+    else:
+        handle_funct = handle_dict[ENV]
+
     msg = ''
     if text == '#'+str(bot_info.display_name):  # show manual
         msg = reply_howto()
@@ -172,7 +200,7 @@ def handle_message(event: MessageEvent):
                 line_bot_api.leave_group(event.source.group_id)
 
 
-@handler.add(JoinEvent)
+@ handler.add(JoinEvent)
 def handle_join(event):
     print(event.source)
     msg = CONST['greeting']
@@ -206,9 +234,15 @@ def handle_white_spaces(text):
     return text
 
 
+def process_555(text: str):
+    text = text.replace('5', 'ฮ่า')
+    return text
+
+
 def process_text_2_list(text):
     text = text.strip()
     text = handle_white_spaces(text)
+    text = process_555(text)
     if check_if_list(text):
         # convert string to properlist
         if not (text[0] == '[' and text[-1] == ']'):
@@ -273,7 +307,8 @@ def puan_kam(text: str = 'สวัสดี',
 
 @app.get("/puan_lu/{text}")
 def puan_lu(text: str = 'สวัสดี',
-            skip_tokenize: Optional[bool] = None):
+            skip_tokenize: Optional[bool] = None,
+            translate_lu: Optional[bool] = False):
     """ภาษาลู
 
     -Args:
@@ -296,8 +331,13 @@ def puan_lu(text: str = 'สวัสดี',
         except ValueError as e:
             raise HTTPException(422, detail=f'Input error: {e}')
 
+    if translate_lu:
+        result = kp.translate_lu(text=split_words)
+    else:
+        result = kp.puan_lu(text=split_words)
+
     return {'input': text,
-            'results': kp.puan_lu(text=split_words)}
+            'results': result}
 
 
 @app.get("/pun_wunnayook/{text}")
@@ -346,3 +386,6 @@ def extract_vowel(text: str = 'สวัสดี'):
 @app.get("/is_thai/{text}")
 def check_thai_ch(text):
     return all(w in kp.const.ACCEPT_CHARS for w in text)
+
+
+# %%
