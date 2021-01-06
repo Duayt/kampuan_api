@@ -13,10 +13,12 @@ from pythainlp.tokenize import word_tokenize
 from pythainlp.tokenize import Trie as dict_trie
 from pythainlp.corpus.common import thai_syllables
 
+
 def pairwise(iterable):
     "s -> (s0, s1), (s2, s3), (s4, s5), ..., ref https://stackoverflow.com/questions/5389507/iterating-over-every-two-elements-in-a-list"
     a = iter(iterable)
     return zip(a, a)
+
 
 def test(name: str = "World!"):
     return f'Hello {name}'
@@ -36,7 +38,8 @@ def extract_vowel(text: str) -> Dict:
 
     return results
 
-def syllable_tokenize_lu(text: str) -> List[str]:    
+
+def syllable_tokenize_lu(text: str) -> List[str]:
     """Reference https://thainlp.org/pythainlp/docs/2.0/_modules/pythainlp/tokenize.html#syllable_tokenize"""
     if not text or not isinstance(text, str):
         return []
@@ -44,55 +47,63 @@ def syllable_tokenize_lu(text: str) -> List[str]:
     tokens = []
     # Read lu syllable list
     with open(LU_SYLLABLE_FILENAME, 'r') as f:
-        syllable_lu_dict = json.load(f) 
-    
+        syllable_lu_dict = json.load(f)
+
     # Create custom dict trie for Lu
     lu_syllable = syllable_lu_dict['data']
     dict_source = frozenset(set(lu_syllable))
     trie = dict_trie(dict_source)
 
-    if text:        
+    if text:
         words = word_tokenize(text, custom_dict=trie)
         #print("lu", words)
-        #dict_source = frozenset(set(lu_syllable).union(set(thai_syllables())))        
+        #dict_source = frozenset(set(lu_syllable).union(set(thai_syllables())))
         for word in words:
             tokens.extend(word_tokenize(text=word, custom_dict=trie))
 
     return tokens
 
+
 def puan_kam_preprocess(text, skip_tokenize=True, flag_lu_2_thai=False):
     # 2. Split phrase to syllables
     if isinstance(text, str):
         tokenized = tokenize(text)
-        if flag_lu_2_thai: tokenized = syllable_tokenize_lu(text)
+        if flag_lu_2_thai:
+            tokenized = syllable_tokenize_lu(text)
     elif isinstance(text, List):
         if skip_tokenize:
             tokenized = text
         else:
-            if not flag_lu_2_thai: tokenized = [w for txt in text for w in tokenize(txt)]
-            else: tokenized = [w for txt in text for w in syllable_tokenize_lu(txt)]
+            if not flag_lu_2_thai:
+                tokenized = [w for txt in text for w in tokenize(txt)]
+            else:
+                tokenized = [
+                    w for txt in text for w in syllable_tokenize_lu(txt)]
     else:
         raise ValueError('incorrect value')
 
     tokenized = process_double(tokenized)
     # tokenized = process_double(tokenize)
     # 3. Sub word processing, types and tones
-    sub_words = [ThaiSubWord(word, lu_word=flag_lu_2_thai) for word in tokenized]
+    sub_words = [ThaiSubWord(word, lu_word=flag_lu_2_thai)
+                 for word in tokenized]
 
     # 4. preprocessing on two syllable words
     # Lu2Thai remark : should not need to check non_conform word
     if not flag_lu_2_thai:
         split_words = [
             word_split for word in sub_words for word_split in word.split_non_conform()]
-    else: split_words = sub_words
+    else:
+        split_words = sub_words
 
     return split_words
+
 
 def lu_2_thai(text):
     """ module that converts Lu words to somewhat readable Thai words
         Lu module does not need index so should be able to wrap everything in one module cleanly
     """
-    
+
     if isinstance(text, str):
         subwords = puan_kam_preprocess(text, flag_lu_2_thai=True)
     elif isinstance(text[0], str):
@@ -100,23 +111,26 @@ def lu_2_thai(text):
     else:
         subwords = text
 
-    output_thai = []    
-    # Iterate every 2 syllable 
-    for a_first, a_second in pairwise(subwords):    
+    output_thai = []
+    # Iterate every 2 syllable
+    for a_first, a_second in pairwise(subwords):
         # Check special case รอ ลอ สอ ซอ
         if a_first.init_con not in ['ซ', 'ส']:
-            thai_out = a_first._vowel_form_sound.replace('-', a_second.init_con) + a_first.final_con            
+            thai_out = a_first._vowel_form_sound.replace(
+                '-', a_second.init_con) + a_first.final_con
         else:
-            thai_out = a_first._vowel_form_sound.replace('-', 'ล') + a_first.final_con
+            thai_out = a_first._vowel_form_sound.replace(
+                '-', 'ล') + a_first.final_con
         # No need to check case อุ อู
-                
+
         thai_out = ThaiSubWord(thai_out)
-        
+
         # Assign tone of second lu words to that_out, this tone should be the same with original Thai word
         thai_out = ThaiSubWord.pun_wunayook(thai_out.raw, a_first._tone)
-        output_thai.append(thai_out)            
+        output_thai.append(thai_out)
 
     return output_thai
+
 
 def puan_2_lu(subwords, lu_tuple=False):
     """ Leverage existing puan kum method to convert to lu language"""
@@ -153,22 +167,20 @@ def puan_2_lu(subwords, lu_tuple=False):
                 a_second = a_raw.main_init_sound + "ู" + a_raw.final_con
 
         a_first = ThaiSubWord(a_first)
-        a_second = ThaiSubWord(a_second)    
-        
+        a_second = ThaiSubWord(a_second)
 
         # Assign tone of original word to both first and second lu
         a_first = ThaiSubWord.pun_wunayook(a_first.raw, a_raw._tone)
         a_second = ThaiSubWord.pun_wunayook(a_second.raw, a_raw._tone)
 
-        
         # Default to return as list of all lu syllables
         if not lu_tuple:
             output_lu.append(a_first)
             output_lu.append(a_second)
         else:
-        # Return as tuple of lu rather than concat together        
+            # Return as tuple of lu rather than concat together
             output_lu.append((a_first, a_second))
-        #output_lu.append(a_target)        
+        # output_lu.append(a_target)
 
     return output_lu
 
@@ -234,9 +246,10 @@ def puan_kam_base(text='สวัสดี', keep_tone=None, use_first=True, ind
 
     # apply tone rules
 
-    if not flag_puan_2_lu: a_target, b_target = puan_2_kam(a_raw, b_raw)
-    else: return puan_2_lu(split_words, lu_tuple=lu_tuple)
-
+    if not flag_puan_2_lu:
+        a_target, b_target = puan_2_kam(a_raw, b_raw)
+    else:
+        return puan_2_lu(split_words, lu_tuple=lu_tuple)
 
     # 7. combine
     kam_puan = [w._raw for w in split_words]
@@ -258,6 +271,7 @@ def puan_kam_all(text='สวัสดี'):
             count += 1
     return result
 
+
 def puan_kam_lu(text, lu_tuple=False):
     """Seperate module for lu for greater simplicity"""
     if isinstance(text, str):
@@ -273,6 +287,7 @@ def puan_kam_lu(text, lu_tuple=False):
 
     return puan_kam_base(text=split_words, keep_tone=None, lu_tuple=lu_tuple, flag_puan_2_lu=True)
 
+
 def puan_kam_auto(text='สวัสดี', use_first=None):
 
     if isinstance(text, str):
@@ -283,7 +298,6 @@ def puan_kam_auto(text='สวัสดี', use_first=None):
         split_words = text
 
     n_subwords = len(split_words)
-
 
     index = (0, 0)
     if n_subwords == 1:
@@ -312,6 +326,7 @@ def puan_kam(text) -> List[str]:
 
 def puan_lu(text, lu_tuple=False) -> List[str]:
     return puan_kam_lu(text=text, lu_tuple=lu_tuple)
+
 
 def translate_lu(text) -> List[str]:
     return lu_2_thai(text=text)

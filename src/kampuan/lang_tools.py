@@ -15,6 +15,37 @@ from kampuan.const import (ASPIRATE, ASPIRATE_HIGH_SOUND,
 # %%
 # Tones
 
+
+def check_if_list(text):
+    return (text[0] == '[' and text[-1] == ']') or (',' in text)
+
+
+def handle_white_spaces(text):
+    text = re.sub(' +', ',', text)
+    return text
+
+
+def process_555(text: str):
+    text = text.replace('5', 'ฮ่า')
+    return text
+
+
+def process_text_2_list(text):
+    text = text.strip()
+    text = handle_white_spaces(text)
+    text = process_555(text)
+    if check_if_list(text):
+        # convert string to properlist
+        if not (text[0] == '[' and text[-1] == ']'):
+            text = '[' + text + ']'
+        if '"' not in text and "'" not in text:
+            text = text.replace(',', '","').replace(
+                '[', '["').replace(']', '"]')
+
+        text = eval(text)  # can input list
+    return text
+
+
 def insert_ch_after(text, ch, index):
     return text[:index+1] + ch + text[index+1:]
 
@@ -24,20 +55,24 @@ def remove_tone_mark(text, tone_marks=THAI_TONE):
         text = text.replace(mark, '')
     return text
 
+
 # %%
-test= ['ได้','ๆ','ไป','กิน','บ่อย','ๆ','ๆ']
-test_result =['ได้', 'ได้', 'ไป', 'กิน', 'บ่อย', 'บ่อย', 'บ่อย']
+test = ['ได้', 'ๆ', 'ไป', 'กิน', 'บ่อย', 'ๆ', 'ๆ']
+test_result = ['ได้', 'ได้', 'ไป', 'กิน', 'บ่อย', 'บ่อย', 'บ่อย']
+
+
 def process_double(text):
-    result=[]
+    result = []
     for i, word in enumerate(text):
-        if word == 'ๆ' and i >0:
+        if word == 'ๆ' and i > 0:
             result.append(result[i-1])
         else:
             result.append(word)
 
     return result
 
-assert process_double(test) ==test_result
+
+assert process_double(test) == test_result
 
 
 # %%
@@ -83,7 +118,9 @@ def get_vowel_pattern(REP='[REP]') -> List[str]:
     return vowel_pattern
 
 
-def extract_vowel_form(text: str, vowel_patterns: List[str] = None, vowel_forms: List[str] = None) -> NamedTuple:
+def extract_vowel_form(text: str,
+                       vowel_patterns: List[str] = None,
+                       vowel_forms: List[str] = None) -> NamedTuple:
     """Extract vowel of the subword
 
     Args:
@@ -223,4 +260,3 @@ if False:
     for ch in TRUE_CONSONANT_CLUSTER:
         print(ch, convert_tone_pair_double_init(ch))
         # %%
-
