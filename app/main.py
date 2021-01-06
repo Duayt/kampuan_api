@@ -1,22 +1,21 @@
-import json
+# %%
 import os
-import re
-from typing import Optional
-from datetime import datetime
+
 from datetime import datetime, timezone
+from typing import Optional
 
 import kampuan as kp
+from kampuan.lang_tools import process_text_2_list
 from fastapi import FastAPI, HTTPException, Request
 # from starlette.requests import Request
-from fastapi.responses import JSONResponse, Response
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import (JoinEvent, MessageEvent, TextMessage,
                             TextSendMessage)
 from starlette.responses import RedirectResponse
 
-from .firebase import FireBaseDb
 from .const import ALL_CONST
+from .firebase import FireBaseDb
 
 # variables
 ENV = str(os.getenv('ENV', 'test'))
@@ -37,14 +36,18 @@ else:
 
 # setup
 app = FastAPI(title="Kampuan project",
-              description="Welcome, This is a project using python to do คำผวน by Tanawat C. \n https://www.linkedin.com/in/tanawat-chiewhawan",
+              description="Welcome,\
+                   This is a project using python to do คำผวน by Tanawat C.\
+                        \n https://www.linkedin.com/in/tanawat-chiewhawan",
               version="0.0.1",)
 
 line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(CHANNEL_SECRET)
-db = FireBaseDb(DB, credential_json=GOOGLE_APPLICATION_CREDENTIALS)
+db = FireBaseDb(credential_json=GOOGLE_APPLICATION_CREDENTIALS)
 # db.test()
 bot_info = line_bot_api.get_bot_info()
+
+# %%
 
 
 @ app.post("/callback", include_in_schema=False)
@@ -111,7 +114,6 @@ def process_test(text):
 
 
 def reply_howto():
-
     return CONST['how_to']
 
 
@@ -160,10 +162,6 @@ def handle_message(event: MessageEvent):
             event_dict['bot_reply'] = True
         except Exception as e:
             msg = f"""ขออภัย {bot_info.display_name} ไม่เข้าใจ {text}"""
-            # f"""{profile.display_name}:{text}
-            # \n ประโยคเหนือชั้นมาก! {bot_info.display_name} ยังต้องเรียนรู้อีก!
-            # \n ลองใช้เฉพาะอักษรไทย หรือ เว้นวรรค ระว่าง คำ/พยางค์ ให้หน่อยจ้า
-            # """
             error_msg = f'{str(repr(e))}'
             print(error_msg)
             event_dict['error'] = error_msg
@@ -221,36 +219,6 @@ async def root():
     return response
 
 
-def check_if_list(text):
-    return (text[0] == '[' and text[-1] == ']') or (',' in text)
-
-
-def handle_white_spaces(text):
-    text = re.sub(' +', ',', text)
-    return text
-
-
-def process_555(text: str):
-    text = text.replace('5', 'ฮ่า')
-    return text
-
-
-def process_text_2_list(text):
-    text = text.strip()
-    text = handle_white_spaces(text)
-    text = process_555(text)
-    if check_if_list(text):
-        # convert string to properlist
-        if not (text[0] == '[' and text[-1] == ']'):
-            text = '[' + text + ']'
-        if '"' not in text and "'" not in text:
-            text = text.replace(',', '","').replace(
-                '[', '["').replace(']', '"]')
-
-        text = eval(text)  # can input list
-    return text
-
-
 @app.get("/puan_kam/{text}")
 def puan_kam(text: str = 'สวัสดี',
              first: Optional[bool] = None,
@@ -283,7 +251,7 @@ def puan_kam(text: str = 'สวัสดี',
 
     try:
         split_words = kp.puan_kam_preprocess(text, skip_tokenize=skip_tokenize)
-    except ValueError as e:
+    except ValueError:
         try:
             split_words = kp.puan_kam_preprocess(text, skip_tokenize=True)
         except ValueError as e:
@@ -320,10 +288,12 @@ def puan_lu(text: str = 'สวัสดี',
 
     text = process_text_2_list(text)
     try:
-        split_words = kp.puan_kam_preprocess(text, skip_tokenize=skip_tokenize)
-    except ValueError as e:
+        split_words = kp.puan_kam_preprocess(
+            text, skip_tokenize=skip_tokenize, flag_lu_2_thai=translate_lu)
+    except ValueError:
         try:
-            split_words = kp.puan_kam_preprocess(text, skip_tokenize=True)
+            split_words = kp.puan_kam_preprocess(
+                text, skip_tokenize=True, flag_lu_2_thai=translate_lu)
         except ValueError as e:
             raise HTTPException(422, detail=f'Input error: {e}')
 

@@ -1,21 +1,21 @@
+# %%
 import firebase_admin
 from firebase_admin import credentials, firestore
 
 
 class FireBaseDb:
-    def __init__(self, collection_name, credential_json="google-credentials.json"):
-        self.db = collection_name
+    def __init__(self, credential_json="google-credentials.json"):
         cred = credentials.Certificate(credential_json)
         firebase_admin.initialize_app(cred)
         self.client = firestore.client()
 
-    def test(self,):
-        # read data
-        snapshots = self.client.collection(self.db).get()
-        print(snapshots[0].to_dict())
+    # def test(self,):
+    #     # read data
+    #     snapshots = self.client.collection(self.db).get()
+    #     print(snapshots[0].to_dict())
 
     def write(self, content, collection_name):
-        self.client .collection(collection_name).add(content)
+        self.client.collection(collection_name).add(content)
 
 
 def test_firebase_function(credential_json="google-credentials.json"):
@@ -30,6 +30,9 @@ def test_firebase_function(credential_json="google-credentials.json"):
     for snapshot in snapshots:
         print(snapshot.to_dict())
 
+
 # test_firebase_function()
-# db =FireBaseDb(u'test')
+# db = FireBaseDb(u'test_bot_source',credential_json='../google-credentials.json')
 # db.test()
+
+# %%
