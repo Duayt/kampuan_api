@@ -176,7 +176,7 @@ def handle_message(event: MessageEvent):
             text_to_puan = db.get_latest_msg(event.source)['msg']['text']
         else:
             text_to_puan = text
-        event['text_to_puan'] = text_to_puan
+        event_dict['text_to_puan'] = text_to_puan
         try:
             # puan process usage
             puan_result = handle_funct(text_to_puan)
