@@ -81,11 +81,14 @@ class FireBaseDb:
                                 collection_sub_name=self.env + '_bot_reply',
                                 content_id=msg_id)
 
-    def get_latest_msg(self, source):
+    def get_latest_msg_query(self, source):
         return self.client.collection('messages').\
             document(get_source_id(source)).collection(self.env).\
             order_by('timestamp', direction=firestore.Query.DESCENDING).\
             limit(1)
+
+    def get_latest_msg(self, source):
+        return self.get_latest_msg_query.get()[0].to_dict()['msg']['text']
 
     def check_source(self, source):
         return self.client.collection('groups').\
