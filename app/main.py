@@ -166,10 +166,8 @@ def handle_message(event: MessageEvent):
             event_dict['bot_reply'] = True
 
     elif text == '#echo':
-        try:
-            msg = db.get_latest_msg(event.source)
-        except:
-            msg = 'no history'
+        msg = db.get_latest_msg(event.source)
+            # msg = 'no history'
         event_dict['bot_reply'] = True
 
     elif text.startswith('#'):
