@@ -163,7 +163,8 @@ def handle_message(event: MessageEvent):
             event_dict['bot_reply'] = True
 
     elif text == '#echo':
-        msg = db.get_latest_msg(event.source)['msg']['text']
+        query = db.get_latest_msg(event.source)
+        msg = query.get()['msg']['text']
         # msg = 'no history'
         event_dict['bot_reply'] = True
 
@@ -173,7 +174,8 @@ def handle_message(event: MessageEvent):
 
     else:
         if text == '#ผวน':
-            text_to_puan = db.get_latest_msg(event.source)['msg']['text']
+            query = db.get_latest_msg(event.source)
+            text_to_puan = query.get()['msg']['text']
         else:
             text_to_puan = text
         event_dict['text_to_puan'] = text_to_puan
