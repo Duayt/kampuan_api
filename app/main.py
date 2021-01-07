@@ -71,8 +71,7 @@ async def callback(request: Request):
     return 'OK'
 
 
-def handle_message_puan(event: MessageEvent):
-    text = event.message.text
+def handle_message_puan(text):
     # puan process usage
     use_first = text.strip().startswith('@')
     text = text.replace('@', '')
@@ -81,8 +80,7 @@ def handle_message_puan(event: MessageEvent):
     return puan_result
 
 
-def handle_message_pun(event):
-    text = event.message.text
+def handle_message_pun(text):
     puan_result = {}
     puan_result = pun_wunnayook(text=text)
     puan_result['msg'] = '\n'.join([' '.join(pun)
@@ -90,8 +88,7 @@ def handle_message_pun(event):
     return puan_result
 
 
-def handle_message_lu(event):
-    text = event.message.text
+def handle_message_lu(text):
     translate_lu = text.strip().startswith('@')
     text = text.replace('@', '')
     puan_result = puan_lu(text=text, translate_lu=translate_lu)
@@ -128,7 +125,7 @@ def handle_message(event: MessageEvent):
         pass
     else:
         print('new room')
-        collect = db.collect_source(event.source, {'source_type': 'old_room'})
+        db.collect_source(event.source, {'source_type': 'old_room'})
 
     text = event.message.text
     profile = line_bot_api.get_profile(event.source.user_id)
@@ -166,23 +163,28 @@ def handle_message(event: MessageEvent):
             event_dict['bot_reply'] = True
 
     elif text == '#echo':
-        msg = db.get_latest_msg(event.source)
-            # msg = 'no history'
+        msg = db.get_latest_msg(event.source)['msg']['text']
+        # msg = 'no history'
         event_dict['bot_reply'] = True
 
-    elif text.startswith('#'):
-        msg = f'#'
-        event_dict['bot_reply'] = True
+    # elif text.startswith('#'):
+    #     msg = f'#'
+    #     event_dict['bot_reply'] = True
 
     else:
+        if text == '#ผวน':
+            text_to_puan = db.get_latest_msg(event.source)['msg']['text']
+        else:
+            text_to_puan = text
+        event['text_to_puan'] = text_to_puan
         try:
             # puan process usage
-            puan_result = handle_funct(event)
+            puan_result = handle_funct(text_to_puan)
             msg = puan_result['msg']
             event_dict['puan_result'] = puan_result
             event_dict['bot_reply'] = True
         except Exception as e:
-            msg = f"""ขออภัย {bot_info.display_name} ไม่เข้าใจ {text}"""
+            msg = f"""ขออภัย {bot_info.display_name} ไม่เข้าใจ {text_to_puan}"""
             error_msg = f'{str(repr(e))}'
             print(error_msg)
             event_dict['error'] = error_msg
