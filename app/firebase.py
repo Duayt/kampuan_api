@@ -82,7 +82,7 @@ class FireBaseDb:
                                 content_id=msg_id)
 
     def get_latest_msg(self, source):
-        return self.collection('messages').\
+        return self.client.collection('messages').\
             document(get_source_id(source)).collection(self.env).\
             order_by('timestamp', direction=firestore.Query.DESCENDING).\
             limit(1)
