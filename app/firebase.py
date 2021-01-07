@@ -1,14 +1,26 @@
 # %%
 import firebase_admin
 from firebase_admin import credentials, firestore
+from datetime import datetime, timezone
+
+
+def get_source_id(src):
+    if src.type == 'user':
+        return src.user_id
+    elif src.type == 'group':
+        return src.group_id
+    elif src.type == 'room':
+        return src.room_id
 
 
 class FireBaseDb:
-    def __init__(self, credential_json="google-credentials.json"):
+    def __init__(self,
+                 credential_json="google-credentials.json",
+                 env='test_bot'):
         cred = credentials.Certificate(credential_json)
         firebase_admin.initialize_app(cred)
         self.client = firestore.client()
-
+        self.env = env
     # def test(self,):
     #     # read data
     #     snapshots = self.client.collection(self.db).get()
@@ -16,6 +28,69 @@ class FireBaseDb:
 
     def write(self, content, collection_name):
         self.client.collection(collection_name).add(content)
+
+    def collect_source(self, src, src_info):
+        return self.client.collection('groups', self.env, src.type).\
+            add({'source': src.as_json_dict(),
+                 'source_info': src_info,
+                 'timestamp': datetime.now(timezone.utc)},
+                get_source_id(src))
+
+    def set_source(self, src, src_info):
+        return self.client.collection('groups', self.env, src.type).\
+            document(get_source_id(src)).set({'source': src.as_json_dict(),
+                                              'source_info': src_info,
+                                              'timestamp': datetime.now(timezone.utc)},
+                                             )
+
+    def collect_doc(self,
+                    content,
+                    source_id,
+                    collection_name,
+                    collection_sub_name,
+                    content_id=None):
+        content['timestamp'] = datetime.now(timezone.utc)
+        return self.client.collection(collection_name).\
+            document(source_id).\
+            collection(collection_sub_name).add(content, content_id)
+
+    def collect_event(self, event_dict, source):
+
+        return self.collect_doc(content=event_dict,
+                                source_id=get_source_id(source),
+                                collection_name='events',
+                                collection_sub_name=self.env)
+
+    def collect_msg(self,
+                    msg_dict,
+                    source,
+                    msg_id=None):
+        return self.collect_doc(content=msg_dict,
+                                source_id=get_source_id(source),
+                                collection_name='messages',
+                                collection_sub_name=self.env,
+                                content_id=msg_id)
+
+    def collect_bot_reply(self,
+                          msg_dict,
+                          source,
+                          msg_id=None):
+        return self.collect_doc(content=msg_dict,
+                                source_id=get_source_id(source),
+                                collection_name='messages',
+                                collection_sub_name=self.env + '_bot_reply',
+                                content_id=msg_id)
+
+    def get_latest_msg(self, source):
+        return self.collection('messages').\
+            document(get_source_id(source)).collection(self.env).\
+            order_by('timestamp', direction=firestore.Query.DESCENDING).\
+            limit(1)
+
+    def check_source(self, source):
+        return self.client.collection('groups').\
+            document(self.env).collection(source.type).\
+            document(get_source_id(source)).get().exists
 
 
 def test_firebase_function(credential_json="google-credentials.json"):
@@ -30,9 +105,5 @@ def test_firebase_function(credential_json="google-credentials.json"):
     for snapshot in snapshots:
         print(snapshot.to_dict())
 
-
-# test_firebase_function()
-# db = FireBaseDb(u'test_bot_source',credential_json='../google-credentials.json')
-# db.test()
 
 # %%

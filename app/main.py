@@ -43,7 +43,7 @@ app = FastAPI(title="Kampuan project",
 
 line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(CHANNEL_SECRET)
-db = FireBaseDb(credential_json=GOOGLE_APPLICATION_CREDENTIALS)
+db = FireBaseDb(credential_json=GOOGLE_APPLICATION_CREDENTIALS, env=ENV)
 # db.test()
 bot_info = line_bot_api.get_bot_info()
 
@@ -74,7 +74,7 @@ async def callback(request: Request):
 def handle_message_puan(event: MessageEvent):
     text = event.message.text
     # puan process usage
-    use_first = text.startswith('@')
+    use_first = text.strip().startswith('@')
     text = text.replace('@', '')
     puan_result = puan_kam(text=text, skip_tokenize=True, first=use_first)
     puan_result['msg'] = ''.join(puan_result['results'])
@@ -92,7 +92,7 @@ def handle_message_pun(event):
 
 def handle_message_lu(event):
     text = event.message.text
-    translate_lu = text.startswith('@')
+    translate_lu = text.strip().startswith('@')
     text = text.replace('@', '')
     puan_result = puan_lu(text=text, translate_lu=translate_lu)
     puan_result['msg'] = ''.join(puan_result['results'])
@@ -117,13 +117,24 @@ def reply_howto():
     return CONST['how_to']
 
 
+# DB functions
+
+
+# Event handler
+
 @ handler.add(MessageEvent, message=TextMessage)
 def handle_message(event: MessageEvent):
+    if db.check_source(event.source):
+        pass
+    else:
+        db.collect_source(event.source, {'source_type': 'old_room'})
+
     text = event.message.text
     profile = line_bot_api.get_profile(event.source.user_id)
     event_dict = {}
-    event_dict['timestamp'] = datetime.now(timezone.utc)
     event_dict['event'] = event.as_json_dict()
+    msg_dict = {}
+    msg_dict['msg'] = event.message.as_json_dict()
 
     if ENV == 'test':
         try:
@@ -153,6 +164,17 @@ def handle_message(event: MessageEvent):
             event_dict['bot_action'] = 'leave'
             event_dict['bot_reply'] = True
 
+    elif text == '#echo':
+        try:
+            msg = db.get_latest_msg(event.source)
+        except:
+            msg = 'no history'
+        event_dict['bot_reply'] = True
+
+    elif text.startswith('#'):
+        msg = f'#'
+        event_dict['bot_reply'] = True
+
     else:
         try:
             # puan process usage
@@ -172,7 +194,13 @@ def handle_message(event: MessageEvent):
     # write databse
     event_dict['msg'] = msg
     print(event_dict)
-    db.write(event_dict, DB)
+    # db.write(event_dict, DB)
+    db.collect_event(
+        event_dict=event_dict,
+        source=event.source)
+
+    db.collect_msg(msg_dict=msg_dict, source=event.source,
+                   msg_id=event.message.id)
     # if error keep another record too
     if 'error' in event_dict:
         db.write(event_dict, DB_ERR)
@@ -197,19 +225,36 @@ def handle_message(event: MessageEvent):
 @ handler.add(JoinEvent)
 def handle_join(event):
     print(event.source)
+    if db.check_source(event.source):
+        db.set_source(event.source, {'source_type': 'rejoin'})
+    else:
+        db.collect_source(event.source, {'source_type': 'new'})
+
     msg = CONST['greeting']
     line_bot_api.reply_message(
         event.reply_token,
         TextSendMessage(text=msg))
 
+    db.collect_event(
+        event_dict={'event': event.as_json_dict(),
+                    'msg': msg},
+        source=event.source)
+
 
 @handler.default()
 def default(event):
-    event_dict = {}
-    event_dict['timestamp'] = datetime.now(timezone.utc)
-    event_dict['event'] = event.as_json_dict()
-    db.write(event_dict, DB)
+    # db.write(event_dict, DB)
+    if db.check_source(event.source):
+        pass
+    else:
+        db.collect_source(event.source, {'source_type': 'old_room'})
 
+    db.collect_event(
+        event_dict={'event': event.as_json_dict()},
+        source=event.source)
+
+
+##### API #####
 
 @app.get("/", include_in_schema=False)
 async def root():
