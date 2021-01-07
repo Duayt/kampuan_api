@@ -127,7 +127,8 @@ def handle_message(event: MessageEvent):
     if db.check_source(event.source):
         pass
     else:
-        db.collect_source(event.source, {'source_type': 'old_room'})
+        print('new room')
+        collect = db.collect_source(event.source, {'source_type': 'old_room'})
 
     text = event.message.text
     profile = line_bot_api.get_profile(event.source.user_id)
