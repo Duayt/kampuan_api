@@ -122,15 +122,15 @@ class SourceInfo:
 
     @classmethod
     def new(cls):
-        return cls('new', False, ENV)
+        return cls('new', True, ENV)
 
     @classmethod
     def rejoin(cls):
-        return cls('rejoin', False, ENV)
+        return cls('rejoin', True, ENV)
 
     @classmethod
     def old(cls):
-        return cls('old_room', False, ENV)
+        return cls('old_room', True, ENV)
 
     def to_dict(self):
         return asdict(self)
