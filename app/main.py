@@ -210,7 +210,7 @@ def handle_message(event: MessageEvent):
         # check if auto mode
         text_to_puan = False
 
-        if ENV in ['test', 'lu']:
+        if ENV in ['test', 'lu','puan']:
             check_case = (text == CONST['exec']) or (
                 text == CONST['exec_anti'])
         else:
