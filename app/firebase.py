@@ -88,7 +88,7 @@ class FireBaseDb:
             limit(1)
 
     def get_latest_msg(self, source):
-        return self.get_latest_msg_query.get()[0].to_dict()['msg']['text']
+        return self.get_latest_msg_query(source).get()[0].to_dict()['msg']['text']
 
     def check_source(self, source):
         return self.client.collection('groups').\
