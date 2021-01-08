@@ -174,8 +174,7 @@ class FireBaseDb:
 
     def update_source_info(self, source, source_info):
         return self.client.collection('groups', self.env, source.type).\
-            document(get_source_id(source))
-        print('updated', source_info)
+            document(get_source_id(source)).update(source_info)
 
 
 def test_firebase_function(credential_json="google-credentials.json"):

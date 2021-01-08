@@ -156,6 +156,7 @@ def handle_message(event: MessageEvent):
     msg_dict['msg'] = event.message.as_json_dict()
     auto_mode = db.get_source_auto_config(event.source)
     latest_msg = db.get_latest_msg(source=event.source)
+    print('previous', latest_msg)
     # handle testing functions
     if ENV == 'test':
         try:
@@ -204,24 +205,11 @@ def handle_message(event: MessageEvent):
 
     else:
         # main puan logic
-        def puan_process(text_to_puan, event_dict):
-            try:
-                puan_result = handle_funct(text_to_puan)
-                msg = puan_result['msg']
-                event_dict['puan_result'] = puan_result
-                event_dict['bot_reply'] = True
-            except Exception as e:
-                msg = f"""ขออภัย {bot_info.display_name} ไม่เข้าใจ {text_to_puan}"""
-                error_msg = f'{str(repr(e))}'
-                print(error_msg)
-                event_dict['error'] = error_msg
-                event_dict['bot_reply'] = True
-            finally:
-                return msg, event_dict
         # check if auto mode
         text_to_puan = False
 
         if auto_mode:
+            print('auto mode')
             text_to_puan = text
         # puan process
             event_dict['text_to_puan'] = text_to_puan
@@ -276,8 +264,8 @@ def handle_message(event: MessageEvent):
 
     # reply bot
     print(f'write to {DB}')
-    if 'bot_reply' in event_dict or msg == '':
-        if event_dict['bot_reply'] or msg == '':
+    if 'bot_reply' in event_dict:
+        if event_dict['bot_reply']:
             line_bot_api.reply_message(
                 event.reply_token,
                 TextSendMessage(text=msg))
