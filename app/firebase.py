@@ -87,13 +87,34 @@ class FireBaseDb:
             order_by('timestamp', direction=firestore.Query.DESCENDING).\
             limit(1)
 
-    def get_latest_msg(self, source):
-        return self.get_latest_msg_query(source).get()[0].to_dict()['msg']['text']
+    def get_latest_msg(self, source, msg_if_none=False):
+        query = self.get_latest_msg_query(source).get()
+
+        if not query:
+            return msg_if_none
+        else:
+            return query[0].to_dict()['msg']['text']
 
     def check_source(self, source):
         return self.client.collection('groups').\
             document(self.env).collection(source.type).\
             document(get_source_id(source)).get().exists
+
+    def get_source_auto_config(self, source):
+        query = self.client.collection('groups').\
+            document(self.env).collection(source.type).\
+            document(get_source_id(source)).get()
+
+        if not query:
+            print('source error')
+            return False
+        else:
+            return query[0].to_dict()['source_info']['auto_mode']
+
+    def update_source_info(self, source, source_info):
+        return self.client.collection('groups', self.env, source.type).\
+            document(get_source_id(source))
+        print('updated', source_info)
 
 
 def test_firebase_function(credential_json="google-credentials.json"):
@@ -110,3 +131,18 @@ def test_firebase_function(credential_json="google-credentials.json"):
 
 
 # %%
+# db = FireBaseDb(credential_json='../google-credentials.json')
+
+# #%%
+# db.client.collection('groups', 'test', 'user').\
+#     add({'source': 'test',
+#          'source_info': {'auto_mode': True},
+#          'timestamp': datetime.now(timezone.utc)},
+#         'test_id')
+
+db.client.collection('groups', 'test', 'user').document(
+    'test_id').update({'source': 'sdf'})
+
+
+db.client.collection('groups', 'test', 'user').\
+    document('test_id').get().to_dict()['source_info']['auto_mode']

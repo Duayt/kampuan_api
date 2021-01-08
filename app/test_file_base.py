@@ -159,3 +159,7 @@ for i in range(10):
 def check_source(source_id):
     return client.collection('groups').document(
         'source').collection('group').document(source_id).get().exists
+
+
+
+# Event handler
