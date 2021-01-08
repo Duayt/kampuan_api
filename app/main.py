@@ -285,7 +285,8 @@ def handle_join(event):
         profile = line_bot_api.get_profile(event.source.user_id)
         db.collect_usr(profile=profile, source=event.source)
         print(profile.display_name)
-    except:
+    except Exception as e:
+        print(e)
         pass
 
     if db.check_source(event.source):
@@ -315,7 +316,8 @@ def default(event):
         profile = line_bot_api.get_profile(event.source.user_id)
         db.collect_usr(profile=profile, source=event.source)
         print(profile.display_name)
-    except:
+    except Exception as e:
+        print(e)
         pass
     print(type(event))
     print(event.as_json_dict())
