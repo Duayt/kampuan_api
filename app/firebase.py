@@ -203,11 +203,11 @@ def test_firebase_function(credential_json="google-credentials.json"):
 
 
  # %%
-db = FireBaseDb(credential_json='../google-credentials.json', env='test')
-# # %%
-# src = SourceUser(type='user', user_id='U787965c323ccfdc033284a4da7a0f06c')
-src_test = SourceRoom(type='room', user_id='U787965c323ccfdc033284a4da7a0f06c',
-                      room_id='Rbfe6cd7da7980315bb2510f9a4bbd365')
+# db = FireBaseDb(credential_json='../google-credentials.json', env='test')
+# # # %%
+# # src = SourceUser(type='user', user_id='U787965c323ccfdc033284a4da7a0f06c')
+# src_test = SourceRoom(type='room', user_id='U787965c323ccfdc033284a4da7a0f06c',
+#                       room_id='Rbfe6cd7da7980315bb2510f9a4bbd365')
 # db.get_latest_msg_query(src)
 
 # #%%
