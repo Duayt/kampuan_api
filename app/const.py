@@ -38,7 +38,7 @@ LU_CONST = {'greeting': 'หละสุหลัสหวูสลีดู ล
                         {get_common(lu_exec,'ลู')}
                         """,
             'exec': lu_exec,
-            'exec_anti': '#ลู@'
+            'exec_anti': '#แปลู'
             }
 
 ALL_CONST = {'puan': PUAN_CONST,
