@@ -84,7 +84,7 @@ class FireBaseDb:
         return self.get_doc(source_id=source_id,
                             collection_name=collection_name,
                             collection_sub_name=collection_sub_name).\
-            doceumnet(content_id).get().exists
+            document(content_id).get().exists
 
     def collect_event(self, event_dict, source):
 
