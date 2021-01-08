@@ -209,8 +209,18 @@ def handle_message(event: MessageEvent):
         # main puan logic
         # check if auto mode
         text_to_puan = False
-        if text == CONST['exec']:
+
+        if ENV in ['test', 'lu']:
+            check_case = (text == CONST['exec']) or (
+                text == CONST['exec_anti'])
+        else:
+            check_case = text == CONST['exec']
+
+        if check_case:
             text_to_puan = latest_msg
+            if ENV in ['test', 'lu']:
+                if text == CONST['exec_anti']:
+                    text_to_puan = '@'+text_to_puan
             # puan process usage
             if text_to_puan:
                 event_dict['text_to_puan'] = text_to_puan
