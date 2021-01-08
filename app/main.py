@@ -210,7 +210,7 @@ def handle_message(event: MessageEvent):
         # check if auto mode
         text_to_puan = False
 
-        if ENV in ['test', 'lu','puan']:
+        if ENV in ['test', 'lu', 'puan']:
             check_case = (text == CONST['exec']) or (
                 text == CONST['exec_anti'])
         else:
@@ -284,7 +284,7 @@ def handle_message(event: MessageEvent):
     if 'bot_reply' in event_dict:
         if event_dict['bot_reply']:
             # collect bot reply as msg too
-            db.collect_msg(msg_dict={'msg': msg, 'type': 'bot'},
+            db.collect_msg(msg_dict={'msg': {'text': msg}, 'type': 'bot'},
                            source=event.source,
                            msg_id=event.message.id+"_bot")
 
