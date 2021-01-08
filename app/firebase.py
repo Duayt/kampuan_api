@@ -30,6 +30,7 @@ class FireBaseDb:
         self.client.collection(collection_name).add(content)
 
     def collect_source(self, src, src_info):
+        print(f'collecting source {src_info}')
         return self.client.collection('groups', self.env, src.type).\
             add({'source': src.as_json_dict(),
                  'source_info': src_info,
@@ -43,6 +44,14 @@ class FireBaseDb:
                                               'timestamp': datetime.now(timezone.utc)},
                                              )
 
+    def get_doc(self,
+                source_id,
+                collection_name,
+                collection_sub_name):
+        return self.client.collection(collection_name).\
+            document(source_id).\
+            collection(collection_sub_name)
+
     def collect_doc(self,
                     content,
                     source_id,
@@ -50,9 +59,32 @@ class FireBaseDb:
                     collection_sub_name,
                     content_id=None):
         content['timestamp'] = datetime.now(timezone.utc)
-        return self.client.collection(collection_name).\
-            document(source_id).\
-            collection(collection_sub_name).add(content, content_id)
+        return self.get_doc(source_id=source_id,
+                            collection_name=collection_name,
+                            collection_sub_name=collection_sub_name).\
+            add(content, content_id)
+
+    def update_doc(self,
+                   content,
+                   source_id,
+                   collection_name,
+                   collection_sub_name,
+                   content_id=None):
+        content['timestamp'] = datetime.now(timezone.utc)
+        return self.get_doc(source_id=source_id,
+                            collection_name=collection_name,
+                            collection_sub_name=collection_sub_name).\
+            document(content_id).update(content)
+
+    def check_doc(self,
+                  content_id,
+                  source_id,
+                  collection_name,
+                  collection_sub_name,):
+        return self.get_doc(source_id=source_id,
+                            collection_name=collection_name,
+                            collection_sub_name=collection_sub_name).\
+            doceumnet(content_id).get().exists
 
     def collect_event(self, event_dict, source):
 
@@ -70,6 +102,36 @@ class FireBaseDb:
                                 collection_name='messages',
                                 collection_sub_name=self.env,
                                 content_id=msg_id)
+
+    def check_usr(self,
+                  profile,
+                  source):
+        return self.check_doc(content=profile.as_json_dict(),
+                              source_id=get_source_id(source),
+                              collection_name='users',
+                              collection_sub_name=self.env,
+                              content_id=profile.user_id)
+
+    def update_usr(self,
+                   profile,
+                   source):
+        return self.update_doc(content=profile.as_json_dict(),
+                               source_id=get_source_id(source),
+                               collection_name='users',
+                               collection_sub_name=self.env,
+                               content_id=profile.user_id)
+
+    def collect_usr(self,
+                    profile,
+                    source):
+        if self.check_usr(profile=profile, source=source):
+            return self.update_usr(profile=profile, source=source)
+        else:
+            return self.collect_doc(content=profile.as_json_dict(),
+                                    source_id=get_source_id(source),
+                                    collection_name='users',
+                                    collection_sub_name=self.env,
+                                    content_id=profile.user_id)
 
     def collect_bot_reply(self,
                           msg_dict,
@@ -109,7 +171,7 @@ class FireBaseDb:
             print('source error')
             return False
         else:
-            return query[0].to_dict()['source_info']['auto_mode']
+            return query.to_dict()['source_info']['auto_mode']
 
     def update_source_info(self, source, source_info):
         return self.client.collection('groups', self.env, source.type).\

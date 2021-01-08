@@ -216,20 +216,20 @@ def handle_message(event: MessageEvent):
                 event_dict['error'] = error_msg
                 event_dict['bot_reply'] = True
             finally:
-                pass
+                return msg
         # check if auto mode
         text_to_puan = False
 
         if auto_mode:
             text_to_puan = text
-            puan_process(text_to_puan)
+            msg = puan_process(text_to_puan)
             event_dict['text_to_puan'] = text_to_puan
         # check if execution phrase
         elif text == CONST['exec']:
             text_to_puan = latest_msg
             # puan process usage
             if text_to_puan:
-                puan_process(text_to_puan)
+                msg = puan_process(text_to_puan)
                 event_dict['text_to_puan'] = text_to_puan
             else:
                 msg = f"""ขออภัย {bot_info.display_name} งง, กรุณาลองใหม่"""
@@ -237,10 +237,10 @@ def handle_message(event: MessageEvent):
                 event_dict['bot_reply'] = True
                 pass
 
-            # write databse
+    # write
     event_dict['msg'] = msg
     print(event_dict)
-    # db.write(event_dict, DB)
+    db.collect_usr(profile=profile, source=event.source)
     db.collect_event(
         event_dict=event_dict,
         source=event.source)
@@ -271,6 +271,9 @@ def handle_message(event: MessageEvent):
 @ handler.add(JoinEvent)
 def handle_join(event):
     print(event.source)
+    profile = line_bot_api.get_profile(event.source.user_id)
+    db.collect_usr(profile=profile, source=event.source)
+    print(profile.display_name)
     if db.check_source(event.source):
         db.set_source(event.source, SourceInfo.rejoin().to_dict())
     else:
@@ -294,7 +297,10 @@ def default(event):
         pass
     else:
         db.collect_source(event.source,  SourceInfo.old().to_dict())
-
+        
+    profile = line_bot_api.get_profile(event.source.user_id)
+    db.collect_usr(profile=profile, source=event.source)
+    print(profile.display_name)
     db.collect_event(
         event_dict={'event': event.as_json_dict()},
         source=event.source)
