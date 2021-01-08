@@ -207,26 +207,8 @@ def handle_message(event: MessageEvent):
         # main puan logic
         # check if auto mode
         text_to_puan = False
-
-        if auto_mode:
-            print('auto mode')
-            text_to_puan = text
-        # puan process
-            event_dict['text_to_puan'] = text_to_puan
-            event_dict['bot_reply'] = True
-            try:
-                puan_result = handle_funct(text_to_puan)
-                msg = puan_result['msg']
-                event_dict['puan_result'] = puan_result
-            except Exception as e:
-                msg = f"""ขออภัย {bot_info.display_name} ไม่เข้าใจ {text_to_puan}"""
-                error_msg = f'{str(repr(e))}'
-                print(error_msg)
-                event_dict['error'] = error_msg
-            finally:
-                pass
-        # check if execution phrase
-        elif text == CONST['exec']:
+        if text == CONST['exec']:
+            print('PUANMODE', latest_msg, text)
             text_to_puan = latest_msg
             # puan process usage
             if text_to_puan:
@@ -248,7 +230,26 @@ def handle_message(event: MessageEvent):
                 print('no history')
                 event_dict['bot_reply'] = True
 
+        # check if execution phrase
+        elif auto_mode:
+            print('auto mode')
+            text_to_puan = text
+        # puan process
+            event_dict['text_to_puan'] = text_to_puan
+            event_dict['bot_reply'] = True
+            try:
+                puan_result = handle_funct(text_to_puan)
+                msg = puan_result['msg']
+                event_dict['puan_result'] = puan_result
+            except Exception as e:
+                msg = f"""ขออภัย {bot_info.display_name} ไม่เข้าใจ {text_to_puan}"""
+                error_msg = f'{str(repr(e))}'
+                print(error_msg)
+                event_dict['error'] = error_msg
+            finally:
+                pass
     # write
+    print('MSG',msg)
     event_dict['msg'] = msg
     print(event_dict)
     db.collect_usr(profile=profile, source=event.source)
