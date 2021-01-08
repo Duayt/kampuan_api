@@ -295,3 +295,4 @@ dmypy.json
 
 credentials/
 google-credentials.json
+ignore.py

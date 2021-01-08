@@ -1,9 +1,10 @@
 # %%
-from linebot.models import (JoinEvent, MessageEvent, TextMessage,
-                            TextSendMessage, SourceUser)
+from datetime import datetime, timezone
+
 import firebase_admin
 from firebase_admin import credentials, firestore
-from datetime import datetime, timezone
+from linebot.models import (JoinEvent, MessageEvent, SourceRoom, SourceUser,
+                            TextMessage, TextSendMessage)
 
 
 def get_source_id(src):
@@ -32,6 +33,10 @@ class FireBaseDb:
     def write(self, content, collection_name):
         self.client.collection(collection_name).add(content)
 
+    def get_source(self, source):
+        return self.client.collection('groups', self.env, source.type).\
+            document(get_source_id(source))
+
     def collect_source(self, src, src_info):
         print(f'collecting source {src_info}')
         return self.client.collection('groups', self.env, src.type).\
@@ -40,12 +45,11 @@ class FireBaseDb:
                  'timestamp': datetime.now(timezone.utc)},
                 get_source_id(src))
 
-    def set_source(self, src, src_info):
-        return self.client.collection('groups', self.env, src.type).\
-            document(get_source_id(src)).set({'source': src.as_json_dict(),
-                                              'source_info': src_info,
-                                              'timestamp': datetime.now(timezone.utc)},
-                                             )
+    def set_source(self, source, src_info):
+        return self.get_source(source).set({'source': source.as_json_dict(),
+                                            'source_info': src_info,
+                                            'timestamp': datetime.now(timezone.utc)},
+                                           )
 
     def get_doc(self,
                 source_id,
@@ -145,24 +149,30 @@ class FireBaseDb:
                                 collection_sub_name=self.env + '_bot_reply',
                                 content_id=msg_id)
 
-    def get_latest_msg_query(self, source):
-        return self.client.collection('messages').\
-            document(get_source_id(source)).collection(self.env).\
-            order_by('timestamp', direction=firestore.Query.DESCENDING).\
-            limit(1)
+    def get_latest_msg_query(self, source, in_session=True):
+
+        if in_session:
+            time_filter = self.get_source(source).get().to_dict()['timestamp']
+            return self.client.collection('messages').\
+                document(get_source_id(source)).collection(self.env).\
+                where('timestamp', '>', time_filter).\
+                order_by(
+                    'timestamp', direction=firestore.Query.DESCENDING).limit(1)
+        else:
+            return self.client.collection('messages').\
+                document(get_source_id(source)).collection(self.env).\
+                order_by('timestamp', direction=firestore.Query.DESCENDING).\
+                limit(1)
 
     def get_latest_msg(self, source, msg_if_none=False):
         query = self.get_latest_msg_query(source).get()
-
         if not query:
             return msg_if_none
         else:
             return query[0].to_dict()['msg']['text']
 
     def check_source(self, source):
-        return self.client.collection('groups').\
-            document(self.env).collection(source.type).\
-            document(get_source_id(source)).get().exists
+        return self.get_source(source).get().exists
 
     def get_source_auto_config(self, source):
         query = self.client.collection('groups').\
@@ -176,6 +186,7 @@ class FireBaseDb:
             return query.to_dict()['source_info']['auto_mode']
 
     def update_source_info(self, source, source_info):
+        source_info['timestamp'] = datetime.now(timezone.utc)
         return self.client.collection('groups', self.env, source.type).\
             document(get_source_id(source)).update(source_info)
 
@@ -192,26 +203,7 @@ def test_firebase_function(credential_json="google-credentials.json"):
     for snapshot in snapshots:
         print(snapshot.to_dict())
 
-
  # %%
-# db = FireBaseDb(credential_json='../google-credentials.json',env='test')
-# # %%
-# src = SourceUser(type='user', user_id='U787965c323ccfdc033284a4da7a0f06c')
 
-# db.get_latest_msg_query(src)
-
-# #%%
-# db.client.collection('groups', 'test', 'user').\
-#     add({'source': 'test',
-#          'source_info': {'auto_mode': True},
-#          'timestamp': datetime.now(timezone.utc)},
-#         'test_id')
-
-# db.client.collection('groups', 'test', 'user').document(
-#     'test_id').update({'source': 'sdf'})
-
-
-# db.client.collection('groups', 'test', 'user').\
-#     document('test_id').get().to_dict()['source_info']['auto_mode']
 
 # %%
