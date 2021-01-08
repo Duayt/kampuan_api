@@ -200,8 +200,8 @@ def handle_message(event: MessageEvent):
         msg = f' change from {auto_mode} to {not(auto_mode)}'
         event_dict['bot_reply'] = True
 
-    elif text.startswith('#'):
-        pass
+    # elif text.startswith('#'):
+    #     pass
 
     else:
         # main puan logic
@@ -249,7 +249,7 @@ def handle_message(event: MessageEvent):
             finally:
                 pass
     # write
-    print('MSG',msg)
+    print('MSG', msg)
     event_dict['msg'] = msg
     print(event_dict)
     db.collect_usr(profile=profile, source=event.source)
