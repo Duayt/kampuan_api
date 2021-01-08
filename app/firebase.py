@@ -1,4 +1,5 @@
 # %%
+from util import SourceInfo
 from linebot.models import (JoinEvent, MessageEvent, TextMessage,
                             TextSendMessage, SourceUser, SourceRoom)
 import firebase_admin
@@ -185,6 +186,7 @@ class FireBaseDb:
             return query.to_dict()['source_info']['auto_mode']
 
     def update_source_info(self, source, source_info):
+        source_info['timestamp'] = datetime.now(timezone.utc)
         return self.client.collection('groups', self.env, source.type).\
             document(get_source_id(source)).update(source_info)
 
@@ -204,11 +206,13 @@ def test_firebase_function(credential_json="google-credentials.json"):
 
  # %%
 # db = FireBaseDb(credential_json='../google-credentials.json', env='test')
-# # # %%
-# # src = SourceUser(type='user', user_id='U787965c323ccfdc033284a4da7a0f06c')
+# # %%
+# # # src = SourceUser(type='user', user_id='U787965c323ccfdc033284a4da7a0f06c')
 # src_test = SourceRoom(type='room', user_id='U787965c323ccfdc033284a4da7a0f06c',
 #                       room_id='Rbfe6cd7da7980315bb2510f9a4bbd365')
-# db.get_latest_msg_query(src)
+# # db.get_latest_msg_query(src)
+
+# src_info = SourceInfo.rejoin('test')
 
 # #%%
 # db.client.collection('groups', 'test', 'user').\

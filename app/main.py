@@ -1,6 +1,5 @@
 # %%
 import os
-from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from typing import Optional
 
@@ -13,6 +12,8 @@ from linebot.exceptions import InvalidSignatureError
 from linebot.models import (JoinEvent, MessageEvent, TextMessage,
                             TextSendMessage)
 from starlette.responses import RedirectResponse
+
+from util import SourceInfo
 
 from .const import ALL_CONST
 from .firebase import FireBaseDb
@@ -114,29 +115,6 @@ def reply_howto():
     return CONST['how_to']
 
 
-@dataclass
-class SourceInfo:
-    source_type: str
-    auto_mode: bool
-    current_bot: str
-
-    @classmethod
-    def new(cls):
-        return cls('new', True, ENV)
-
-    @classmethod
-    def rejoin(cls):
-        return cls('rejoin', True, ENV)
-
-    @classmethod
-    def old(cls):
-        return cls('old_room', True, ENV)
-
-    def to_dict(self):
-        return asdict(self)
-# Event handler
-
-
 @ handler.add(MessageEvent, message=TextMessage)
 def handle_message(event: MessageEvent):
 
@@ -145,7 +123,7 @@ def handle_message(event: MessageEvent):
         pass
     else:
         print('new room')
-        db.collect_source(event.source, SourceInfo.old().to_dict())
+        db.collect_source(event.source, SourceInfo.old(ENV).to_dict())
     text = event.message.text.lower().strip()
 
     # data to text
@@ -309,9 +287,9 @@ def handle_join(event):
     print(profile.display_name)
 
     if db.check_source(event.source):
-        db.update_source_info(event.source, SourceInfo.rejoin().to_dict())
+        db.set_source(event.source, SourceInfo.rejoin(ENV).to_dict())
     else:
-        db.collect_source(event.source, SourceInfo.new().to_dict())
+        db.collect_source(event.source, SourceInfo.new(ENV).to_dict())
 
     msg = CONST['greeting']
     line_bot_api.reply_message(
@@ -330,7 +308,7 @@ def default(event):
     if db.check_source(event.source):
         pass
     else:
-        db.collect_source(event.source,  SourceInfo.old().to_dict())
+        db.collect_source(event.source,  SourceInfo.old(ENV).to_dict())
 
     profile = line_bot_api.get_profile(event.source.user_id)
     db.collect_usr(profile=profile, source=event.source)
