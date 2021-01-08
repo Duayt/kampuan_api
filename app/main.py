@@ -312,6 +312,8 @@ def default(event):
     profile = line_bot_api.get_profile(event.source.user_id)
     db.collect_usr(profile=profile, source=event.source)
     print(profile.display_name)
+    print(type(event))
+    print(event.as_json_dict())
     db.collect_event(
         event_dict={'event': event.as_json_dict()},
         source=event.source)
