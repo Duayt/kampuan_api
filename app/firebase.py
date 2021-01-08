@@ -169,6 +169,7 @@ class FireBaseDb:
         if not query:
             return msg_if_none
         else:
+            print(query[0].to_dict())
             return query[0].to_dict()['msg']['text']
 
     def check_source(self, source):
