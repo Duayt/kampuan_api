@@ -307,8 +307,9 @@ def handle_join(event):
     profile = line_bot_api.get_profile(event.source.user_id)
     db.collect_usr(profile=profile, source=event.source)
     print(profile.display_name)
+
     if db.check_source(event.source):
-        db.set_source(event.source, SourceInfo.rejoin().to_dict())
+        db.update_source_info(event.source, SourceInfo.rejoin().to_dict())
     else:
         db.collect_source(event.source, SourceInfo.new().to_dict())
 

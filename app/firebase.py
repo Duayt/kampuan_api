@@ -1,6 +1,6 @@
 # %%
 from linebot.models import (JoinEvent, MessageEvent, TextMessage,
-                            TextSendMessage, SourceUser)
+                            TextSendMessage, SourceUser, SourceRoom)
 import firebase_admin
 from firebase_admin import credentials, firestore
 from datetime import datetime, timezone
@@ -154,7 +154,7 @@ class FireBaseDb:
             time_filter = self.get_source(source).get().to_dict()['timestamp']
             return self.client.collection('messages').\
                 document(get_source_id(source)).collection(self.env).\
-                where('timestamp', '>=', time_filter).\
+                where('timestamp', '>', time_filter).\
                 order_by(
                     'timestamp', direction=firestore.Query.DESCENDING).limit(1)
         else:
@@ -201,11 +201,13 @@ def test_firebase_function(credential_json="google-credentials.json"):
     for snapshot in snapshots:
         print(snapshot.to_dict())
 
+
  # %%
-# db = FireBaseDb(credential_json='../google-credentials.json', env='test')
+db = FireBaseDb(credential_json='../google-credentials.json', env='test')
 # # %%
 # src = SourceUser(type='user', user_id='U787965c323ccfdc033284a4da7a0f06c')
-
+src_test = SourceRoom(type='room', user_id='U787965c323ccfdc033284a4da7a0f06c',
+                      room_id='Rbfe6cd7da7980315bb2510f9a4bbd365')
 # db.get_latest_msg_query(src)
 
 # #%%
