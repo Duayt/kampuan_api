@@ -2,7 +2,7 @@
 import firebase_admin
 from firebase_admin import credentials, firestore
 from linebot.models import (JoinEvent, MessageEvent, TextMessage,
-                            TextSendMessage)
+                            TextSendMessage, Source)
 from datetime import datetime, timezone
 
 credential_json = '../google-credentials.json'
@@ -161,5 +161,6 @@ def check_source(source_id):
         'source').collection('group').document(source_id).get().exists
 
 
-
 # Event handler
+src = Source(type='user', userId='U787965c323ccfdc033284a4da7a0f06c')
+

@@ -1,16 +1,19 @@
 # %%
+from linebot.models import (JoinEvent, MessageEvent, TextMessage,
+                            TextSendMessage, SourceUser)
 import firebase_admin
 from firebase_admin import credentials, firestore
 from datetime import datetime, timezone
 
 
 def get_source_id(src):
-    if src.type == 'user':
-        return src.user_id
-    elif src.type == 'group':
-        return src.group_id
-    elif src.type == 'room':
-        return src.room_id
+    # if src.type == 'user':
+    #     return src.userId
+    # elif src.type == 'group':
+    #     return src.group_id
+    # elif src.type == 'room':
+    #     return src.room_id
+    return str(src.sender_id)
 
 
 class FireBaseDb:
@@ -190,8 +193,12 @@ def test_firebase_function(credential_json="google-credentials.json"):
         print(snapshot.to_dict())
 
 
-# %%
-# db = FireBaseDb(credential_json='../google-credentials.json')
+ # %%
+# db = FireBaseDb(credential_json='../google-credentials.json',env='test')
+# # %%
+# src = SourceUser(type='user', user_id='U787965c323ccfdc033284a4da7a0f06c')
+
+# db.get_latest_msg_query(src)
 
 # #%%
 # db.client.collection('groups', 'test', 'user').\
@@ -206,3 +213,5 @@ def test_firebase_function(credential_json="google-credentials.json"):
 
 # db.client.collection('groups', 'test', 'user').\
 #     document('test_id').get().to_dict()['source_info']['auto_mode']
+
+# %%
