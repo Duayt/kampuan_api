@@ -1,12 +1,12 @@
 # %%
 import os
-
+from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from typing import Optional
 
 import kampuan as kp
-from kampuan.lang_tools import process_text_2_list
 from fastapi import FastAPI, HTTPException, Request
+from kampuan.lang_tools import process_text_2_list
 # from starlette.requests import Request
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
@@ -43,7 +43,7 @@ app = FastAPI(title="Kampuan project",
 
 line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(CHANNEL_SECRET)
-db = FireBaseDb(credential_json=GOOGLE_APPLICATION_CREDENTIALS)
+db = FireBaseDb(credential_json=GOOGLE_APPLICATION_CREDENTIALS, env=ENV)
 # db.test()
 bot_info = line_bot_api.get_bot_info()
 
@@ -71,18 +71,16 @@ async def callback(request: Request):
     return 'OK'
 
 
-def handle_message_puan(event: MessageEvent):
-    text = event.message.text
+def handle_message_puan(text):
     # puan process usage
-    use_first = text.startswith('@')
+    use_first = text.strip().startswith('@')
     text = text.replace('@', '')
     puan_result = puan_kam(text=text, skip_tokenize=True, first=use_first)
     puan_result['msg'] = ''.join(puan_result['results'])
     return puan_result
 
 
-def handle_message_pun(event):
-    text = event.message.text
+def handle_message_pun(text):
     puan_result = {}
     puan_result = pun_wunnayook(text=text)
     puan_result['msg'] = '\n'.join([' '.join(pun)
@@ -90,9 +88,8 @@ def handle_message_pun(event):
     return puan_result
 
 
-def handle_message_lu(event):
-    text = event.message.text
-    translate_lu = text.startswith('@')
+def handle_message_lu(text):
+    translate_lu = text.strip().startswith('@')
     text = text.replace('@', '')
     puan_result = puan_lu(text=text, translate_lu=translate_lu)
     puan_result['msg'] = ''.join(puan_result['results'])
@@ -117,14 +114,49 @@ def reply_howto():
     return CONST['how_to']
 
 
+@dataclass
+class SourceInfo:
+    source_type: str
+    auto_mode: bool
+    current_bot: str
+
+    @classmethod
+    def new(cls):
+        return cls('new', True, ENV)
+
+    @classmethod
+    def rejoin(cls):
+        return cls('rejoin', True, ENV)
+
+    @classmethod
+    def old(cls):
+        return cls('old_room', True, ENV)
+
+    def to_dict(self):
+        return asdict(self)
+# Event handler
+
+
 @ handler.add(MessageEvent, message=TextMessage)
 def handle_message(event: MessageEvent):
+
+    # handle previous room
+    if db.check_source(event.source):
+        pass
+    else:
+        print('new room')
+        db.collect_source(event.source, SourceInfo.old().to_dict())
     text = event.message.text
+
+    # data to text
     profile = line_bot_api.get_profile(event.source.user_id)
     event_dict = {}
-    event_dict['timestamp'] = datetime.now(timezone.utc)
     event_dict['event'] = event.as_json_dict()
-
+    msg_dict = {}
+    msg_dict['msg'] = event.message.as_json_dict()
+    auto_mode = db.get_source_auto_config(event.source)
+    latest_msg = db.get_latest_msg(source=event.source)
+    # handle testing functions
     if ENV == 'test':
         try:
             text, env_test = process_test(text)
@@ -136,6 +168,8 @@ def handle_message(event: MessageEvent):
         handle_funct = handle_dict[ENV]
 
     msg = ''
+    event_dict['bot_reply'] = False
+    # bot flow
     if text == '#'+str(bot_info.display_name):  # show manual
         msg = reply_howto()
         event_dict['bot_reply'] = True
@@ -153,34 +187,92 @@ def handle_message(event: MessageEvent):
             event_dict['bot_action'] = 'leave'
             event_dict['bot_reply'] = True
 
-    else:
-        try:
-            # puan process usage
-            puan_result = handle_funct(event)
-            msg = puan_result['msg']
-            event_dict['puan_result'] = puan_result
-            event_dict['bot_reply'] = True
-        except Exception as e:
-            msg = f"""ขออภัย {bot_info.display_name} ไม่เข้าใจ {text}"""
-            error_msg = f'{str(repr(e))}'
-            print(error_msg)
-            event_dict['error'] = error_msg
-            event_dict['bot_reply'] = True
-        finally:
-            pass
+    elif text == '#echo':
+        msg = db.get_latest_msg(source=event.source, msg_if_none='no history')
+        event_dict['bot_reply'] = True
 
-    # write databse
+   # toggle auto mode
+
+    elif text == '#auto':
+        db.update_source_info(
+            event.source, {'source_info': {'auto_mode': not(auto_mode)}})
+        if not(auto_mode):
+            msg = f'ปิด auto แล้วจ้า พิมพ์ #auto อีกครั้งเพื่อเปิด หรือ พิมพ์ {CONST["exec"] } เพื่อใช้งานได้เลย'
+        else:
+            msg = f'เปิด auto แล้วจ้า, ได้เวลามันส์'
+        event_dict['bot_reply'] = True
+
+    # elif text.startswith('#'):
+    #     pass
+
+    else:
+        # main puan logic
+        # check if auto mode
+        text_to_puan = False
+        if text == CONST['exec']:
+            text_to_puan = latest_msg
+            # puan process usage
+            if text_to_puan:
+                event_dict['text_to_puan'] = text_to_puan
+                event_dict['bot_reply'] = True
+                try:
+                    puan_result = handle_funct(text_to_puan)
+                    msg = puan_result['msg']
+                    event_dict['puan_result'] = puan_result
+                except Exception as e:
+                    if text_to_puan.startswith("#"):
+                        msg = f"""อันนี้ {text_to_puan} เป็นคำสั่งหรือปล่าว?"""
+                    else:
+                        msg = f"""ขออภัย {bot_info.display_name} ไม่เข้าใจ {text_to_puan}"""
+                    error_msg = f'{str(repr(e))}'
+                    print(error_msg)
+                    event_dict['error'] = error_msg
+                finally:
+                    pass
+            else:
+                msg = f"""ขออภัย {bot_info.display_name} งง, กรุณาลองใหม่"""
+                print('no history')
+                event_dict['bot_reply'] = True
+
+        # check if execution phrase
+        elif auto_mode:
+            print('auto mode')
+            text_to_puan = text
+        # puan process
+            event_dict['text_to_puan'] = text_to_puan
+            event_dict['bot_reply'] = True
+            try:
+                puan_result = handle_funct(text_to_puan)
+                msg = puan_result['msg']
+                event_dict['puan_result'] = puan_result
+            except Exception as e:
+                if text_to_puan.startswith("#"):
+                    msg = f"""อันนี้ {text_to_puan} เป็นคำสั่งหรือปล่าว?"""
+                else:
+                    msg = f"""ขออภัย {bot_info.display_name} ไม่เข้าใจ {text_to_puan}"""
+                error_msg = f'{str(repr(e))}'
+                print(error_msg)
+                event_dict['error'] = error_msg
+            finally:
+                pass
+    # write
     event_dict['msg'] = msg
     print(event_dict)
-    db.write(event_dict, DB)
+    db.collect_usr(profile=profile, source=event.source)
+    db.collect_event(
+        event_dict=event_dict,
+        source=event.source)
+
+    db.collect_msg(msg_dict=msg_dict, source=event.source,
+                   msg_id=event.message.id)
     # if error keep another record too
     if 'error' in event_dict:
         db.write(event_dict, DB_ERR)
 
     # reply bot
     print(f'write to {DB}')
-    if 'bot_reply' in event_dict or msg == '':
-        if event_dict['bot_reply'] or msg == '':
+    if 'bot_reply' in event_dict:
+        if event_dict['bot_reply']:
             line_bot_api.reply_message(
                 event.reply_token,
                 TextSendMessage(text=msg))
@@ -197,19 +289,42 @@ def handle_message(event: MessageEvent):
 @ handler.add(JoinEvent)
 def handle_join(event):
     print(event.source)
+    profile = line_bot_api.get_profile(event.source.user_id)
+    db.collect_usr(profile=profile, source=event.source)
+    print(profile.display_name)
+    if db.check_source(event.source):
+        db.set_source(event.source, SourceInfo.rejoin().to_dict())
+    else:
+        db.collect_source(event.source, SourceInfo.new().to_dict())
+
     msg = CONST['greeting']
     line_bot_api.reply_message(
         event.reply_token,
         TextSendMessage(text=msg))
 
+    db.collect_event(
+        event_dict={'event': event.as_json_dict(),
+                    'msg': msg},
+        source=event.source)
+
 
 @handler.default()
 def default(event):
-    event_dict = {}
-    event_dict['timestamp'] = datetime.now(timezone.utc)
-    event_dict['event'] = event.as_json_dict()
-    db.write(event_dict, DB)
+    # db.write(event_dict, DB)
+    if db.check_source(event.source):
+        pass
+    else:
+        db.collect_source(event.source,  SourceInfo.old().to_dict())
 
+    profile = line_bot_api.get_profile(event.source.user_id)
+    db.collect_usr(profile=profile, source=event.source)
+    print(profile.display_name)
+    db.collect_event(
+        event_dict={'event': event.as_json_dict()},
+        source=event.source)
+
+
+#### API #####
 
 @app.get("/", include_in_schema=False)
 async def root():
