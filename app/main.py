@@ -156,7 +156,6 @@ def handle_message(event: MessageEvent):
     msg_dict['msg'] = event.message.as_json_dict()
     auto_mode = db.get_source_auto_config(event.source)
     latest_msg = db.get_latest_msg(source=event.source)
-    print('previous', latest_msg)
     # handle testing functions
     if ENV == 'test':
         try:
@@ -208,7 +207,6 @@ def handle_message(event: MessageEvent):
         # check if auto mode
         text_to_puan = False
         if text == CONST['exec']:
-            print('PUANMODE', latest_msg, text)
             text_to_puan = latest_msg
             # puan process usage
             if text_to_puan:
@@ -249,7 +247,6 @@ def handle_message(event: MessageEvent):
             finally:
                 pass
     # write
-    print('MSG', msg)
     event_dict['msg'] = msg
     print(event_dict)
     db.collect_usr(profile=profile, source=event.source)
