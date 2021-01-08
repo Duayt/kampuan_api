@@ -152,7 +152,6 @@ class FireBaseDb:
 
         if in_session:
             time_filter = self.get_source(source).get().to_dict()['timestamp']
-            print(time_filter)
             return self.client.collection('messages').\
                 document(get_source_id(source)).collection(self.env).\
                 where('timestamp', '>=', time_filter).\
@@ -169,7 +168,6 @@ class FireBaseDb:
         if not query:
             return msg_if_none
         else:
-            print(query[0].to_dict())
             return query[0].to_dict()['msg']['text']
 
     def check_source(self, source):
