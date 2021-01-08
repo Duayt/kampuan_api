@@ -197,7 +197,7 @@ def handle_message(event: MessageEvent):
         db.update_source_info(
             event.source, {'source_info': {'auto_mode': not(auto_mode)}})
         if not(auto_mode):
-            msg = f'ปิด auto แล้วจ้า พิมพ์ #auto อีกครั้งเพื่อเปิด หรือ พิมพ์ { CONST['exec'] } เพื่อใช้งานได้เลย'
+            msg = f'ปิด auto แล้วจ้า พิมพ์ #auto อีกครั้งเพื่อเปิด หรือ พิมพ์ {CONST["exec"] } เพื่อใช้งานได้เลย'
         else:
             msg = f'เปิด auto แล้วจ้า, ได้เวลามันส์'
         event_dict['bot_reply'] = True
@@ -246,10 +246,10 @@ def handle_message(event: MessageEvent):
                 msg = puan_result['msg']
                 event_dict['puan_result'] = puan_result
             except Exception as e:
-                    if text_to_puan.startswith("#"):
-                        msg = f"""อันนี้ {text_to_puan} เป็นคำสั่งหรือปล่าว?"""
-                    else:
-                        msg = f"""ขออภัย {bot_info.display_name} ไม่เข้าใจ {text_to_puan}"""
+                if text_to_puan.startswith("#"):
+                    msg = f"""อันนี้ {text_to_puan} เป็นคำสั่งหรือปล่าว?"""
+                else:
+                    msg = f"""ขออภัย {bot_info.display_name} ไม่เข้าใจ {text_to_puan}"""
                 error_msg = f'{str(repr(e))}'
                 print(error_msg)
                 event_dict['error'] = error_msg
@@ -324,7 +324,7 @@ def default(event):
         source=event.source)
 
 
-##### API #####
+#### API #####
 
 @app.get("/", include_in_schema=False)
 async def root():
