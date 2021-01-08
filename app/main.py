@@ -146,7 +146,7 @@ def handle_message(event: MessageEvent):
     else:
         print('new room')
         db.collect_source(event.source, SourceInfo.old().to_dict())
-    text = event.message.text.lower()
+    text = event.message.text.lower().strip()
 
     # data to text
     profile = line_bot_api.get_profile(event.source.user_id)
