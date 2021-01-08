@@ -168,6 +168,7 @@ def handle_message(event: MessageEvent):
         handle_funct = handle_dict[ENV]
 
     msg = ''
+    event_dict['bot_reply'] = False
     # bot flow
     if text == '#'+str(bot_info.display_name):  # show manual
         msg = reply_howto()
@@ -222,20 +223,42 @@ def handle_message(event: MessageEvent):
 
         if auto_mode:
             text_to_puan = text
-            msg, event_dict = puan_process(text_to_puan, event_dict)
+        # puan process
             event_dict['text_to_puan'] = text_to_puan
+            event_dict['bot_reply'] = True
+            try:
+                puan_result = handle_funct(text_to_puan)
+                msg = puan_result['msg']
+                event_dict['puan_result'] = puan_result
+            except Exception as e:
+                msg = f"""ขออภัย {bot_info.display_name} ไม่เข้าใจ {text_to_puan}"""
+                error_msg = f'{str(repr(e))}'
+                print(error_msg)
+                event_dict['error'] = error_msg
+            finally:
+                pass
         # check if execution phrase
         elif text == CONST['exec']:
             text_to_puan = latest_msg
             # puan process usage
             if text_to_puan:
-                msg, event_dict = puan_process(text_to_puan, event_dict)
                 event_dict['text_to_puan'] = text_to_puan
+                event_dict['bot_reply'] = True
+                try:
+                    puan_result = handle_funct(text_to_puan)
+                    msg = puan_result['msg']
+                    event_dict['puan_result'] = puan_result
+                except Exception as e:
+                    msg = f"""ขออภัย {bot_info.display_name} ไม่เข้าใจ {text_to_puan}"""
+                    error_msg = f'{str(repr(e))}'
+                    print(error_msg)
+                    event_dict['error'] = error_msg
+                finally:
+                    pass
             else:
                 msg = f"""ขออภัย {bot_info.display_name} งง, กรุณาลองใหม่"""
                 print('no history')
                 event_dict['bot_reply'] = True
-                pass
 
     # write
     event_dict['msg'] = msg
