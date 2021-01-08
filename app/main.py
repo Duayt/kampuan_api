@@ -220,7 +220,10 @@ def handle_message(event: MessageEvent):
                     msg = puan_result['msg']
                     event_dict['puan_result'] = puan_result
                 except Exception as e:
-                    msg = f"""ขออภัย {bot_info.display_name} ไม่เข้าใจ {text_to_puan}"""
+                    if text_to_puan.startswith("#"):
+                        msg = f"""อันนี้ {text_to_puan} เป็นคำสั่งหรือปล่าว?"""
+                    else:
+                        msg = f"""ขออภัย {bot_info.display_name} ไม่เข้าใจ {text_to_puan}"""
                     error_msg = f'{str(repr(e))}'
                     print(error_msg)
                     event_dict['error'] = error_msg
@@ -243,7 +246,10 @@ def handle_message(event: MessageEvent):
                 msg = puan_result['msg']
                 event_dict['puan_result'] = puan_result
             except Exception as e:
-                msg = f"""ขออภัย {bot_info.display_name} ไม่เข้าใจ {text_to_puan}"""
+                    if text_to_puan.startswith("#"):
+                        msg = f"""อันนี้ {text_to_puan} เป็นคำสั่งหรือปล่าว?"""
+                    else:
+                        msg = f"""ขออภัย {bot_info.display_name} ไม่เข้าใจ {text_to_puan}"""
                 error_msg = f'{str(repr(e))}'
                 print(error_msg)
                 event_dict['error'] = error_msg
