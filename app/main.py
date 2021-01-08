@@ -281,9 +281,12 @@ def handle_message(event: MessageEvent):
 @ handler.add(JoinEvent)
 def handle_join(event):
     print(event.source)
-    profile = line_bot_api.get_profile(event.source.user_id)
-    db.collect_usr(profile=profile, source=event.source)
-    print(profile.display_name)
+    try:
+        profile = line_bot_api.get_profile(event.source.user_id)
+        db.collect_usr(profile=profile, source=event.source)
+        print(profile.display_name)
+    except:
+        pass
 
     if db.check_source(event.source):
         db.set_source(event.source, SourceInfo.rejoin(ENV).to_dict())
@@ -291,14 +294,14 @@ def handle_join(event):
         db.collect_source(event.source, SourceInfo.new(ENV).to_dict())
 
     msg = CONST['greeting']
-    line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(text=msg))
-
     db.collect_event(
         event_dict={'event': event.as_json_dict(),
                     'msg': msg},
         source=event.source)
+
+    line_bot_api.reply_message(
+        event.reply_token,
+        TextSendMessage(text=msg))
 
 
 @handler.default()
@@ -308,10 +311,12 @@ def default(event):
         pass
     else:
         db.collect_source(event.source,  SourceInfo.old(ENV).to_dict())
-
-    profile = line_bot_api.get_profile(event.source.user_id)
-    db.collect_usr(profile=profile, source=event.source)
-    print(profile.display_name)
+    try:
+        profile = line_bot_api.get_profile(event.source.user_id)
+        db.collect_usr(profile=profile, source=event.source)
+        print(profile.display_name)
+    except:
+        pass
     print(type(event))
     print(event.as_json_dict())
     db.collect_event(
