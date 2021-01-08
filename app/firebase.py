@@ -140,9 +140,9 @@ def test_firebase_function(credential_json="google-credentials.json"):
 #          'timestamp': datetime.now(timezone.utc)},
 #         'test_id')
 
-db.client.collection('groups', 'test', 'user').document(
-    'test_id').update({'source': 'sdf'})
+# db.client.collection('groups', 'test', 'user').document(
+#     'test_id').update({'source': 'sdf'})
 
 
-db.client.collection('groups', 'test', 'user').\
-    document('test_id').get().to_dict()['source_info']['auto_mode']
+# db.client.collection('groups', 'test', 'user').\
+#     document('test_id').get().to_dict()['source_info']['auto_mode']
