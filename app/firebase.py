@@ -106,8 +106,7 @@ class FireBaseDb:
     def check_usr(self,
                   profile,
                   source):
-        return self.check_doc(content=profile.as_json_dict(),
-                              source_id=get_source_id(source),
+        return self.check_doc(source_id=get_source_id(source),
                               collection_name='users',
                               collection_sub_name=self.env,
                               content_id=profile.user_id)
