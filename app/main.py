@@ -146,7 +146,7 @@ def handle_message(event: MessageEvent):
     else:
         print('new room')
         db.collect_source(event.source, SourceInfo.old().to_dict())
-    text = event.message.text.lower()
+    text = event.message.text.lower().strip()
 
     # data to text
     profile = line_bot_api.get_profile(event.source.user_id)
@@ -209,8 +209,18 @@ def handle_message(event: MessageEvent):
         # main puan logic
         # check if auto mode
         text_to_puan = False
-        if text == CONST['exec']:
+
+        if ENV in ['test', 'lu']:
+            check_case = (text == CONST['exec']) or (
+                text == CONST['exec_anti'])
+        else:
+            check_case = text == CONST['exec']
+
+        if check_case:
             text_to_puan = latest_msg
+            if ENV in ['test', 'lu']:
+                if text == CONST['exec_anti']:
+                    text_to_puan = '@'+text_to_puan
             # puan process usage
             if text_to_puan:
                 event_dict['text_to_puan'] = text_to_puan
