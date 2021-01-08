@@ -166,11 +166,10 @@ class FireBaseDb:
 
     def get_latest_msg(self, source, msg_if_none=False):
         query = self.get_latest_msg_query(source).get()
-
         if not query:
             return msg_if_none
         else:
-            return query[0].to_dict()['msg']['text']
+            return query.to_dict()['msg']['text']
 
     def check_source(self, source):
         return self.get_source(source).get().exists
