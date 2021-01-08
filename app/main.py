@@ -283,6 +283,11 @@ def handle_message(event: MessageEvent):
     print(f'write to {DB}')
     if 'bot_reply' in event_dict:
         if event_dict['bot_reply']:
+            # collect bot reply as msg too
+            db.collect_msg(msg_dict={'msg': msg, 'type': 'bot'},
+                           source=event.source,
+                           msg_id=event.message.id+"_bot")
+
             line_bot_api.reply_message(
                 event.reply_token,
                 TextSendMessage(text=msg))
