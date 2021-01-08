@@ -1,6 +1,5 @@
 # %%
 import os
-from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from typing import Optional
 
@@ -16,6 +15,7 @@ from starlette.responses import RedirectResponse
 
 from .const import ALL_CONST
 from .firebase import FireBaseDb
+from .util import SourceInfo
 
 # variables
 ENV = str(os.getenv('ENV', 'test'))
@@ -114,29 +114,6 @@ def reply_howto():
     return CONST['how_to']
 
 
-@dataclass
-class SourceInfo:
-    source_type: str
-    auto_mode: bool
-    current_bot: str
-
-    @classmethod
-    def new(cls):
-        return cls('new', True, ENV)
-
-    @classmethod
-    def rejoin(cls):
-        return cls('rejoin', True, ENV)
-
-    @classmethod
-    def old(cls):
-        return cls('old_room', True, ENV)
-
-    def to_dict(self):
-        return asdict(self)
-# Event handler
-
-
 @ handler.add(MessageEvent, message=TextMessage)
 def handle_message(event: MessageEvent):
 
@@ -145,7 +122,7 @@ def handle_message(event: MessageEvent):
         pass
     else:
         print('new room')
-        db.collect_source(event.source, SourceInfo.old().to_dict())
+        db.collect_source(event.source, SourceInfo.old(ENV).to_dict())
     text = event.message.text.lower().strip()
 
     # data to text
@@ -210,7 +187,7 @@ def handle_message(event: MessageEvent):
         # check if auto mode
         text_to_puan = False
 
-        if ENV in ['test', 'lu']:
+        if ENV in ['test', 'lu', 'puan']:
             check_case = (text == CONST['exec']) or (
                 text == CONST['exec_anti'])
         else:
@@ -283,6 +260,11 @@ def handle_message(event: MessageEvent):
     print(f'write to {DB}')
     if 'bot_reply' in event_dict:
         if event_dict['bot_reply']:
+            # collect bot reply as msg too
+            db.collect_msg(msg_dict={'msg': {'text': msg}, 'type': 'bot'},
+                           source=event.source,
+                           msg_id=event.message.id+"_bot")
+
             line_bot_api.reply_message(
                 event.reply_token,
                 TextSendMessage(text=msg))
@@ -299,23 +281,28 @@ def handle_message(event: MessageEvent):
 @ handler.add(JoinEvent)
 def handle_join(event):
     print(event.source)
-    profile = line_bot_api.get_profile(event.source.user_id)
-    db.collect_usr(profile=profile, source=event.source)
-    print(profile.display_name)
+    try:
+        profile = line_bot_api.get_profile(event.source.user_id)
+        db.collect_usr(profile=profile, source=event.source)
+        print(profile.display_name)
+    except Exception as e:
+        print(e)
+        pass
+
     if db.check_source(event.source):
-        db.set_source(event.source, SourceInfo.rejoin().to_dict())
+        db.set_source(event.source, SourceInfo.rejoin(ENV).to_dict())
     else:
-        db.collect_source(event.source, SourceInfo.new().to_dict())
+        db.collect_source(event.source, SourceInfo.new(ENV).to_dict())
 
     msg = CONST['greeting']
-    line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(text=msg))
-
     db.collect_event(
         event_dict={'event': event.as_json_dict(),
                     'msg': msg},
         source=event.source)
+
+    line_bot_api.reply_message(
+        event.reply_token,
+        TextSendMessage(text=msg))
 
 
 @handler.default()
@@ -324,11 +311,16 @@ def default(event):
     if db.check_source(event.source):
         pass
     else:
-        db.collect_source(event.source,  SourceInfo.old().to_dict())
-
-    profile = line_bot_api.get_profile(event.source.user_id)
-    db.collect_usr(profile=profile, source=event.source)
-    print(profile.display_name)
+        db.collect_source(event.source,  SourceInfo.old(ENV).to_dict())
+    try:
+        profile = line_bot_api.get_profile(event.source.user_id)
+        db.collect_usr(profile=profile, source=event.source)
+        print(profile.display_name)
+    except Exception as e:
+        print(e)
+        pass
+    print(type(event))
+    print(event.as_json_dict())
     db.collect_event(
         event_dict={'event': event.as_json_dict()},
         source=event.source)
