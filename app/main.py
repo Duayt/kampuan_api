@@ -196,7 +196,7 @@ def handle_message(event: MessageEvent):
     elif text == '#auto':
         db.update_source_info(
             event.source, {'source_info': {'auto_mode': not(auto_mode)}})
-        if not(auto_mode):
+        if auto_mode:
             msg = f'ปิด auto แล้วจ้า พิมพ์ #auto อีกครั้งเพื่อเปิด หรือ พิมพ์ {CONST["exec"] } เพื่อใช้งานได้เลย'
         else:
             msg = f'เปิด auto แล้วจ้า, ได้เวลามันส์'
