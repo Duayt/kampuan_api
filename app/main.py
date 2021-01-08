@@ -13,10 +13,9 @@ from linebot.models import (JoinEvent, MessageEvent, TextMessage,
                             TextSendMessage)
 from starlette.responses import RedirectResponse
 
-from util import SourceInfo
-
 from .const import ALL_CONST
 from .firebase import FireBaseDb
+from .util import SourceInfo
 
 # variables
 ENV = str(os.getenv('ENV', 'test'))

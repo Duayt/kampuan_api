@@ -1,10 +1,10 @@
 # %%
-from util import SourceInfo
-from linebot.models import (JoinEvent, MessageEvent, TextMessage,
-                            TextSendMessage, SourceUser, SourceRoom)
+from datetime import datetime, timezone
+
 import firebase_admin
 from firebase_admin import credentials, firestore
-from datetime import datetime, timezone
+from linebot.models import (JoinEvent, MessageEvent, SourceRoom, SourceUser,
+                            TextMessage, TextSendMessage)
 
 
 def get_source_id(src):
@@ -203,29 +203,7 @@ def test_firebase_function(credential_json="google-credentials.json"):
     for snapshot in snapshots:
         print(snapshot.to_dict())
 
-
  # %%
-# db = FireBaseDb(credential_json='../google-credentials.json', env='test')
-# # %%
-# # # src = SourceUser(type='user', user_id='U787965c323ccfdc033284a4da7a0f06c')
-# src_test = SourceRoom(type='room', user_id='U787965c323ccfdc033284a4da7a0f06c',
-#                       room_id='Rbfe6cd7da7980315bb2510f9a4bbd365')
-# # db.get_latest_msg_query(src)
 
-# src_info = SourceInfo.rejoin('test')
-
-# #%%
-# db.client.collection('groups', 'test', 'user').\
-#     add({'source': 'test',
-#          'source_info': {'auto_mode': True},
-#          'timestamp': datetime.now(timezone.utc)},
-#         'test_id')
-
-# db.client.collection('groups', 'test', 'user').document(
-#     'test_id').update({'source': 'sdf'})
-
-
-# db.client.collection('groups', 'test', 'user').\
-#     document('test_id').get().to_dict()['source_info']['auto_mode']
 
 # %%
