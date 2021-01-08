@@ -204,9 +204,9 @@ def test_firebase_function(credential_json="google-credentials.json"):
         print(snapshot.to_dict())
 
  # %%
-db = FireBaseDb(credential_json='../google-credentials.json', env='test')
-# %%
-src = SourceUser(type='user', user_id='U787965c323ccfdc033284a4da7a0f06c')
+# db = FireBaseDb(credential_json='../google-credentials.json', env='test')
+# # %%
+# src = SourceUser(type='user', user_id='U787965c323ccfdc033284a4da7a0f06c')
 
 # db.get_latest_msg_query(src)
 
