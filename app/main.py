@@ -203,7 +203,7 @@ def handle_message(event: MessageEvent):
 
     else:
         # main puan logic
-        def puan_process(text_to_puan):
+        def puan_process(text_to_puan, event_dict):
             try:
                 puan_result = handle_funct(text_to_puan)
                 msg = puan_result['msg']
@@ -216,20 +216,20 @@ def handle_message(event: MessageEvent):
                 event_dict['error'] = error_msg
                 event_dict['bot_reply'] = True
             finally:
-                return msg
+                return msg, event_dict
         # check if auto mode
         text_to_puan = False
 
         if auto_mode:
             text_to_puan = text
-            msg = puan_process(text_to_puan)
+            msg, event_dict = puan_process(text_to_puan, event_dict)
             event_dict['text_to_puan'] = text_to_puan
         # check if execution phrase
         elif text == CONST['exec']:
             text_to_puan = latest_msg
             # puan process usage
             if text_to_puan:
-                msg = puan_process(text_to_puan)
+                msg, event_dict = puan_process(text_to_puan, event_dict)
                 event_dict['text_to_puan'] = text_to_puan
             else:
                 msg = f"""ขออภัย {bot_info.display_name} งง, กรุณาลองใหม่"""
@@ -297,7 +297,7 @@ def default(event):
         pass
     else:
         db.collect_source(event.source,  SourceInfo.old().to_dict())
-        
+
     profile = line_bot_api.get_profile(event.source.user_id)
     db.collect_usr(profile=profile, source=event.source)
     print(profile.display_name)
