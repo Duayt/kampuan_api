@@ -113,9 +113,9 @@ class BotCommand:
         else:
             command = self.const['exec']
         if auto_mode:
-            return f'ปิด auto แล้วจ้า พิมพ์ {com_auto} อีกครั้งเพื่อเปิด หรือ พิมพ์ {command} เพื่อใช้งานได้เลย'
+            return f'ปิด auto แล้วจ้า พิมพ์ {self.com_auto} อีกครั้งเพื่อเปิด หรือ พิมพ์ {command} เพื่อใช้งานได้เลย'
         else:
-            return f'เปิด auto แล้วจ้า พิมพ์ {com_auto} อีกครั้งเพื่อปิด, ได้เวลามันส์ '
+            return f'เปิด auto แล้วจ้า พิมพ์ {self.com_auto} อีกครั้งเพื่อปิด, ได้เวลามันส์ '
 
     @property
     def reply_greeting(self):
