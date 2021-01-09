@@ -76,7 +76,7 @@ PUAN_CONST = {'action': 'ผวน',
 
 PUN_CONST = {'action': 'ผัน',
              'greeting': 'สวัสดี ดี่ ดี้ ดี๊ ดี ยอดนักผัน มาแลว แหล่ว แล่ว แล้ว แหลว อยากรู้จักยอดนักผันมากขึ้นพิมพ์ #ยอดนักผัน ',
-             'how_to':,
+             'how_to': pun_how_to,
              'exec': pun_exec
 
              }
