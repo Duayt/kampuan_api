@@ -13,7 +13,7 @@ from linebot.models import (JoinEvent, MessageEvent, TextMessage,
                             TextSendMessage)
 from starlette.responses import RedirectResponse
 
-from .const import ALL_CONST, BotCommand, BotReply
+from .const import ALL_CONST, BotCommand
 from .firebase import FireBaseDb
 from .util import SourceInfo
 
@@ -45,7 +45,7 @@ db = FireBaseDb(credential_json=GOOGLE_APPLICATION_CREDENTIALS, env=ENV)
 # db.test()
 bot_info = line_bot_api.get_bot_info()
 
-bot_command = BotCommand(bot_name == bot_info.display_name, bot_env=ENV)
+bot_command = BotCommand(bot_name=bot_info.display_name, bot_env=ENV)
 # %%
 
 
