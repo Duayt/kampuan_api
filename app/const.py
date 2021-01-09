@@ -172,4 +172,4 @@ class BotCommand:
 
     @property
     def reply_kick_user_room(self):
-        return f'ไม่ออก! อันนี้ไม่ใช้ group คุยกันสองคน จะให้ {self.bot_name} ออกไปไหน'
+        return f'ไม่ออก! อันนี้ไม่ใช่groupนะ เราคุยกันสองคน จะให้ {self.bot_name} ออกไปไหน'
