@@ -152,19 +152,19 @@ def handle_message(event: MessageEvent):
         event_dict['bot_reply'] = True
 
     elif text == bot_command.com_hi:
-        msg = bot_info.display_name
+        msg = bot_command.reply_greeting
         event_dict['bot_reply'] = True
 
     elif text == bot_command.com_kick:
         if event.source.type == 'user':
-            msg = f'ไม่ออก! นี่มันไม่ใช่ห้องจ้า'
+            msg = bot_command.reply_kick_user_room
             event_dict['bot_reply'] = True
         else:
-            msg = f'{bot_info.display_name} ลาก่อนจ้า'
+            msg = bot_command.reply_kick
             event_dict['bot_action'] = 'leave'
             event_dict['bot_reply'] = True
 
-    elif text == bot_command.com_kick:
+    elif text == bot_command.com_echo:
         msg = db.get_latest_msg(source=event.source, msg_if_none='no history')
         event_dict['bot_reply'] = True
 
@@ -173,10 +173,7 @@ def handle_message(event: MessageEvent):
     elif text == bot_command.com_auto:
         db.update_source_info(
             event.source, {'source_info': {'auto_mode': not(auto_mode)}})
-        if auto_mode:
-            msg = f'ปิด auto แล้วจ้า พิมพ์ #auto อีกครั้งเพื่อเปิด หรือ พิมพ์ {CONST["exec"]} เพื่อใช้งานได้เลย'
-        else:
-            msg = f'เปิด auto แล้วจ้า, ได้เวลามันส์'
+        msg = bot_command.reply_auto_mode(auto_mode=auto_mode)
         event_dict['bot_reply'] = True
 
     # elif text.startswith('#'):
@@ -208,16 +205,17 @@ def handle_message(event: MessageEvent):
                     event_dict['puan_result'] = puan_result
                 except Exception as e:
                     if text_to_puan.startswith("#"):
-                        msg = f"""อันนี้ {text_to_puan}"""
+                        msg = bot_command.reply_error_text_for_action(
+                            text_to_puan)
                     else:
-                        msg = f"""ขออภัย {bot_info.display_name} ไม่เข้าใจ {text_to_puan}"""
+                        msg = bot_command.reply_error_text(text_to_puan)
                     error_msg = f'{str(repr(e))}'
                     print(error_msg)
                     event_dict['error'] = error_msg
                 finally:
                     pass
             else:
-                msg = f"""ขออภัย {bot_info.display_name} งง, กรุณาลองใหม่"""
+                msg = bot_command.reply_no_history
                 print('no history')
                 event_dict['bot_reply'] = True
 
@@ -234,9 +232,9 @@ def handle_message(event: MessageEvent):
                 event_dict['puan_result'] = puan_result
             except Exception as e:
                 if text_to_puan.startswith("#"):
-                    msg = f"""อันนี้ {text_to_puan} เป็นคำสั่งหรือปล่าว?"""
+                    msg = bot_command.reply_error_text_for_action(text_to_puan)
                 else:
-                    msg = f"""ขออภัย {bot_info.display_name} ไม่เข้าใจ {text_to_puan}"""
+                    msg = bot_command.reply_error_text(text_to_puan)
                 error_msg = f'{str(repr(e))}'
                 print(error_msg)
                 event_dict['error'] = error_msg
@@ -294,7 +292,7 @@ def handle_join(event):
     else:
         db.collect_source(event.source, SourceInfo.new(ENV).to_dict())
 
-    msg = CONST['greeting']
+    msg = bot_command.reply_greeting
     db.collect_event(
         event_dict={'event': event.as_json_dict(),
                     'msg': msg},
