@@ -1,19 +1,15 @@
 # %%
-
-def get_common(exec, mode='ผวน'):
-    return f""" \n พิมพ์ #auto ไว้เปิด/ปิด การตอบทันที ของยอดนัก{mode}
-                \n เมื่อปิด auto {exec} ใช้เพื่อ {mode} คำล่าสุด
-                \n หากเบื่อ ยอดนัก{mode} พิมพ์ #ออกไปเลยชิ่วๆ
-            """
+from dataclasses import dataclass, asdict
 
 
 puan_exec = '#ผวน'
-puan_exec_anti = '#ผวนนำ'
+puan_exec_anti = '#ผวน1'
 
 lu_exec = '#ลู'
 lu_exec_anti = '#แปลู'
 pun_exec = '#ผัน'
-PUAN_CONST = {'greeting': """สะวีดัส หยวนนักพอด แมวล้า อยากรู้จักยอดนักผวนมากขึ้นพิมพ์ #ยอดนักผวน """,
+PUAN_CONST = {'action': 'ผวน',
+              'greeting': """สะวีดัส หยวนนักพอด แมวล้า อยากรู้จักยอดนักผวนมากขึ้นพิมพ์ #ยอดนักผวน """,
               'how_to': f"""ยอดนักผวน  ถนัดผวนสองพยางค์ และใช้ได้กับตัวอักษรภาษาไทยเท่านั้น 
                         \n ยอดนักผวนจะผวน พยางค์ที่สองและสุดท้ายเป็นหลัก: มะนาวต่างดุ๊ด >> มะนุดต่างดาว
                         \n ถ้าต้องการให้ผวนพยางค์แรกและพยางค์สุดท้าย ให้ใส่ @ไว้ที่หน้าพยางค์แรก: @ใตหาหัวจาม >> ตามหาหัวใจ
@@ -49,6 +45,34 @@ ALL_CONST = {'puan': PUAN_CONST,
              'pun': PUN_CONST,
              'lu': LU_CONST}
 
-# %%
+# Command
 
-# %%
+
+@dataclass
+class BotCommand:
+    bot_name: str
+    bot_env: str
+    com_auto: str = '#auto'
+    com_hi: str = '#hi'
+    com_echo: str = '#echo'
+    com_kick: str = '#ออกไปเลยชิ่วๆ'
+
+    @property
+    def com_manual(self) -> str:
+        return f'#{self.bot_name}'
+
+# general msg
+
+
+def auto_mode(command, auto_mode):
+    if auto_mode:
+        return f'ปิด auto แล้วจ้า พิมพ์ #auto อีกครั้งเพื่อเปิด หรือ พิมพ์ {command} เพื่อใช้งานได้เลย'
+    else:
+        return f'เปิด auto แล้วจ้า, ได้เวลามันส์'
+
+
+def get_common(exec, mode='ผวน'):
+    return f""" \n พิมพ์ #auto ไว้เปิด/ปิด การตอบทันที ของยอดนัก{mode}
+                \n เมื่อปิด auto {exec} ใช้เพื่อ {mode} คำล่าสุด
+                \n หากเบื่อ ยอดนัก{mode} พิมพ์ #ออกไปเลยชิ่วๆ
+            """
