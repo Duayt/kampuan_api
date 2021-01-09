@@ -13,7 +13,7 @@ from linebot.models import (JoinEvent, MessageEvent, TextMessage,
                             TextSendMessage)
 from starlette.responses import RedirectResponse
 
-from .const import ALL_CONST, BotCommand, BotReply
+from .const import ALL_CONST, BotCommand
 from .firebase import FireBaseDb
 from .util import SourceInfo
 
@@ -36,8 +36,7 @@ else:
 
 # setup
 app = FastAPI(title="Kampuan project",
-              description="Welcome,\
-                   This is a project using python to do คำผวน by Tanawat C. '
+              description="Welcome,This is a project using python to do คำผวน by Tanawat C. ",
               version="0.0.1",)
 
 line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
@@ -46,7 +45,7 @@ db = FireBaseDb(credential_json=GOOGLE_APPLICATION_CREDENTIALS, env=ENV)
 # db.test()
 bot_info = line_bot_api.get_bot_info()
 
-bot_command = BotCommand(bot_name == bot_info.display_name, bot_env=ENV)
+bot_command = BotCommand(bot_name=bot_info.display_name, bot_env=ENV)
 # %%
 
 
@@ -342,36 +341,67 @@ def puan_kam(text: str = 'สวัสดี',
              skip_tokenize: Optional[bool] = None):
     """Puan kum (ผวนคำ) is a Thai toung twister, This API convert string into kampuan
         Play around with the options to see different results.
-
     -Args:
-    - **text ** (str):  Defaults to 'สวัสดี'.
-    - input string 'ไปเที่ยว' -> auto tokenize will apply and split to ไป and เที่ยว
-     - list of string which accepted 3 formats: ['ไป', 'กิน', 'ข้าว'] | 'ไป', 'กิน', 'ข้าว' | ไป, กิน, ข้าว, the list input will also neglect auto tokenization.
-    - **first ** (bool, optional): if True use the first word  to puan together with the last word otherwise will select second word and last word
-    (None will let us decide). Defaults to None.
-
-    - **keep_tone ** (bool, optional): force whether to keep the tone when doing the puan(None will let us decide). Defaults to None.
-
-    - **all ** (bool, optional): if True will provide all 4 puan results. Defaults to False.
-
-    - **skip_tokenize ** (bool, optional): if True will skip tokenzation and use user provided list of words(input pure string will force to False or dont skip tokenization). Defaults to None.
-
+    - **text** (str):  Defaults to 'สวัสดี'.
+        - input string 'ไปเที่ยว' -> auto tokenize will apply and split to ไป and  เที่ยว
+        - list of string which accepted 3 formats: ['ไป','กิน','ข้าว'] | 'ไป','กิน','ข้าว' | ไป,กิน,ข้าว, the list input will also neglect auto tokenization.
+    - **first** (bool, optional): if True use the first word  to puan together with the last word otherwise will select second word and last word
+                                    (None will let us decide). Defaults to None.
+    - **keep_tone** (bool, optional): force whether to keep the tone when doing the puan (None will let us decide). Defaults to None.
+    - **all** (bool, optional): if True will provide all 4 puan results. Defaults to False.
+    - **skip_tokenize** (bool, optional): if True will skip tokenzation and use user provided list of words (input pure string will force to False or dont skip tokenization). Defaults to None.
     -Returns:
     - **results**: List of คำผวน
     """
-    if not check_thai_ch(text):         raise HTTPException(400, detail=f'Input contains non Thai')     text = process_text_2_list(text)     try:         split_words = kp.puan_kam_preprocess(text, skip_tokenize=skip_tokenize)     except ValueError:         try:            split_words = kp.puan_kam_preprocess(text, skip_tokenize=True)         except ValueError as e:            raise HTTPException(422, detail=f'Input error: {e}')     if all is not None and all:         return {'input': text,                 'results': kp.puan_kam_all(text=split_words)}     else:         if first is None and keep_tone is None:             return {'input': text,                     'results': kp.puan_kam(text=split_words)}         else:             return {'input': text,                     'results': kp.puan_kam_base(text=split_words, keep_tone=keep_tone, use_first=first)} 
+    if not check_thai_ch(text):
+        raise HTTPException(400, detail=f'Input contains non Thai')
+
+    text = process_text_2_list(text)
+
+    try:
+        split_words = kp.puan_kam_preprocess(text, skip_tokenize=skip_tokenize)
+    except ValueError:
+        try:
+            split_words = kp.puan_kam_preprocess(text, skip_tokenize=True)
+        except ValueError as e:
+            raise HTTPException(422, detail=f'Input error: {e}')
+
+    if all is not None and all:
+        return {'input': text,
+                'results': kp.puan_kam_all(text=split_words)}
+    else:
+        if first is None and keep_tone is None:
+            return {'input': text,
+                    'results': kp.puan_kam(text=split_words)}
+        else:
+            return {'input': text,
+                    'results': kp.puan_kam_base(text=split_words, keep_tone=keep_tone, use_first=first)}
 
 
-@ app.get("/puan_lu/{text}")
+@app.get("/puan_lu/{text}")
 def puan_lu(text: str = 'สวัสดี',
             skip_tokenize: Optional[bool] = None,
             translate_lu: Optional[bool] = False):
     """ภาษาลู
-     -Args:     - **text ** (str):  Defaults to 'สวัสดี'.       - input string 'ไปเที่ยว' -> auto tokenize will apply and split to ไป and เที่ยว         - list of string which accepted 3 formats: ['ไป', 'กิน', 'ข้าว'] | 'ไป', 'กิน', 'ข้าว' | ไป, กิน, ข้าว, the list input will also neglect auto tokenization.     -Returns:     - **results**: List of คำผันลู     """
+    -Args:
+    - **text** (str):  Defaults to 'สวัสดี'.
+        - input string 'ไปเที่ยว' -> auto tokenize will apply and split to ไป and  เที่ยว
+        - list of string which accepted 3 formats: ['ไป','กิน','ข้าว'] | 'ไป','กิน','ข้าว' | ไป,กิน,ข้าว, the list input will also neglect auto tokenization.
+    -Returns:
+    - **results**: List of คำผันลู
+    """
     if not check_thai_ch(text):
-        raise HTTPException(400, detail=f'Input contains non Thai')     text = process_text_2_list(text) try:         split_words = kp.puan_kam_preprocess(text, skip_tokenize=skip_tokenize, flag_lu_2_thai=translate_lu) except ValueError: try:            split_words = kp.puan_kam_preprocess(
+        raise HTTPException(400, detail=f'Input contains non Thai')
+
+    text = process_text_2_list(text)
+    try:
+        split_words = kp.puan_kam_preprocess(
+            text, skip_tokenize=skip_tokenize, flag_lu_2_thai=translate_lu)
+    except ValueError:
+        try:
+            split_words = kp.puan_kam_preprocess(
                 text, skip_tokenize=True, flag_lu_2_thai=translate_lu)
-       except ValueError as e:
+        except ValueError as e:
             raise HTTPException(422, detail=f'Input error: {e}')
 
     if translate_lu:
@@ -383,27 +413,49 @@ def puan_lu(text: str = 'สวัสดี',
             'results': result}
 
 
-@ app.get("/pun_wunnayook/{text}")
+@app.get("/pun_wunnayook/{text}")
 def pun_wunnayook(text: str = 'สวัสดี'):
     """pun wunnayook (ผันเสียงวรรณยุกต์)
-     -Args:     - **text ** (str):  Defaults to 'สวัสดี'.       - input string 'ไปเที่ยว' -> auto tokenize will apply and split to ไป and เที่ยว         - list of string which accepted 3 formats: ['ไป', 'กิน', 'ข้าว'] | 'ไป', 'กิน', 'ข้าว' | ไป, กิน, ข้าว, the list input will also neglect auto tokenization.     -Returns:     - **results**: List of คำผัน
+    -Args:
+    - **text** (str):  Defaults to 'สวัสดี'.
+        - input string 'ไปเที่ยว' -> auto tokenize will apply and split to ไป and  เที่ยว
+        - list of string which accepted 3 formats: ['ไป','กิน','ข้าว'] | 'ไป','กิน','ข้าว' | ไป,กิน,ข้าว, the list input will also neglect auto tokenization.
+    -Returns:
+    - **results**: List of คำผัน
     """
     if not check_thai_ch(text):
-        raise HTTPException(400, detail=f'Input contains non Thai')     text = process_text_2_list(text)     return {'input': text,             'results': kp.pun_wunayook(text=text)} 
+        raise HTTPException(400, detail=f'Input contains non Thai')
+
+    text = process_text_2_list(text)
+    return {'input': text,
+            'results': kp.pun_wunayook(text=text)}
 
 
-@ app.get("/vowel/{text}")
+@app.get("/vowel/{text}")
 def extract_vowel(text: str = 'สวัสดี'):
     """ Method to extract Thai vowel form out.
-     -Args:     - **text ** (str):  Defaults to 'สวัสดี'.      - input string 'ไปเที่ยว' -> auto tokenize will apply and split to ไป and เที่ยว         - list of string which accepted 3 formats: ['ไป', 'กิน', 'ข้าว'] | 'ไป', 'กิน', 'ข้าว' | ไป, กิน, ข้าว, the list input will also neglect auto tokenization.     -Returns:     - **results**: List of extracted vowel
+    -Args:
+    - **text** (str):  Defaults to 'สวัสดี'.
+        - input string 'ไปเที่ยว' -> auto tokenize will apply and split to ไป and  เที่ยว
+        - list of string which accepted 3 formats: ['ไป','กิน','ข้าว'] | 'ไป','กิน','ข้าว' | ไป,กิน,ข้าว, the list input will also neglect auto tokenization.
+    -Returns:
+    - **results**: List of extracted vowel
     """
     if not check_thai_ch(text):
-        return HTTPException(400, detail=f'Input contains non Thai')     text = process_text_2_list(text)     if isinstance(text, str):         text = kp.tokenize(text)     return {"input": text,             "result": kp.extract_vowel(text)} 
+        return HTTPException(400, detail=f'Input contains non Thai')
+
+    text = process_text_2_list(text)
+    if isinstance(text, str):
+        text = kp.tokenize(text)
+    return {"input": text,
+            "result": kp.extract_vowel(text)}
 
 
-@ app.get("/is_thai/{text}")
+@app.get("/is_thai/{text}")
 def check_thai_ch(text):
     return all(w in kp.const.ACCEPT_CHARS for w in text)
 
+
+# %%
 
 # %%
