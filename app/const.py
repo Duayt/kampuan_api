@@ -25,7 +25,7 @@ PUAN_CONST = {'action': 'ผวน',
                         \n การเว้นวรรคระหว่างคำ/พยางค์ ช่วยให้ผวนเก่งขึ้น: @คัก น่า รน >> คนน่ารัก
                         \n ยอดนักผวนตอบเฉพาะคนที่แอดเป็นเพื่อนกันนะ กดที่ profile แล้วเพิ่มเพื่อน ได้เลย
                         {get_common(
-                            f'{puan_exec_anti} และ {puan_exec_anti}','ผวน')}
+                            f'{puan_exec} และ {puan_exec_anti}','ผวน')}
                         """,
                         'exec': puan_exec,  # execution phrase
                         'exec_anti': puan_exec_anti

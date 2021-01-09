@@ -37,7 +37,7 @@ else:
 # setup
 app = FastAPI(title="Kampuan project",
               description="Welcome,\
-                   This is a project using python to do คำผวน by Tanawat C. '
+                   This is a project using python to do คำผวน by Tanawat C. ',
               version="0.0.1",)
 
 line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
