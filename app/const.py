@@ -48,7 +48,8 @@ LU_CONST = {'action': 'ลู',
 
 ALL_CONST = {'puan': PUAN_CONST,
              'pun': PUN_CONST,
-             'lu': LU_CONST}
+             'lu': LU_CONST,
+             'test':PUAN_CONST}
 
 # Command
 
