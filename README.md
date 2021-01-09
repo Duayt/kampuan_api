@@ -1,5 +1,5 @@
 # kampuan_api
-Kampuan api project, An API for คำผวน.
+Kampuan api project, An API for คำผวน คำผัน คำลู.
 
 The API:
 https://kampuan-api.herokuapp.com/
@@ -35,6 +35,7 @@ http://thailanguagept.blogspot.com/2016/08/
 * add hard language cases as listed below
 * add homonym conversion to give the closest meaning of kampuan
 * build dataset for NLP deep learning
+* ภาษามะละกอ
 
 # hard case not implemented yet
 * กษัตริย์
