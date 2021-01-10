@@ -130,7 +130,8 @@ def handle_message(event: MessageEvent):
         db.collect_usr(profile=profile, source=event.source)
         print(profile.display_name)
     except Exception as e:
-        print(e,'user not follow')
+        print(e, 'user not follow')
+        user_not_follow = True
         pass
 
     event_dict = {}
@@ -249,7 +250,6 @@ def handle_message(event: MessageEvent):
     # write
     event_dict['msg'] = msg
     print(event_dict)
-    db.collect_usr(profile=profile, source=event.source)
     db.collect_event(
         event_dict=event_dict,
         source=event.source)
