@@ -88,7 +88,7 @@ def puan_kam_preprocess(text, skip_tokenize=True, flag_lu_2_thai=False):
     tokenized = [txt for txt in tokenized if len(txt.strip()) > 0]
     # tokenized = process_double(tokenize)
     # 3. Sub word processing, types and tones
-    print('before sub word', tokenized)
+    #print('before sub word', tokenized)
     sub_words = [ThaiSubWord(word, lu_word=flag_lu_2_thai)
                  for word in tokenized]
 
