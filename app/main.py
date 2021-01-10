@@ -460,7 +460,7 @@ def pun_wunnayook(text: str = 'สวัสดี',
             raise HTTPException(422, detail=f'Input error: {e}')
 
     return {'input': text,
-            'results': kp.pun_wunayook(text=text)}
+            'results': kp.pun_wunayook(text=split_words)}
 
 
 @app.get("/vowel/{text}")
