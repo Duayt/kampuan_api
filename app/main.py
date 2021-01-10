@@ -81,7 +81,7 @@ def handle_message_puan(text):
 
 def handle_message_pun(text):
     puan_result = {}
-    puan_result = pun_wunnayook(text=text)
+    puan_result = pun_wunnayook(text=text, skip_tokenize=True)
     puan_result['msg'] = '\n'.join([' '.join(pun)
                                     for k, pun in puan_result['results'].items()])
     return puan_result
@@ -381,12 +381,10 @@ def puan_kam(text: str = 'สวัสดี',
         split_words = kp.puan_kam_preprocess(text, skip_tokenize=skip_tokenize)
     except ValueError:
         try:
-            split_words = kp.puan_kam_preprocess(text, skip_tokenize=True)
+            split_words = kp.puan_kam_preprocess(
+                text, skip_tokenize=not(skip_tokenize))
         except ValueError as e:
-            try:
-                split_words = kp.puan_kam_preprocess(text, skip_tokenize=False)
-            except ValueError as e:
-                raise HTTPException(422, detail=f'Input error: {e}')
+            raise HTTPException(422, detail=f'Input error: {e}')
 
     if all is not None and all:
         return {'input': text,
@@ -422,7 +420,7 @@ def puan_lu(text: str = 'สวัสดี',
     except ValueError:
         try:
             split_words = kp.puan_kam_preprocess(
-                text, skip_tokenize=True, flag_lu_2_thai=translate_lu)
+                text, skip_tokenize=not(skip_tokenize), flag_lu_2_thai=translate_lu)
         except ValueError as e:
             raise HTTPException(422, detail=f'Input error: {e}')
 
@@ -436,7 +434,8 @@ def puan_lu(text: str = 'สวัสดี',
 
 
 @app.get("/pun_wunnayook/{text}")
-def pun_wunnayook(text: str = 'สวัสดี'):
+def pun_wunnayook(text: str = 'สวัสดี',
+                  skip_tokenize: Optional[bool] = None):
     """pun wunnayook (ผันเสียงวรรณยุกต์)
     -Args:
     - **text** (str):  Defaults to 'สวัสดี'.
@@ -449,6 +448,17 @@ def pun_wunnayook(text: str = 'สวัสดี'):
         raise HTTPException(400, detail=f'Input contains non Thai')
 
     text = process_text_2_list(text)
+    try:
+        split_words = kp.puan_kam_preprocess(
+            text, skip_tokenize=skip_tokenize)
+    except ValueError:
+        try:
+            split_words = kp.puan_kam_preprocess(
+                text, skip_tokenize=not(skip_tokenize))
+
+        except ValueError as e:
+            raise HTTPException(422, detail=f'Input error: {e}')
+
     return {'input': text,
             'results': kp.pun_wunayook(text=text)}
 

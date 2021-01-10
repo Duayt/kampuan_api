@@ -337,7 +337,6 @@ def translate_lu(text) -> List[str]:
 
 
 def pun_wunayook(text):
-    text = puan_kam_preprocess(text)
     result = {}
     for i, txt in enumerate(text):
         result[txt._raw] = [ThaiSubWord.pun_wunayook(txt._raw, tone_target=j)
@@ -348,3 +347,4 @@ def pun_wunayook(text):
 # text = "ลอง เว้นวรรค เยอะๆแบบนี้ จะงง มั้ยละ12345 55555"
 # print(tokenize(text))
 # print(puan_kam_preprocess(text))
+
