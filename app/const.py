@@ -169,6 +169,10 @@ class BotCommand:
 
     def reply_error_text_for_action(self, text):
         return f""""{text}" น่าจะเป็นคำสั่ง {self.bot_name} {self.action}ไม่ได้จ้า, วิธีใช้ พิมพ์ #{self.bot_name}"""
+    
+    @property
+    def reply_user_not_follow(self):
+        return f'แอดเพื่อน/follow {self.bot_name} กันก่อนนะ'
 
     @property
     def reply_kick_user_room(self):

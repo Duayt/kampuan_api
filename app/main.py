@@ -129,7 +129,16 @@ def handle_message(event: MessageEvent):
         profile = line_bot_api.get_profile(event.source.user_id)
         db.collect_usr(profile=profile, source=event.source)
         print(profile.display_name)
+        user_not_follow = False
     except Exception as e:
+        if event.source.type == 'room':
+            profile = line_bot_api.get_group_member_profile(
+                event.source.room_id, event.source.user_id)
+        else:
+            profile = line_bot_api.get_room_member_profile(
+                event.source.group_id, event.source.user_id)
+
+        print(profile.display_name)
         print(e, 'user not follow')
         user_not_follow = True
         pass
@@ -154,8 +163,11 @@ def handle_message(event: MessageEvent):
     msg = ''
     event_dict['bot_reply'] = False
     # bot flow
-    if text == '#'+str(bot_info.display_name):  # show manual
+    if user_not_follow:
         msg = reply_howto()
+        event_dict['bot_reply'] = False
+    elif text == '#'+str(bot_info.display_name):  # show manual
+        msg = bot_command.reply_how_to
         event_dict['bot_reply'] = True
 
     elif text == bot_command.com_hi:
@@ -371,7 +383,10 @@ def puan_kam(text: str = 'สวัสดี',
         try:
             split_words = kp.puan_kam_preprocess(text, skip_tokenize=True)
         except ValueError as e:
-            raise HTTPException(422, detail=f'Input error: {e}')
+            try:
+                split_words = kp.puan_kam_preprocess(text, skip_tokenize=False)
+            except ValueError as e:
+                raise HTTPException(422, detail=f'Input error: {e}')
 
     if all is not None and all:
         return {'input': text,

@@ -3,7 +3,7 @@ from typing import Dict, List, Union
 import pythainlp.tokenize as tk
 from pythainlp.tokenize import syllable_tokenize
 
-from kampuan.lang_tools import extract_vowel_form, process_double
+from kampuan.lang_tools import extract_vowel_form, process_double,process_num_to_thaiword
 from kampuan.sub_word import ThaiSubWord
 
 # Lu2Thai related libraries
@@ -82,6 +82,7 @@ def puan_kam_preprocess(text, skip_tokenize=True, flag_lu_2_thai=False):
     else:
         raise ValueError('incorrect value')
 
+    tokenized = process_double(tokenized)
     tokenized = process_double(tokenized)
     # tokenized = process_double(tokenize)
     # 3. Sub word processing, types and tones
@@ -339,3 +340,5 @@ def pun_wunayook(text):
         result[txt._raw] = [ThaiSubWord.pun_wunayook(txt._raw, tone_target=j)
                             for j in range(0, 5)]
     return result
+
+print(tokenize('สวัสดี555'))
