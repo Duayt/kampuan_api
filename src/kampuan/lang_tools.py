@@ -38,9 +38,14 @@ def process_num_to_thaiword(texts):
     return result
 
 
-def process_555(text: str):
-    text = text.replace('5', 'ฮ่า')
-    return text
+def process_555(texts: List[str]):
+    result = []
+    for i, word in enumerate(texts):
+        if word.isnumeric() and '55' in word:
+            result.append(word.replace('5', 'ฮ่า'))
+        else:
+            result.append(word)
+    return result
 
 
 test_case = ['555', 'หิวข้าว55', 'กิน5มื้อ', 'กิน5ข้าว5', '5555ตลก']
@@ -52,7 +57,6 @@ test_case = ['555', 'หิวข้าว55', 'กิน5มื้อ', 'กิ
 def process_text_2_list(text):
     text = text.strip()
     text = handle_white_spaces(text)
-    text = process_555(text)
     if check_if_list(text):
         # convert string to properlist
         if not (text[0] == '[' and text[-1] == ']'):
