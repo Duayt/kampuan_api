@@ -125,7 +125,14 @@ def handle_message(event: MessageEvent):
     text = event.message.text.lower().strip()
 
     # data to text
-    profile = line_bot_api.get_profile(event.source.user_id)
+    try:
+        profile = line_bot_api.get_profile(event.source.user_id)
+        db.collect_usr(profile=profile, source=event.source)
+        print(profile.display_name)
+    except Exception as e:
+        print(e,'user not follow')
+        pass
+
     event_dict = {}
     event_dict['event'] = event.as_json_dict()
     msg_dict = {}
