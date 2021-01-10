@@ -43,7 +43,8 @@ def process_555(texts: List[str]):
     result = []
     for i, word in enumerate(texts):
         if word.isnumeric() and '55' in word:
-            result.append(word.replace('5', 'ฮ่า'))
+            for num in word:
+                result.append(num.replace('5', 'ฮ่า'))
         else:
             result.append(word)
     return result

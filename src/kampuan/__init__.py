@@ -3,7 +3,7 @@ from typing import Dict, List, Union
 import pythainlp.tokenize as tk
 from pythainlp.tokenize import syllable_tokenize
 
-from kampuan.lang_tools import extract_vowel_form, process_double, process_num_to_thaiword, process_555
+from kampuan.lang_tools import extract_vowel_form, process_double, process_num_to_thaiword, process_555, handle_white_spaces
 from kampuan.sub_word import ThaiSubWord
 
 # Lu2Thai related libraries
@@ -85,8 +85,10 @@ def puan_kam_preprocess(text, skip_tokenize=True, flag_lu_2_thai=False):
     tokenized = process_555(tokenized)
     tokenized = process_double(tokenized)
     tokenized = process_num_to_thaiword(tokenized)
+    tokenized = [txt for txt in tokenized if len(txt.strip()) > 0]
     # tokenized = process_double(tokenize)
     # 3. Sub word processing, types and tones
+    print('before sub word', tokenized)
     sub_words = [ThaiSubWord(word, lu_word=flag_lu_2_thai)
                  for word in tokenized]
 
@@ -342,6 +344,7 @@ def pun_wunayook(text):
                             for j in range(0, 5)]
     return result
 
-# text='สวัสดี1234'
+
+# text = "ลอง เว้นวรรค เยอะๆแบบนี้ จะงง มั้ยละ12345 55555"
 # print(tokenize(text))
 # print(puan_kam_preprocess(text))
