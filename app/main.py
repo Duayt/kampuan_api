@@ -203,7 +203,7 @@ def handle_message(event: MessageEvent):
                     msg = puan_result['msg']
                     event_dict['puan_result'] = puan_result
                 except Exception as e:
-                    if text_to_puan.startswith("#") or text_to_puan.startswith("@"):
+                    if text_to_puan.startswith("#"):
                         msg = bot_command.reply_error_text_for_action(
                             text_to_puan)
                     else:
