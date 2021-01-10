@@ -342,5 +342,6 @@ def pun_wunayook(text):
                             for j in range(0, 5)]
     return result
 
-
-print(tokenize('สวัสดี555'))
+# text='สวัสดี1234'
+# print(tokenize(text))
+# print(puan_kam_preprocess(text))

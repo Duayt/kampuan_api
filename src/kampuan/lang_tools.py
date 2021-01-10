@@ -32,7 +32,8 @@ def process_num_to_thaiword(texts):
     result = []
     for i, word in enumerate(texts):
         if word.isnumeric():
-            result.append(num_to_thaiword(word))
+            for num in word:
+                result.append(num_to_thaiword(int(num)))
         else:
             result.append(word)
     return result
