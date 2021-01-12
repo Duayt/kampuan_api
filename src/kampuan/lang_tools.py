@@ -3,6 +3,7 @@ import re
 from collections import namedtuple
 from typing import List, NamedTuple
 import numpy as np
+from .util import check_if_list
 from pythainlp.util import normalize, num_to_thaiword
 from kampuan.const import (ASPIRATE, ASPIRATE_HIGH_SOUND,
                            ASPIRATE_HIGH_SOUND_INV, ASPIRATE_LOW_SOUND,
@@ -46,12 +47,6 @@ def process_555(texts: List[str]):
     return result
 
 
-test_case = ['555', 'หิวข้าว55', 'กิน5มื้อ', 'กิน5ข้าว5', '5555ตลก']
-
-# for text in test_case:
-#     print(process_555(text))
-
-
 def process_text_2_list(text):
     text = text.strip()
     text = handle_white_spaces(text)
@@ -77,11 +72,6 @@ def remove_tone_mark(text, tone_marks=THAI_TONE):
     return text
 
 
-# %%
-test = ['ได้', 'ๆ', 'ไป', 'กิน', 'บ่อย', 'ๆ', 'ๆ']
-test_result = ['ได้', 'ได้', 'ไป', 'กิน', 'บ่อย', 'บ่อย', 'บ่อย']
-
-
 def process_double(texts):
     result = []
     for i, word in enumerate(texts):
@@ -90,9 +80,6 @@ def process_double(texts):
         else:
             result.append(word)
     return result
-
-
-assert process_double(test) == test_result
 
 
 # %%
@@ -268,16 +255,15 @@ def convert_tone_pair_double_init(ch: str, tractor_case=False):  # แทร็�
         raise ValueError(f'Not implement {ch}')
 
 
-        # %%
-# to move to test
-if False:
-    for ch in THAI_CONS:
-        new_ch = convert_tone_pair_single_init(ch)
-        if len(new_ch) > 1:
-            print(ch, new_ch, convert_tone_pair_double_init(new_ch))
-        else:
-            print(ch, new_ch)
+# # to move to test
+# if False:
+#     for ch in THAI_CONS:
+#         new_ch = convert_tone_pair_single_init(ch)
+#         if len(new_ch) > 1:
+#             print(ch, new_ch, convert_tone_pair_double_init(new_ch))
+#         else:
+#             print(ch, new_ch)
 
-    for ch in TRUE_CONSONANT_CLUSTER:
-        print(ch, convert_tone_pair_double_init(ch))
-        # %%
+#     for ch in TRUE_CONSONANT_CLUSTER:
+#         print(ch, convert_tone_pair_double_init(ch))
+#         # %%

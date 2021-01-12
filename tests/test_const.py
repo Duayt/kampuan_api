@@ -1,4 +1,4 @@
-from kampuan.const import *
+from kampuan.const import THAI_CHARS, THAI_CONS, THAI_VOW, THAI_TONE
 
 
 def test_const():
@@ -7,5 +7,6 @@ def test_const():
     assert len(THAI_VOW) == 20
     assert len(THAI_TONE) == 4
 
+
 def test_numbers(numbers):
-    assert numbers <5
+    assert numbers < 5
