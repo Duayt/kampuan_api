@@ -19,7 +19,6 @@ words_list = [
     TestWord('คั่ว', '-ัว', '-่', None, None),
     TestWord('ปลอม', '-อ', None, 'ปล', 'ม'),
     TestWord('กลบ', '-', None, 'กล', 'บ'),
-    
 ]
 
 
@@ -28,8 +27,7 @@ def words(request):
     yield request.param
 
 
-
 # Example fixture to test list
-@pytest.fixture(scope='module', params=[1,2,3])
+@pytest.fixture(scope='module', params=[1, 2, 3])
 def numbers(request):
     yield request.param

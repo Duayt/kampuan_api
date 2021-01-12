@@ -1,17 +1,15 @@
+# Lu2Thai related libraries
+import json
 from typing import Dict, List, Union
 
 import pythainlp.tokenize as tk
-from pythainlp.tokenize import syllable_tokenize
+from pythainlp.corpus.common import thai_syllables
+from pythainlp.tokenize import Trie as dict_trie
+from pythainlp.tokenize import syllable_tokenize, word_tokenize
 
+from kampuan.const import LU_SYLLABLE_FILENAME
 from kampuan.lang_tools import extract_vowel_form, process_double
 from kampuan.sub_word import ThaiSubWord
-
-# Lu2Thai related libraries
-import json
-from kampuan.const import LU_SYLLABLE_FILENAME
-from pythainlp.tokenize import word_tokenize
-from pythainlp.tokenize import Trie as dict_trie
-from pythainlp.corpus.common import thai_syllables
 
 
 def pairwise(iterable):
@@ -31,7 +29,7 @@ def tokenize(text: str = "สวัสดี") -> List[str]:
 
 def extract_vowel(text: str) -> Dict:
     if isinstance(text, str):
-        phrases = tokenize(text=text)
+        text = tokenize(text=text)
     results = {}
     for word in text:
         results[word] = extract_vowel_form(word).vowel_form

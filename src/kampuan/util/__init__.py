@@ -40,3 +40,6 @@ def LCSubStr(X, Y, m, n):
 def match_pattern(pattern, text):
     m = re.match(pattern, text)
     return m
+
+def check_if_list(text):
+    return (text[0] == '[' and text[-1] == ']') or (',' in text)

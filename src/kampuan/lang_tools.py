@@ -2,7 +2,7 @@
 import re
 from collections import namedtuple
 from typing import List, NamedTuple
-
+from .util import check_if_list
 import numpy as np
 
 from kampuan.const import (ASPIRATE, ASPIRATE_HIGH_SOUND,
@@ -14,10 +14,6 @@ from kampuan.const import (ASPIRATE, ASPIRATE_HIGH_SOUND,
 
 # %%
 # Tones
-
-
-def check_if_list(text):
-    return (text[0] == '[' and text[-1] == ']') or (',' in text)
 
 
 def handle_white_spaces(text):
@@ -246,6 +242,7 @@ def convert_tone_pair_double_init(ch: str, tractor_case=False):  # แทร็�
         return init+final
     else:
         raise ValueError(f'Not implement {ch}')
+
 
         # %%
 # to move to test
