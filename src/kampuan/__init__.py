@@ -7,8 +7,7 @@ from pythainlp.corpus.common import thai_syllables
 from pythainlp.tokenize import Trie as dict_trie
 from pythainlp.tokenize import syllable_tokenize, word_tokenize
 
-from kampuan.const import LU_SYLLABLE_FILENAME
-from kampuan.lang_tools import extract_vowel_form, process_double
+from kampuan.lang_tools import extract_vowel_form, process_double, process_num_to_thaiword, process_555, handle_white_spaces
 from kampuan.sub_word import ThaiSubWord
 
 
@@ -80,9 +79,13 @@ def puan_kam_preprocess(text, skip_tokenize=True, flag_lu_2_thai=False):
     else:
         raise ValueError('incorrect value')
 
+    tokenized = process_555(tokenized)
     tokenized = process_double(tokenized)
+    tokenized = process_num_to_thaiword(tokenized)
+    tokenized = [txt for txt in tokenized if len(txt.strip()) > 0]
     # tokenized = process_double(tokenize)
     # 3. Sub word processing, types and tones
+    #print('before sub word', tokenized)
     sub_words = [ThaiSubWord(word, lu_word=flag_lu_2_thai)
                  for word in tokenized]
 
@@ -331,9 +334,14 @@ def translate_lu(text) -> List[str]:
 
 
 def pun_wunayook(text):
-    text = puan_kam_preprocess(text)
     result = {}
     for i, txt in enumerate(text):
         result[txt._raw] = [ThaiSubWord.pun_wunayook(txt._raw, tone_target=j)
                             for j in range(0, 5)]
     return result
+
+
+# text = "ลอง เว้นวรรค เยอะๆแบบนี้ จะงง มั้ยละ12345 55555"
+# print(tokenize(text))
+# print(puan_kam_preprocess(text))
+

@@ -81,7 +81,7 @@ def handle_message_puan(text):
 
 def handle_message_pun(text):
     puan_result = {}
-    puan_result = pun_wunnayook(text=text)
+    puan_result = pun_wunnayook(text=text, skip_tokenize=True)
     puan_result['msg'] = '\n'.join([' '.join(pun)
                                     for k, pun in puan_result['results'].items()])
     return puan_result
@@ -125,7 +125,24 @@ def handle_message(event: MessageEvent):
     text = event.message.text.lower().strip()
 
     # data to text
-    profile = line_bot_api.get_profile(event.source.user_id)
+    try:
+        profile = line_bot_api.get_profile(event.source.user_id)
+        db.collect_usr(profile=profile, source=event.source)
+        print(profile.display_name)
+        user_not_follow = False
+    except Exception as e:
+        if event.source.type == 'room':
+            profile = line_bot_api.get_group_member_profile(
+                event.source.room_id, event.source.user_id)
+        else:
+            profile = line_bot_api.get_room_member_profile(
+                event.source.group_id, event.source.user_id)
+
+        print(profile.display_name)
+        print(e, 'user not follow')
+        user_not_follow = True
+        pass
+
     event_dict = {}
     event_dict['event'] = event.as_json_dict()
     msg_dict = {}
@@ -146,8 +163,11 @@ def handle_message(event: MessageEvent):
     msg = ''
     event_dict['bot_reply'] = False
     # bot flow
-    if text == '#'+str(bot_info.display_name):  # show manual
+    if user_not_follow:
         msg = reply_howto()
+        event_dict['bot_reply'] = False
+    elif text == '#'+str(bot_info.display_name):  # show manual
+        msg = bot_command.reply_how_to
         event_dict['bot_reply'] = True
 
     elif text == bot_command.com_hi:
@@ -203,7 +223,7 @@ def handle_message(event: MessageEvent):
                     msg = puan_result['msg']
                     event_dict['puan_result'] = puan_result
                 except Exception as e:
-                    if text_to_puan.startswith("#") or text_to_puan.startswith("@"):
+                    if text_to_puan.startswith("#"):
                         msg = bot_command.reply_error_text_for_action(
                             text_to_puan)
                     else:
@@ -230,7 +250,7 @@ def handle_message(event: MessageEvent):
                 msg = puan_result['msg']
                 event_dict['puan_result'] = puan_result
             except Exception as e:
-                if text_to_puan.startswith("#") or text_to_puan.startswith("@"):
+                if text_to_puan.startswith("#"):
                     msg = bot_command.reply_error_text_for_action(text_to_puan)
                 else:
                     msg = bot_command.reply_error_text(text_to_puan)
@@ -242,7 +262,6 @@ def handle_message(event: MessageEvent):
     # write
     event_dict['msg'] = msg
     print(event_dict)
-    db.collect_usr(profile=profile, source=event.source)
     db.collect_event(
         event_dict=event_dict,
         source=event.source)
@@ -362,7 +381,8 @@ def puan_kam(text: str = 'สวัสดี',
         split_words = kp.puan_kam_preprocess(text, skip_tokenize=skip_tokenize)
     except ValueError:
         try:
-            split_words = kp.puan_kam_preprocess(text, skip_tokenize=True)
+            split_words = kp.puan_kam_preprocess(
+                text, skip_tokenize=not(skip_tokenize))
         except ValueError as e:
             raise HTTPException(422, detail=f'Input error: {e}')
 
@@ -400,7 +420,7 @@ def puan_lu(text: str = 'สวัสดี',
     except ValueError:
         try:
             split_words = kp.puan_kam_preprocess(
-                text, skip_tokenize=True, flag_lu_2_thai=translate_lu)
+                text, skip_tokenize=not(skip_tokenize), flag_lu_2_thai=translate_lu)
         except ValueError as e:
             raise HTTPException(422, detail=f'Input error: {e}')
 
@@ -414,7 +434,8 @@ def puan_lu(text: str = 'สวัสดี',
 
 
 @app.get("/pun_wunnayook/{text}")
-def pun_wunnayook(text: str = 'สวัสดี'):
+def pun_wunnayook(text: str = 'สวัสดี',
+                  skip_tokenize: Optional[bool] = None):
     """pun wunnayook (ผันเสียงวรรณยุกต์)
     -Args:
     - **text** (str):  Defaults to 'สวัสดี'.
@@ -427,8 +448,19 @@ def pun_wunnayook(text: str = 'สวัสดี'):
         raise HTTPException(400, detail=f'Input contains non Thai')
 
     text = process_text_2_list(text)
+    try:
+        split_words = kp.puan_kam_preprocess(
+            text, skip_tokenize=skip_tokenize)
+    except ValueError:
+        try:
+            split_words = kp.puan_kam_preprocess(
+                text, skip_tokenize=not(skip_tokenize))
+
+        except ValueError as e:
+            raise HTTPException(422, detail=f'Input error: {e}')
+
     return {'input': text,
-            'results': kp.pun_wunayook(text=text)}
+            'results': kp.pun_wunayook(text=split_words)}
 
 
 @app.get("/vowel/{text}")

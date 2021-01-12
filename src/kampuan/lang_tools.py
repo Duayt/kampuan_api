@@ -2,9 +2,8 @@
 import re
 from collections import namedtuple
 from typing import List, NamedTuple
-from .util import check_if_list
 import numpy as np
-
+from pythainlp.util import normalize, num_to_thaiword
 from kampuan.const import (ASPIRATE, ASPIRATE_HIGH_SOUND,
                            ASPIRATE_HIGH_SOUND_INV, ASPIRATE_LOW_SOUND,
                            ASPIRATE_LOW_SOUND_INV, FALSE_CONSONANT_CLUSTER,
@@ -21,15 +20,41 @@ def handle_white_spaces(text):
     return text
 
 
-def process_555(text: str):
-    text = text.replace('5', 'ฮ่า')
-    return text
+def normalize_word(text):
+    return normalize(text)
+
+
+def process_num_to_thaiword(texts):
+    result = []
+    for i, word in enumerate(texts):
+        if word.isnumeric():
+            for num in word:
+                result.append(num_to_thaiword(int(num)))
+        else:
+            result.append(word)
+    return result
+
+
+def process_555(texts: List[str]):
+    result = []
+    for i, word in enumerate(texts):
+        if word.isnumeric() and '55' in word:
+            for num in word:
+                result.append(num.replace('5', 'ฮ่า'))
+        else:
+            result.append(word)
+    return result
+
+
+test_case = ['555', 'หิวข้าว55', 'กิน5มื้อ', 'กิน5ข้าว5', '5555ตลก']
+
+# for text in test_case:
+#     print(process_555(text))
 
 
 def process_text_2_list(text):
     text = text.strip()
     text = handle_white_spaces(text)
-    text = process_555(text)
     if check_if_list(text):
         # convert string to properlist
         if not (text[0] == '[' and text[-1] == ']'):
@@ -57,14 +82,13 @@ test = ['ได้', 'ๆ', 'ไป', 'กิน', 'บ่อย', 'ๆ', 'ๆ']
 test_result = ['ได้', 'ได้', 'ไป', 'กิน', 'บ่อย', 'บ่อย', 'บ่อย']
 
 
-def process_double(text):
+def process_double(texts):
     result = []
-    for i, word in enumerate(text):
+    for i, word in enumerate(texts):
         if word == 'ๆ' and i > 0:
             result.append(result[i-1])
         else:
             result.append(word)
-
     return result
 
 

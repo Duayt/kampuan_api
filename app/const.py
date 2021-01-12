@@ -38,7 +38,8 @@ puan_how_to =\
 3.เตะบอทออกจากห้อง
     พิมพ์ #ออกไปเลยชิ่วๆ
 
-FAQ: ใน group chat ถ้าบอทไม่ยอมตอบใคร ให้คนนั้นแอดไปใหม่ หรือ ลอง block/unblock บอท ดูจ้า"""
+FAQ: ใน group chat ถ้าบอทไม่ยอมตอบใคร ให้คนนั้นแอดไปใหม่ หรือ ลอง block/unblock บอท ดูจ้า
+บอทตัวอื่นก็มีนะ https://www.facebook.com/puanbot"""
 
 pun_how_to =\
     f"""ยอดนักผันใช้ได้กับตัวอักษรภาษาไทยเท่านั้นและ ตอบเฉพาะคนที่แอดเป็นเพื่อนกันนะ
@@ -58,10 +59,11 @@ pun_how_to =\
 3.เตะบอทออกจากห้อง
     พิมพ์ #ออกไปเลยชิ่วๆ
 
-FAQ: ใน group chat ถ้าบอทไม่ยอมตอบใคร ให้คนนั้นแอดไปใหม่ หรือ ลอง block/unblock บอท ดูจ้า"""
+FAQ: ใน group chat ถ้าบอทไม่ยอมตอบใคร ให้คนนั้นแอดไปใหม่ หรือ ลอง block/unblock บอท ดูจ้า
+บอทตัวอื่นก็มีนะ https://www.facebook.com/puanbot"""
 
 lu_how_to =\
-    f"""ยอดนักลู แปลงภาษาไทยเป็นภาษาลูไปทั้งไปกลับได้,ใช้ได้กับตัวอักษรภาษาไทยเท่านั้น และตอบเฉพาะคนที่แอดเป็นเพื่อนกันจ้า
+    f"""ยอดนักลู แปลงภาษาไทยเป็นภาษาลูไปกลับได้,ใช้ได้กับตัวอักษรภาษาไทยเท่านั้น และตอบเฉพาะคนที่แอดเป็นเพื่อนกันจ้า
 ##How to use
 
 1.โหมด ปกติ
@@ -83,10 +85,11 @@ lu_how_to =\
 3.เตะบอทออกจากห้อง
     พิมพ์ #ออกไปเลยชิ่วๆ
 
-FAQ: ใน group chat ถ้าบอทไม่ยอมตอบใคร ให้คนนั้นแอดไปใหม่ หรือ ลอง block/unblock บอท ดูจ้า"""
+FAQ: ใน group chat ถ้าบอทไม่ยอมตอบใคร ให้คนนั้นแอดไปใหม่ หรือ ลอง block/unblock บอท ดูจ้า
+บอทตัวอื่นก็มีนะ https://www.facebook.com/puanbot"""
 
 PUAN_CONST = {'action': 'ผวน',
-              'greeting': """สะวีดัส หยวนนักพอด แมวล้า เรียนรู้วิธีใช้ พิมพ์ #ยอดนักผวน หรือ พิมพ์ #auto เพื่อ เปิิด/ปิด""",
+              'greeting': """สะวีดัส หยวนนักพอด แมวล้า เรียนรู้วิธีใช้ พิมพ์ #ยอดนักผวน หรือ พิมพ์ #auto เพื่อ เปิด/ปิด, #ออกไปเลยชิ่วๆ""",
               'how_to': puan_how_to,
               'exec': puan_exec,
               'exec_anti': puan_exec_anti,
@@ -94,14 +97,14 @@ PUAN_CONST = {'action': 'ผวน',
               }
 
 PUN_CONST = {'action': 'ผัน',
-             'greeting': 'สวัสดี ดี่ ดี้ ดี๊ ดี ยอดนักผัน มาแลว แหล่ว แล่ว แล้ว แหลว เรียนรู้วิธีใช้ พิมพ์ #ยอดนักผัน หรือ พิมพ์ #auto เพื่อ เปิิด/ปิด',
+             'greeting': 'สวัสดี ดี่ ดี้ ดี๊ ดี ยอดนักผัน มาแลว แหล่ว แล่ว แล้ว แหลว เรียนรู้วิธีใช้ พิมพ์ #ยอดนักผัน หรือ พิมพ์ #auto เพื่อ เปิด/ปิด',
              'how_to': pun_how_to,
              'exec': pun_exec,
              'auto_extra': 'ลองพิมพ์ ดีจ้า555 ดูสิ'
              }
 
 LU_CONST = {'action': 'ลู',
-            'greeting': 'หละสุหลัสหวูสลีดู ลอดยูดลักนูกซูลี ลามูแซ้วลู้ว เรียนรู้วิธีใช้ พิมพ์  #ยอดนักลู หรือ พิมพ์ #auto เพื่อ เปิิด/ปิด',
+            'greeting': 'หละสุหลัสหวูสลีดู ลอดยูดลักนูกซูลี ลามูแซ้วลู้ว เรียนรู้วิธีใช้ พิมพ์ #ยอดนักลู หรือ พิมพ์ #auto เพื่อ เปิด/ปิด',
             'how_to': lu_how_to,
             'exec': lu_exec,
             'exec_anti': lu_exec_anti,
@@ -141,9 +144,9 @@ class BotCommand:
         else:
             command = self.const['exec']
         if auto_mode:
-            return f'ปิด auto แล้วจ้า พิมพ์ {self.com_auto} อีกครั้งเพื่อเปิด, ต่อจากนี้ให้พิมพ์ {command} เพื่อใช้งานน้า'
+            return f'ปิด auto แล้วจ้า พิมพ์ {self.com_auto} อีกครั้งเพื่อเปิด, ต่อจากนี้ให้พิมพ์ {command} เพื่อใช้งานน้า วิธีใช้ พิมพ์ #{self.bot_name}'
         else:
-            return f'เปิด auto แล้วจ้า พิมพ์ {self.com_auto} อีกครั้งเพื่อปิด, {self.const["auto_extra"]}, ได้เวลามันส์'
+            return f'เปิด auto แล้วจ้า พิมพ์ {self.com_auto} อีกครั้งเพื่อปิด, {self.const["auto_extra"]}, ได้เวลามันส์ วิธีใช้ พิมพ์ #{self.bot_name}'
 
     @property
     def reply_greeting(self):
@@ -155,18 +158,22 @@ class BotCommand:
 
     @property
     def reply_kick(self):
-        return f"{self.bot_name} ลาก่อนจ้า ไว้มาเล่นกันอีกนะ"
+        return f"เรามีบอทตัวอื่นด้วยติดตามได้ที่ https://www.facebook.com/puanbot {self.bot_name} ลาก่อนจ้า ไว้มาเล่นกันอีกน้า  "
 
     @property
     def reply_no_history(self):
         return f""""ขออภัย{self.bot_name} ไม่เจอข้อความให้ {self.action} กรุณาลองใหม่"""
 
     def reply_error_text(self, text):
-        return f"""ขออภัย {self.bot_name} ไม่เข้าใจ "{text}" ขอไปฝึกก่อนน้า """
+        return f"""ขออภัย {self.bot_name} ไม่เข้าใจ "{text}" ขอไปฝึกก่อนน้า, วิธีใช้ พิมพ์ #{self.bot_name}  """
 
     def reply_error_text_for_action(self, text):
-        return f""""{text}" น่าจะเป็นคำสั่ง {self.bot_name} {self.action}ไม่ได้จ้า"""
+        return f""""{text}" น่าจะเป็นคำสั่ง {self.bot_name} {self.action}ไม่ได้จ้า, วิธีใช้ พิมพ์ #{self.bot_name}"""
+    
+    @property
+    def reply_user_not_follow(self):
+        return f'แอดเพื่อน/follow {self.bot_name} กันก่อนนะ'
 
     @property
     def reply_kick_user_room(self):
-        return f'ไม่ออก! อันนี้ไม่ใช้ group คุยกันสองคน จะให้ {self.bot_name} ออกไปไหน'
+        return f'ไม่ออก! อันนี้ไม่ใช่groupนะ เราคุยกันสองคน จะให้ {self.bot_name} ออกไปไหน'
