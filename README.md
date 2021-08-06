@@ -1,5 +1,7 @@
 # kampuan_api
 Kampuan api project, An API for คำผวน คำผัน คำลู.
+ยอดนักผวน facebook page
+https://www.facebook.com/puanbot
 
 The API:
 https://kampuan-api.herokuapp.com/
