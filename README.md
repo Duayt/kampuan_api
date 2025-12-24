@@ -1,4 +1,4 @@
-# kampuan_api
+# kampuan_api 2026
 Kampuan api project, An API for คำผวน คำผัน คำลู.
 ยอดนักผวน facebook page
 https://www.facebook.com/puanbot
@@ -50,3 +50,4 @@ http://thailanguagept.blogspot.com/2016/08/
 * ภูมิ พยาธิ ชาติ สาเหตุ   ธาตุ
 * เป็ด(เอะ) 
 * อยาก
+
